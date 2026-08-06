@@ -26,7 +26,8 @@
 (defn -main [& _]
   (let [namespaces '[glitter-gl.vector-test glitter-gl.vec2-test
                      glitter-gl.matrix-test glitter-gl.quaternion-test
-                     glitter-gl.aabb-test glitter-gl.rect-test glitter-gl.circle-test]]
+                     glitter-gl.aabb-test glitter-gl.rect-test glitter-gl.circle-test
+                     glitter-gl.line-test glitter-gl.plane-test glitter-gl.triangle-test]]
     (doseq [ns namespaces]
       (try (require ns :reload)
            (catch Throwable e
