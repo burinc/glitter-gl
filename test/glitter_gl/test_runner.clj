@@ -29,7 +29,8 @@
                      glitter-gl.aabb-test glitter-gl.rect-test glitter-gl.circle-test
                      glitter-gl.line-test glitter-gl.plane-test glitter-gl.triangle-test
                      glitter-gl.sphere-test glitter-gl.polygon-test glitter-gl.bezier-test
-                     glitter-gl.intersect-test glitter-gl.mesh-test glitter-gl.glmesh-test]]
+                     glitter-gl.intersect-test glitter-gl.mesh-test glitter-gl.glmesh-test
+                     glitter-gl.primitives-test glitter-gl.polyhedra-test]]
     (doseq [ns namespaces]
       (try (require ns :reload)
            (catch Throwable e
