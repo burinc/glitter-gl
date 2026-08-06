@@ -1,0 +1,30 @@
+{:paths ["src"]
+
+ ;; glitter-gl is an extension of glitter: the geometry/matrix/GL namespaces are
+ ;; standalone, but glitter-gl.gtk registers a :gl-area widget into glitter's
+ ;; widget registry, so glitter is a dependency. Its GTK4/GLib native libs merge
+ ;; in via the dependency walk (only used by glitter-gl.gtk).
+ :deps {burinc/glitter {:local/root "../glitter"}}
+
+ ;; OpenGL via the host. On macOS OpenGL ships as a framework; on Linux it's the
+ ;; libGL shared object (mesa or the vendor driver). Chez's dlopen default search
+ ;; path does not include the framework dirs, so the absolute framework
+ ;; executable path is listed first — mirrors glimmer-gl's own deps.edn.
+ :jolt/native [{:name "opengl"
+                :darwin ["/System/Library/Frameworks/OpenGL.framework/OpenGL"
+                         "/System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL"
+                         "libGL.dylib"]
+                :linux  ["libGL.so.1" "libGL.so"]}]
+
+ ;; Native-GL geometry & matrix library for jolt, ported from glimmer-gl (itself
+ ;; ported from thi.ng/geom's platform-independent math) onto glitter's
+ ;; Replicant-style widget registry. See README.md.
+ :aliases {:test          {:extra-paths ["test"]     :main-opts ["-m" "glitter-gl.test-runner"]}
+           :plasma        {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.plasma"]}
+           :check         {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.check"]}
+           :gl-area-smoke {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.gl-area-smoke"]}}
+
+ :tasks {test          "jolt -M:test"
+         plasma        "jolt -M:plasma"
+         check         "jolt -M:check"
+         gl-area-smoke "jolt -M:gl-area-smoke"}}

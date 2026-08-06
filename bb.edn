@@ -1,0 +1,95 @@
+;; Babashka runner for glitter-gl — the OpenGL/3D-geometry extension of
+;; glitter, ported from glimmer-gl.
+;;   bb info               grouped task cheat-sheet (start here)
+;;   bb test                run the unit suite (jolt -M:test)
+;;   bb plasma               interactive demo: rotating primitive + plasma/stripes shader
+;;   bb check                 headless sanity check: shader compiles, geometry buffers valid
+;;   bb gl-area-smoke          live-GTK smoke: :gl-area construct/realize/render/resize
+;;   bb smokes                  gl-area-smoke (CI-safe entry point, mirrors glitter's bb smokes)
+;;   bb lint | lint:strict      clj-kondo over glitter-gl-authored code; :strict propagates findings
+;;   bb lsp:format | lsp:format-check       clojure-lsp format (mutate | dry-run)
+;;   bb lsp:clean-ns | lsp:clean-ns-check   clojure-lsp clean-ns (mutate | dry-run)
+;;   bb lsp:diagnostics | lsp:check | lsp:fix   diagnostics | all dry-run checks | auto-fix
+;;   bb verify                pre-commit gate: lint (report) + test (must pass)
+;; NOTE: task bodies are EDN-parsed — no #"regex", @deref, or #(...) reader macros.
+;; NOTE: every jolt task below shells out to `jolt -M:<alias>`, never the deps.edn
+;; `jolt <task>` shorthand — the task form does not propagate its child process's
+;; exit status (verified in glitter against jolt v0.6.3); `-M:<alias>` exits correctly.
+{:min-bb-version "1.3.0"
+ :tasks
+ {info {:doc "Grouped task cheat-sheet (start here; easier to scan than `bb tasks`)"
+        :task
+        (let [esc (str (char 27) "[")
+              col (fn [c s] (str esc c "m" s esc "0m"))
+              hdr (fn [s] (println (str "\n" (col "35" (str "── " s " ──")))))
+              row (fn [t d] (println (str "  " (col "36" (format "%-24s" (str "bb " t))) d)))]
+          (println (col "1;35" "\nglitter-gl — OpenGL/3D geometry extension of glitter"))
+          (hdr "Verify")
+          (row "test" "run the unit suite (jolt -M:test)")
+          (row "verify" "lint (report) + test (must pass) — pre-commit gate")
+          (hdr "Run")
+          (row "plasma" "interactive demo: rotating primitive + plasma/stripes shader")
+          (row "check" "headless sanity check: shader compiles, geometry buffers valid")
+          (hdr "Smoke (live GTK, exits non-zero on failure)")
+          (row "gl-area-smoke" ":gl-area construct/realize/render/resize against real GTK")
+          (row "smokes" "run every live-GTK smoke in sequence; stops at first failure")
+          (hdr "Quality — lint/format/checks")
+          (row "lint" "clj-kondo over glitter-gl-authored code (report only)")
+          (row "lint:strict" "bb lint, but exit non-zero if any findings")
+          (row "lsp:format" "reformat all Clojure files (clojure-lsp)")
+          (row "lsp:format-check" "check formatting — dry run")
+          (row "lsp:clean-ns" "clean + organize ns forms (clojure-lsp)")
+          (row "lsp:clean-ns-check" "check ns forms — dry run")
+          (row "lsp:diagnostics" "clojure-lsp diagnostics")
+          (row "lsp:check" "all LSP checks (format + clean-ns + diagnostics) — dry run")
+          (row "lsp:fix" "auto-fix: format + clean-ns (mutating)")
+          (println (str "\n" (col "2" "first run: bb test, then bb plasma  ·  CI gate: bb test && bb smokes"))))}
+
+  test {:doc "Run the unit suite"
+        :task (shell "jolt" "-M:test")}
+
+  plasma {:doc "Interactive demo: rotating primitive + plasma/stripes shader"
+          :task (shell "jolt" "-M:plasma")}
+
+  check {:doc "Headless sanity check: shader compiles, geometry buffers valid"
+         :task (shell "jolt" "-M:check")}
+
+  gl-area-smoke {:doc "Live-GTK smoke: :gl-area construct/realize/render/resize"
+                 :task (shell "jolt" "-M:gl-area-smoke")}
+
+  smokes {:doc "Run every live-GTK smoke in sequence; stops at the first failure"
+          :task (shell "jolt" "-M:gl-area-smoke")}
+
+  lint {:doc "clj-kondo over glitter-gl-authored code (report only)"
+        :task (shell {:continue true} "clj-kondo" "--lint" "src" "test" "examples")}
+
+  lint:strict {:doc "bb lint, but exit non-zero if any findings"
+               :task (shell "clj-kondo" "--lint" "src" "test" "examples")}
+
+  lsp:format {:doc "Reformat all Clojure files (clojure-lsp)"
+              :task (shell "clojure-lsp" "format")}
+
+  lsp:format-check {:doc "Check formatting — dry run"
+                    :task (shell "clojure-lsp" "format" "--dry")}
+
+  lsp:clean-ns {:doc "Clean + organize ns forms (clojure-lsp)"
+                :task (shell "clojure-lsp" "clean-ns")}
+
+  lsp:clean-ns-check {:doc "Check ns forms — dry run"
+                      :task (shell "clojure-lsp" "clean-ns" "--dry")}
+
+  lsp:diagnostics {:doc "clojure-lsp diagnostics"
+                   :task (shell "clojure-lsp" "diagnostics")}
+
+  lsp:check {:doc "All LSP checks (format + clean-ns + diagnostics) — dry run"
+             :task (do (shell "clojure-lsp" "format" "--dry")
+                       (shell "clojure-lsp" "clean-ns" "--dry")
+                       (shell "clojure-lsp" "diagnostics"))}
+
+  lsp:fix {:doc "Auto-fix: format + clean-ns (mutating)"
+           :task (do (shell "clojure-lsp" "format")
+                     (shell "clojure-lsp" "clean-ns"))}
+
+  verify {:doc "Pre-commit gate: lint (report) + test (must pass)"
+          :task (do (shell {:continue true} "clj-kondo" "--lint" "src" "test" "examples")
+                    (shell "jolt" "-M:test"))}}}

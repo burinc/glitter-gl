@@ -1,0 +1,7 @@
+;; clj-kondo configuration for glitter-gl.
+;;
+;; jolt.ffi/defcfn defines a var per bound C symbol. clj-kondo cannot see
+;; through the macro, so hooks/jolt_ffi.clj rewrites each call into an
+;; equivalent `defn` — see that file for why. Without it every gl-*/gtk-*
+;; binding in glitter-gl.gl / glitter-gl.gtk is a false "Unresolved symbol".
+{:hooks {:analyze-call {jolt.ffi/defcfn hooks.jolt-ffi/defcfn}}}
