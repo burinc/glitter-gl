@@ -158,6 +158,23 @@
 ;;   :on-key     (fn [area keyval pressed?])  key press/release
 ;;   :on-button  (fn [area btn pressed? x y]) mouse press/release
 (defonce ^:private wired (atom {}))
+;; KNOWN V1 LIMITATION, found during Task 17's review: `wired` is keyed by
+;; the raw GtkGLArea pointer (a plain machine address), with no release path
+;; when a widget is destroyed. Beyond plain unbounded growth (a shape this
+;; project already accepts elsewhere — glitter.gtk's own `memory` atom has
+;; the same no-release characteristic), this is a genuine latent risk: if
+;; GTK/glib ever reuses a freed :gl-area's address for a new widget, the new
+;; widget would silently inherit the old one's `wired` entries and
+;; `wire-once!` would skip connecting its real handlers — no exception, just
+;; a GL area that never realizes. glitter.gtk's own `memory` atom sidesteps
+;; this exact trap by keying off the tracking atom's Clojure identity
+;; instead of the raw pointer (see its IMemory comment) — that pattern isn't
+;; available here without changing glitter.widget's :apply contract to pass
+;; a stable identity alongside the raw widget pointer, which is genuinely
+;; out of scope for this fix. Not fixed now because no current call site in
+;; this project destroys/recreates a :gl-area — Tasks 18-19's demo mounts
+;; one GL area for the app's lifetime. Revisit if/when a future task
+;; introduces dynamic :gl-area mount/unmount.
 
 (defn- wire-once!
   "True the FIRST time `event` is seen for `area`; false (and no side effect)
