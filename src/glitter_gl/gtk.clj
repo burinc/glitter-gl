@@ -9,10 +9,11 @@
 
   The GLArea is inherently imperative — its realize/render/resize signals
   build and drive raw GL objects, and render returns a gboolean — so those
-  handlers are wired directly (see `gl-area-spec`'s :connect) rather than
-  through glitter's uniform void(widget,data) signal path. This is the same
-  shape glitter.widget/register-widget! documents as its motivating example
-  for the :connect hook (see glitter.widget's register-widget! docstring).
+  handlers are wired directly from `gl-area-spec`'s :apply (see the
+  correction note above :gl-area's :apply closure for why :apply, not
+  :connect — glitter.core's create-node never passes real hiccup props to
+  create-element/:connect; only the separate set-attributes/:apply path
+  does) rather than through glitter's uniform void(widget,data) signal path.
 
   Ported from glimmer-gl.gtk (see NOTICE.md). Unlike glimmer-gl.gtk, this
   namespace does NOT register :scale — glitter already ships a richer
@@ -128,6 +129,26 @@
   (g/g-signal-connect-data widget signal cb ffi/null ffi/null g/CONNECT-DEFAULT))
 
 ;; --- :gl-area widget ---------------------------------------------------------
+;; CORRECTION (found live via the Task 17 smoke, 2026-08-07): glitter.core's
+;; create-node calls `(r/create-element renderer tag-name (when ns {:ns ns}))`
+;; — the options glitter.gtk's create-element (and therefore glitter.widget's
+;; create!) receives is ONLY an :ns hint, never the hiccup element's real
+;; props. A :connect hook (which only ever runs inside create!) can never see
+;; :on-realize/:on-render/etc. under glitter's actual reconcile flow — this
+;; differs from glimmer's single-shot creation model gtk.clj was originally
+;; ported from. The real props arrive via a SEPARATE path: create-node's own
+;; (set-attributes ...) call right after create-element returns, which routes
+;; through set-attribute -> glitter.widget/apply-props! -> the widget spec's
+;; :apply closure, called ONCE PER PROP KEY (not the whole map at once), and
+;; again on every re-render. This is the exact same path :scale's min/max/step
+;; re-ranging already relies on (see :scale's own docstring in
+;; glitter.widget: "construct horizontal by default... :apply then re-ranges
+;; ... on every render if they change" — :ctor never sees real props either).
+;; So the fix is to wire from :apply, not :connect, guarded so each event
+;; only ever connects once per widget (:apply may be called multiple times
+;; for the same event: once per key-arrival during creation, and again on
+;; every re-render).
+;;
 ;; The handler props, each called with the GLArea pointer GTK hands us:
 ;;   :on-realize (fn [area])        build GL objects (context is current)
 ;;   :on-render  (fn [area])        issue draw calls; we always return TRUE
@@ -136,34 +157,52 @@
 ;;   :on-motion  (fn [area x y])    pointer move (widget-relative px)
 ;;   :on-key     (fn [area keyval pressed?])  key press/release
 ;;   :on-button  (fn [area btn pressed? x y]) mouse press/release
-(defn- gl-area-connect! [area props]
-  (let [{:keys [on-realize on-render on-resize on-tick on-motion on-key on-button]} props]
-    (when on-realize
+(defonce ^:private wired (atom {}))
+
+(defn- wire-once!
+  "True the FIRST time `event` is seen for `area`; false (and no side effect)
+  on any repeat call. See the correction note above :gl-area's :apply for why
+  this guard is necessary."
+  [area event]
+  (let [seen (get @wired area #{})]
+    (when-not (contains? seen event)
+      (swap! wired update area (fnil conj #{}) event)
+      true)))
+
+(defn- gl-area-apply! [area props]
+  (let [{:keys [version depth-buffer on-realize on-render on-resize on-tick
+                on-motion on-key on-button]} props]
+    (when version
+      (let [[maj min] version]
+        (gtk-gl-area-set-required-version area maj min)))
+    (when (contains? props :depth-buffer)
+      (gtk-gl-area-set-has-depth-buffer area (if (false? depth-buffer) 0 1)))
+    (when (and on-realize (wire-once! area :on-realize))
       (connect! area "realize"
                 (ffi/foreign-callable (fn [a _] (on-realize a))
                                       [:pointer :pointer] :void :collect-safe)))
-    (when on-render
+    (when (and on-render (wire-once! area :on-render))
       (connect! area "render"
                 (ffi/foreign-callable (fn [a _] (on-render a) 1)
                                       [:pointer :pointer] :int :collect-safe)))
-    (when on-resize
+    (when (and on-resize (wire-once! area :on-resize))
       (connect! area "resize"
                 (ffi/foreign-callable (fn [a w h _] (on-resize a w h))
                                       [:pointer :int :int :pointer] :void :collect-safe)))
-    (when on-tick
+    (when (and on-tick (wire-once! area :on-tick))
       (gtk-widget-add-tick-callback area
                                     (let [cb (ffi/foreign-callable
                                               (fn [a _clock _data] (on-tick a) (queue-render a) 1)
                                               [:pointer :pointer :pointer] :int :collect-safe)]
                                       (w/retain-callable! cb) cb)
                                     ffi/null ffi/null))
-    (when on-motion
+    (when (and on-motion (wire-once! area :on-motion))
       (let [ctl (gtk-event-controller-motion-new)]
         (gtk-widget-add-controller area ctl)
         (connect! ctl "motion"
                   (ffi/foreign-callable (fn [_ x y _] (on-motion area (double x) (double y)))
                                         [:pointer :double :double :pointer] :void :collect-safe))))
-    (when on-key
+    (when (and on-key (wire-once! area :on-key))
       (let [armed? (atom false)
             arm (ffi/foreign-callable
                  (fn [_area _]
@@ -182,7 +221,7 @@
                                                          [:pointer :uint :uint :uint :pointer] :void :collect-safe))))))
                  [:pointer :pointer] :void :collect-safe)]
         (connect! area "realize" arm)))
-    (when on-button
+    (when (and on-button (wire-once! area :on-button))
       (let [g (gtk-gesture-click-new)]
         (gtk-widget-add-controller area g)
         (connect! g "pressed"
@@ -201,8 +240,7 @@
                   (gtk-gl-area-set-has-depth-buffer
                    area (if (false? (:depth-buffer props)) 0 1))
                   area))
-   :apply     (fn [_ _])     ; signals wire once via :connect; nothing to re-apply
-   :connect   gl-area-connect!
+   :apply     gl-area-apply!
    :container :none})
 
 ;; --- registration ------------------------------------------------------------
