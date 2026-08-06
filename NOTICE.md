@@ -17,5 +17,52 @@ shader-spec model (thi.ng.geom.gl.shaders).
 glitter-gl is licensed under the Apache License, Version 2.0 (see
 ./LICENSE), which is compatible with jolt's Eclipse Public License 1.0.
 
-<!-- Full glimmer-gl -> glitter-gl port ledger: see the "Porting ledger"
-     section added at the end of this arc. -->
+## Porting ledger: glimmer-gl → glitter-gl (2026-08-06 arc)
+
+Verbatim port (namespace rename only — see the plan's "Standard Verbatim
+Port Procedure"): `vector.clj`, `vec2.clj`, `matrix.clj`, `quaternion.clj`,
+`aabb.clj`, `rect.clj`, `circle.clj`, `line.clj`, `plane.clj`,
+`triangle.clj`, `sphere.clj`, `polygon.clj`, `bezier.clj`, `intersect.clj`,
+`mesh.clj`, `glmesh.clj`, `primitives.clj`, `polyhedra.clj`, `shader.clj`,
+`gl.clj`, `offscreen.clj`, `renderer.clj` (+ every corresponding test file).
+`gl.clj` landed before `shader.clj`, the reverse of the plan's original
+task order — `shader.clj` itself requires `glitter-gl.gl`, so the plan's
+numbering was swapped to match the real dependency direction; the ported
+code itself is unaffected.
+
+Adapted for glitter's Replicant-style model (see
+`PRIVATE-PLANNING-DOC` for the full
+rationale, and `docs/guide/gl-area-widget-layer.md` for a correction to
+one part of it): `gtk.clj` (`:gl-area`'s realize/render/resize/tick/
+motion/key/button handlers wire from the widget spec's `:apply` closure,
+guarded idempotent per `[area event]` via a `wired` atom — **not** via
+glitter.widget's `:connect` hook, which the design spec originally called
+for and which turns out to never see a hiccup element's real props under
+glitter's actual reconcile flow, so it silently never fired; `:scale` is
+dropped entirely — glitter already ships its own, richer native `:scale`),
+`scene.clj` (`plan` drops the `glimmer.ratom/reaction` wrapper, becomes a
+plain function of `state`), `app.clj` (`reactive-area` takes glitter's
+state atom directly instead of reactive cells).
+
+Demo (`examples/glitter_gl/`), ported from
+`~/dev/jolt-examples/glimmer-gl-app`'s `gl_demo/*.clj`: `plasma_shader.clj`
+and `check.clj` near-verbatim; `plasma.clj` (from `gl_demo/core.clj`)
+rewrites its reactive-cell control panel as glitter's state atom + action
+dispatch, keeping the GL render-loop plumbing's direct state-atom
+read/write — its `shape-button` helper is called directly,
+`(shape-button ...)`, not as a bracket-vector hiccup tag
+`[shape-button ...]`; glitter has no function-as-hiccup-tag convention
+(see `AGENTS.md`'s Conventions & gotchas).
+
+New, not present in glimmer-gl: `examples/glitter_gl/gl_area_smoke.clj`
+(live-GTK smoke), `test/glitter_gl/renderer_test.clj` and
+`test/glitter_gl/app_test.clj` (glimmer-gl ships no test for either
+`renderer.clj` or `app.clj`).
+
+`glitter-gl.glmesh-test` briefly failed to `require` partway through this
+arc: `glmesh.clj`'s real transitive dependencies (`gl.clj`, `shader.clj`,
+`primitives.clj`, `scene.clj`) hadn't landed yet at the point `glmesh.clj`
+itself was ported, and a namespace that fails to require contributes zero
+tests rather than a build failure — easy to mistake for "nothing to test"
+rather than "broken." Closed once the last of those four dependencies
+landed; `glmesh-test` now requires and passes cleanly.
