@@ -24,7 +24,8 @@
     :else nil))
 
 (defn -main [& _]
-  (let [namespaces '[glitter-gl.vector-test glitter-gl.vec2-test]]
+  (let [namespaces '[glitter-gl.vector-test glitter-gl.vec2-test
+                     glitter-gl.matrix-test glitter-gl.quaternion-test]]
     (doseq [ns namespaces]
       (try (require ns :reload)
            (catch Throwable e
