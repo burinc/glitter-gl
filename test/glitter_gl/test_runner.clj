@@ -31,7 +31,7 @@
                      glitter-gl.sphere-test glitter-gl.polygon-test glitter-gl.bezier-test
                      glitter-gl.intersect-test glitter-gl.mesh-test glitter-gl.glmesh-test
                      glitter-gl.primitives-test glitter-gl.polyhedra-test
-                     glitter-gl.gl-test glitter-gl.shader-test]]
+                     glitter-gl.gl-test glitter-gl.shader-test glitter-gl.offscreen-test]]
     (doseq [ns namespaces]
       (try (require ns :reload)
            (catch Throwable e
