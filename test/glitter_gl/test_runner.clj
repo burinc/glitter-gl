@@ -30,7 +30,8 @@
                      glitter-gl.line-test glitter-gl.plane-test glitter-gl.triangle-test
                      glitter-gl.sphere-test glitter-gl.polygon-test glitter-gl.bezier-test
                      glitter-gl.intersect-test glitter-gl.mesh-test glitter-gl.glmesh-test
-                     glitter-gl.primitives-test glitter-gl.polyhedra-test]]
+                     glitter-gl.primitives-test glitter-gl.polyhedra-test
+                     glitter-gl.gl-test]]
     (doseq [ns namespaces]
       (try (require ns :reload)
            (catch Throwable e
