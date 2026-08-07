@@ -11,18 +11,24 @@
 ;;   bb lsp:clean-ns | lsp:clean-ns-check   clojure-lsp clean-ns (mutate | dry-run)
 ;;   bb lsp:diagnostics | lsp:check | lsp:fix   diagnostics | all dry-run checks | auto-fix
 ;;   bb verify                pre-commit gate: lint (report) + test (must pass)
+;;   bb check:positional-args | :strict   find fns with 3+ positional args (report | strict)
+;;   bb hooks:install | hooks:install:full | hooks:uninstall   git pre-commit hook
+;;   bb nrepl [port]           start a jolt nREPL server (default 7888)
 ;; NOTE: task bodies are EDN-parsed — no #"regex", @deref, or #(...) reader macros.
 ;; NOTE: every jolt task below shells out to `jolt -M:<alias>`, never the deps.edn
 ;; `jolt <task>` shorthand — the task form does not propagate its child process's
 ;; exit status (verified in glitter against jolt v0.6.3); `-M:<alias>` exits correctly.
 {:min-bb-version "1.3.0"
  :tasks
- {info {:doc "Grouped task cheat-sheet (start here; easier to scan than `bb tasks`)"
+ {:requires ([babashka.fs :as fs]
+             [clojure.string :as str])
+
+  info {:doc "Grouped task cheat-sheet (start here; easier to scan than `bb tasks`)"
         :task
         (let [esc (str (char 27) "[")
               col (fn [c s] (str esc c "m" s esc "0m"))
               hdr (fn [s] (println (str "\n" (col "35" (str "── " s " ──")))))
-              row (fn [t d] (println (str "  " (col "36" (format "%-24s" (str "bb " t))) d)))]
+              row (fn [t d] (println (str "  " (col "36" (format "%-33s" (str "bb " t))) d)))]
           (println (col "1;35" "\nglitter-gl — OpenGL/3D geometry extension of glitter"))
           (hdr "Verify")
           (row "test" "run the unit suite (jolt -M:test)")
@@ -43,6 +49,14 @@
           (row "lsp:diagnostics" "clojure-lsp diagnostics")
           (row "lsp:check" "all LSP checks (format + clean-ns + diagnostics) — dry run")
           (row "lsp:fix" "auto-fix: format + clean-ns (mutating)")
+          (row "check:positional-args" "find fns with 3+ positional args (report only)")
+          (row "check:positional-args:strict" "bb check:positional-args, but exit non-zero if any found")
+          (hdr "Git hooks")
+          (row "hooks:install" "install FAST pre-commit hook (lint errors + format + clean-ns, ~2s)")
+          (row "hooks:install:full" "install FULL pre-commit hook (+ unit tests, slower)")
+          (row "hooks:uninstall" "remove the git pre-commit hook")
+          (hdr "Dev")
+          (row "nrepl [port]" "start a jolt nREPL server (default 7888)")
           (println (str "\n" (col "2" "first run: bb test, then bb plasma  ·  CI gate: bb test && bb smokes"))))}
 
   test {:doc "Run the unit suite"
@@ -93,4 +107,58 @@
 
   verify {:doc "Pre-commit gate: lint (report) + test (must pass)"
           :task (do (shell {:continue true} "clj-kondo" "--lint" "src" "test" "examples")
-                    (shell "jolt" "-M:test"))}}}
+                    (shell "jolt" "-M:test"))}
+
+  check:positional-args {:doc "Find fns with 3+ positional args (prefer a kwargs map)"
+                         :task (let [{:keys [exit]} (shell {:continue true} "bb" "scripts/check_positional_args.clj")]
+                                 (System/exit exit))}
+
+  check:positional-args:strict {:doc "check:positional-args, but fail (exit 1) if any found"
+                                :task (let [{:keys [exit]} (shell {:continue true} "bb" "scripts/check_positional_args.clj" "--strict")]
+                                        (System/exit exit))}
+
+  hooks:install {:doc "Install FAST git pre-commit hook (lint errors + format + clean-ns, ~2s)"
+                 :task (let [hook (str/trim (:out (shell {:out :string} "git" "rev-parse" "--git-path" "hooks/pre-commit")))]
+                         (spit hook (str "#!/bin/bash\n"
+                                         "# glitter-gl pre-commit (FAST — lint errors-only + format + clean-ns dry-run).\n"
+                                         "# Full (+ test suite): bb hooks:install:full\n"
+                                         "echo 'pre-commit 1/3: clj-kondo (errors only; known warnings accepted)'\n"
+                                         "clj-kondo --lint src test examples\n"
+                                         "LINT_EXIT=$?\n"
+                                         "if [ \"$LINT_EXIT\" = \"3\" ]; then echo 'pre-commit: lint errors found'; exit 1; fi\n"
+                                         "echo 'pre-commit 2/3: clojure-lsp format --dry'\n"
+                                         "clojure-lsp format --dry || { echo 'run bb lsp:format'; exit 1; }\n"
+                                         "echo 'pre-commit 3/3: clojure-lsp clean-ns --dry'\n"
+                                         "clojure-lsp clean-ns --dry || { echo 'run bb lsp:clean-ns'; exit 1; }\n"
+                                         "exit 0\n"))
+                         (shell "chmod" "+x" hook)
+                         (println "OK fast pre-commit hook installed")
+                         (println ">> skip once with: git commit --no-verify"))}
+
+  hooks:install:full {:doc "Install FULL git pre-commit hook (lint errors + format + clean-ns + unit tests, slower)"
+                      :task (let [hook (str/trim (:out (shell {:out :string} "git" "rev-parse" "--git-path" "hooks/pre-commit")))]
+                              (spit hook (str "#!/bin/bash\n"
+                                              "# glitter-gl pre-commit (FULL). Fast: bb hooks:install\n"
+                                              "echo 'pre-commit 1/4: clj-kondo (errors only; known warnings accepted)'\n"
+                                              "clj-kondo --lint src test examples\n"
+                                              "LINT_EXIT=$?\n"
+                                              "if [ \"$LINT_EXIT\" = \"3\" ]; then echo 'pre-commit: lint errors found'; exit 1; fi\n"
+                                              "echo 'pre-commit 2/4: clojure-lsp format --dry'\n"
+                                              "clojure-lsp format --dry || { echo 'run bb lsp:format'; exit 1; }\n"
+                                              "echo 'pre-commit 3/4: clojure-lsp clean-ns --dry'\n"
+                                              "clojure-lsp clean-ns --dry || { echo 'run bb lsp:clean-ns'; exit 1; }\n"
+                                              "echo 'pre-commit 4/4: unit tests'\n"
+                                              "jolt -M:test\n"
+                                              "exit $?\n"))
+                              (shell "chmod" "+x" hook)
+                              (println "OK full pre-commit hook installed")
+                              (println ">> skip once with: git commit --no-verify"))}
+
+  hooks:uninstall {:doc "Remove the git pre-commit hook"
+                   :task (let [hook (str/trim (:out (shell {:out :string} "git" "rev-parse" "--git-path" "hooks/pre-commit")))]
+                           (if (fs/exists? hook)
+                             (do (fs/delete hook) (println "OK pre-commit hook removed"))
+                             (println ">> no pre-commit hook found")))}
+
+  nrepl {:doc "Start a jolt nREPL server for interactive dev: bb nrepl [port] (default 7888)"
+         :task (shell "jolt" "nrepl-server" (or (first *command-line-args*) "7888"))}}}

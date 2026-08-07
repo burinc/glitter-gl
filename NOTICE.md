@@ -58,11 +58,25 @@ read/write — its `shape-button` helper is called directly,
 (see `AGENTS.md`'s Conventions & gotchas).
 
 Tooling config adapted from glitter (same author/org, no license file, no
-attribution obligation, listed here for provenance only), diffing cleanly
-against glitter's own copies modulo project-name renames:
-`.clj-kondo/hooks/jolt_ffi.clj`, `.clj-kondo/config.edn`, `.lsp/config.edn`.
+attribution obligation, listed here for provenance only): `.clj-kondo/
+hooks/jolt_ffi.clj`, `.clj-kondo/config.edn`, `.lsp/config.edn` — diffing
+cleanly against glitter's own copies modulo project-name renames.
 glitter's own `NOTICE.md` in turn credits b12n-rljlt for the original
-`jolt_ffi.clj` hook.
+`jolt_ffi.clj` hook. `scripts/check_positional_args.clj` is adapted from
+glitter's own copy with one real logic change on top of the rename — see
+the script's own header comment (glitter-gl's type-hint-heavy geometry/
+matrix layer needed the arg-counter fixed, not just renamed). `bb.edn`'s
+`check:positional-args`/`:strict` and `nrepl` tasks are the same
+rename-only adaptation as the `.clj-kondo`/`.lsp` config above — task
+bodies unchanged beyond path/alias substitution. `hooks:install`/
+`:install:full`/`:uninstall` carry one further deviation on top of
+that: they resolve the hook path via `git rev-parse --git-path
+hooks/pre-commit` rather than glitter's hardcoded
+`.git/hooks/pre-commit` literal — the hardcoded relative path breaks
+when run from inside a linked git worktree (where `.git` is a gitlink
+file, not a directory); the git-path form resolves correctly in both a
+normal checkout and any worktree, since hooks are shared, not
+per-worktree, in git.
 
 New, not present in glimmer-gl: `examples/glitter_gl/gl_area_smoke.clj`
 (live-GTK smoke), `test/glitter_gl/renderer_test.clj` (glimmer-gl ships

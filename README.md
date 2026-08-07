@@ -49,7 +49,16 @@ bb test      # jolt -M:test
 bb plasma    # interactive demo
 bb check     # headless sanity check
 bb smokes    # live-GTK smoke, CI-safe
+bb hooks:install / :install:full / :uninstall  # git pre-commit hook: fast | +tests | remove
 ```
+
+`bb hooks:install` sets up a fast pre-commit hook (lint errors + format +
+ns cleanliness) that gates every commit on staying `bb lsp:format-check`-
+clean — the whole codebase is formatted uniformly, including the 22 files
+ported verbatim from glimmer-gl. See `AGENTS.md`'s gotcha #1 for why a
+project-wide `clojure-lsp format` pass doesn't conflict with the "don't
+improve ported files" porting discipline — it mirrors glitter's identical
+resolution of the same tension for its own Replicant-ported files.
 
 ## Architecture
 
