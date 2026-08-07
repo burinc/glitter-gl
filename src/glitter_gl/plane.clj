@@ -2,8 +2,8 @@
   "3D plane, ported from thi.ng/geom's Plane. Stored as a unit Vec3 normal `n`
   and a ^double `w` offset, with the plane equation n·x + w = 0 (so a point x
   is on the plane when dot(n,x) + w = 0). Plain functions."
-  (:require [glitter-gl.vector :as v3 :refer [vec3 Vec3]]
-            [glitter-gl.line :as line]))
+  (:require [glitter-gl.line :as line]
+            [glitter-gl.vector :as v3 :refer [vec3 Vec3]]))
 
 (def ^:private ^double eps 1e-6)
 

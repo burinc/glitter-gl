@@ -1,8 +1,8 @@
 (ns glitter-gl.polygon
   "2D polygon, ported from thi.ng/geom's Polygon2. Stored as a vector of Vec2
   vertices in winding order (CCW ⇒ positive area). Plain functions."
-  (:require [glitter-gl.vec2 :as v2 :refer [vec2 Vec2]]
-            [glitter-gl.rect :as r]))
+  (:require [glitter-gl.rect :as r]
+            [glitter-gl.vec2 :as v2 :refer [vec2 Vec2]]))
 
 (defrecord Polygon2 [points])
 

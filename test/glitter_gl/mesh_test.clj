@@ -1,7 +1,7 @@
 (ns glitter-gl.mesh-test
   (:require [clojure.test :refer [deftest is testing]]
-            [glitter-gl.vector :as v]
-            [glitter-gl.mesh :as mesh]))
+            [glitter-gl.mesh :as mesh]
+            [glitter-gl.vector :as v]))
 
 (defn- approx
   ([a b] (approx a b 1e-9))

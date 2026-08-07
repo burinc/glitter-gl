@@ -61,7 +61,9 @@
   node; wrap several top-level nodes in a :group."
   [node]
   (let [[items lights camera] (walk node (m/ident) [] [] nil)]
-    {:camera camera :lights lights :items items}))
+    {:camera camera
+     :lights lights
+     :items items}))
 
 ;; --- component expansion -----------------------------------------------------
 (declare expand)
@@ -122,9 +124,15 @@
   [{:keys [eye target up fov aspect near far]}]
   (let [view (m/look-at eye target up)
         proj (m/perspective fov aspect near far)]
-    {:eye eye :target target :up up
-     :fov fov :aspect aspect :near near :far far
-     :view view :proj proj}))
+    {:eye eye
+     :target target
+     :up up
+     :fov fov
+     :aspect aspect
+     :near near
+     :far far
+     :view view
+     :proj proj}))
 
 (defn apply-camera
   "Merge a camera's :view/:proj into a draw-spec's :uniforms."

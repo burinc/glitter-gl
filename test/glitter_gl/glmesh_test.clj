@@ -1,7 +1,7 @@
 (ns glitter-gl.glmesh-test
   (:require [clojure.test :refer [deftest is testing]]
-            [glitter-gl.glmesh :as glmesh]
             [glitter-gl.gl :as gl]
+            [glitter-gl.glmesh :as glmesh]
             [glitter-gl.matrix :as m]
             [glitter-gl.primitives :as prim]
             [glitter-gl.scene :as scene]))
@@ -36,8 +36,13 @@
 ;; the draw spec it feeds.
 (deftest perspective-camera-builds-matrices
   (let [cam (scene/perspective-camera
-              {:eye [4.0 3.0 6.0] :target [0.0 0.0 0.0] :up [0.0 1.0 0.0]
-               :fov 45.0 :aspect (/ 4.0 3.0) :near 0.1 :far 100.0})]
+             {:eye [4.0 3.0 6.0]
+              :target [0.0 0.0 0.0]
+              :up [0.0 1.0 0.0]
+              :fov 45.0
+              :aspect (/ 4.0 3.0)
+              :near 0.1
+              :far 100.0})]
     (is (= 16 (count (m/->vec (:view cam)))))
     (is (= 16 (count (m/->vec (:proj cam)))))
     (is (= 0.1 (:near cam)))

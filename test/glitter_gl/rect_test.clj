@@ -8,7 +8,7 @@
   ([a b eps]
    (and (== (count a) (count b))
         (every? (fn [[x y]] (< (Math/abs (- x y)) eps))
-                 (map vector a b)))))
+                (map vector a b)))))
 
 (defn rect-points-approx [a b]
   (and (approx (v2/->vec (r/p a)) (v2/->vec (r/p b)))

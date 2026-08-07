@@ -1,8 +1,8 @@
 (ns glitter-gl.circle
   "2D circle, ported from thi.ng/geom's Circle2. Plain functions on a
   defrecord with a Vec2 center `p` and a ^double radius `r`."
-  (:require [glitter-gl.vec2 :as v2 :refer [vec2 Vec2]]
-            [glitter-gl.rect :as rect :refer [Rect2]]))
+  (:require [glitter-gl.rect :as rect :refer [Rect2]]
+            [glitter-gl.vec2 :as v2 :refer [vec2 Vec2]]))
 
 (def ^:private ^double two-pi (* 2.0 Math/PI))
 

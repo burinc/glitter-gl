@@ -1,8 +1,8 @@
 (ns glitter-gl.triangle
   "3D triangle, ported from thi.ng/geom's Triangle3. Stored as three hinted
   Vec3 vertices a, b, c (CCW winding yields the outward normal). Plain functions."
-  (:require [glitter-gl.vector :as v3 :refer [vec3 Vec3]]
-            [glitter-gl.line :as line]))
+  (:require [glitter-gl.line :as line]
+            [glitter-gl.vector :as v3 :refer [vec3 Vec3]]))
 
 (def ^:private ^double eps 1e-6)
 
@@ -80,11 +80,11 @@
       (if (and (>= u 0.0) (>= v 0.0) (>= w 0.0))
         q
         (reduce
-          (fn [best [s e]]
-            (let [cp (line/closest-point (line/line3 s e) p)]
-              (if (< (v3/dist-squared p cp) (v3/dist-squared p best)) cp best)))
-          (line/closest-point (line/line3 (.-a t) (.-b t)) p)
-          [[(.-b t) (.-c t)] [(.-c t) (.-a t)]])))))
+         (fn [best [s e]]
+           (let [cp (line/closest-point (line/line3 s e) p)]
+             (if (< (v3/dist-squared p cp) (v3/dist-squared p best)) cp best)))
+         (line/closest-point (line/line3 (.-a t) (.-b t)) p)
+         [[(.-b t) (.-c t)] [(.-c t) (.-a t)]])))))
 
 (defn flip
   "Reverse the winding (swap b and c), flipping the normal."

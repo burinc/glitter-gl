@@ -3,8 +3,8 @@
   Stored as (x y z w): w is the scalar (cos θ/2), xyz the imaginary part
   (axis·sin θ/2). deftype with ^double fields for hot-path rotation; plain
   functions, house style."
-  (:require [glitter-gl.vector :as v3 :refer [vec3 Vec3]]
-            [glitter-gl.matrix :as mat]))
+  (:require [glitter-gl.matrix :as mat]
+            [glitter-gl.vector :as v3 :refer [vec3 Vec3]]))
 
 (deftype Quaternion [^double x ^double y ^double z ^double w])
 
@@ -55,10 +55,10 @@
   (let [ax (.-x a) ay (.-y a) az (.-z a) aw (.-w a)
         bx (.-x b) by (.-y b) bz (.-z b) bw (.-w b)]
     (Quaternion.
-      (+ (* aw bx) (* ax bw) (* ay bz) (- (* az by)))
-      (+ (* aw by) (- (* ax bz)) (* ay bw) (* az bx))
-      (+ (* aw bz) (* ax by) (- (* ay bx)) (* az bw))
-      (- (* aw bw) (* ax bx) (* ay by) (* az bz)))))
+     (+ (* aw bx) (* ax bw) (* ay bz) (- (* az by)))
+     (+ (* aw by) (- (* ax bz)) (* ay bw) (* az bx))
+     (+ (* aw bz) (* ax by) (- (* ay bx)) (* az bw))
+     (- (* aw bw) (* ax bx) (* ay by) (* az bz)))))
 
 (defn from-axis-angle
   "^double theta is radians. Axis is normalized internally."
@@ -115,10 +115,10 @@
         yy (* y y2) yz (* y z2) zz (* z z2)
         wx (* w x2) wy (* w y2) wz (* w z2)]
     (mat/matrix44
-      (- 1.0 (+ yy zz)) (+ xy wz) (- xz wy) 0.0
-      (- xy wz) (- 1.0 (+ xx zz)) (+ yz wx) 0.0
-      (+ xz wy) (- yz wx) (- 1.0 (+ xx yy)) 0.0
-      0.0 0.0 0.0 1.0)))
+     (- 1.0 (+ yy zz)) (+ xy wz) (- xz wy) 0.0
+     (- xy wz) (- 1.0 (+ xx zz)) (+ yz wx) 0.0
+     (+ xz wy) (- yz wx) (- 1.0 (+ xx yy)) 0.0
+     0.0 0.0 0.0 1.0)))
 
 (defn from-rotation-between
   "Shortest-arc quaternion rotating unit-vector a onto unit-vector b.

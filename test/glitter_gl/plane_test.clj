@@ -1,7 +1,7 @@
 (ns glitter-gl.plane-test
   (:require [clojure.test :refer [deftest is testing]]
-            [glitter-gl.plane :as pl]
             [glitter-gl.line :as l]
+            [glitter-gl.plane :as pl]
             [glitter-gl.vector :as v3]))
 
 (defn approx

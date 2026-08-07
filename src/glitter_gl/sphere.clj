@@ -1,8 +1,8 @@
 (ns glitter-gl.sphere
   "3D sphere, ported from thi.ng/geom's Sphere. Plain functions on a
   defrecord with a Vec3 center `p` and a ^double radius `r`."
-  (:require [glitter-gl.vector :as v3 :refer [vec3 Vec3]]
-            [glitter-gl.aabb :refer [AABB]]))
+  (:require [glitter-gl.aabb :refer [AABB]]
+            [glitter-gl.vector :as v3 :refer [vec3 Vec3]]))
 
 (defrecord Sphere [^Vec3 p ^double r])
 

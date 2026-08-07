@@ -10,8 +10,8 @@
 
   Vertices are value-equal Vec3 records, so a shared corner hashes to one map key
   — that is what lets `vertex-normals` average face normals for smooth shading."
-  (:require [glitter-gl.vector :as v]
-            [glitter-gl.matrix :as mat]))
+  (:require [glitter-gl.matrix :as mat]
+            [glitter-gl.vector :as v]))
 
 (defrecord Mesh [faces])
 
@@ -107,13 +107,15 @@
   to the normal to emit for that vertex."
   [tris normal-of]
   (let [data (vec (mapcat
-                    (fn [tri]
-                      (mapcat (fn [p]
-                                (let [n (normal-of tri p)]
-                                  [(v/x p) (v/y p) (v/z p) (v/x n) (v/y n) (v/z n)]))
-                              tri))
-                    tris))]
-    {:data data :count (* 3 (count tris)) :stride 6}))
+                   (fn [tri]
+                     (mapcat (fn [p]
+                               (let [n (normal-of tri p)]
+                                 [(v/x p) (v/y p) (v/z p) (v/x n) (v/y n) (v/z n)]))
+                             tri))
+                   tris))]
+    {:data data
+     :count (* 3 (count tris))
+     :stride 6}))
 
 (defn ->floats
   "Tessellate to an interleaved [x y z nx ny nz] vertex buffer ready for a VBO.
@@ -123,7 +125,8 @@
     :shading :flat (default) — one face normal per triangle (faceted look)
              :smooth         — per-vertex averaged normals (rounded look)"
   ([m] (->floats m {}))
-  ([m {:keys [shading] :or {shading :flat}}]
+  ([m {:keys [shading]
+       :or {shading :flat}}]
    (let [tris (triangles m)]
      (if (= shading :smooth)
        (let [vn (vertex-normals m)]

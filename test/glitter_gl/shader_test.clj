@@ -1,12 +1,14 @@
 (ns glitter-gl.shader-test
-  (:require [clojure.test :refer [deftest is testing]]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
+            [clojure.test :refer [deftest is testing]]
             [glitter-gl.shader :as sh]))
 
 (def ^:private spec
   {:version  "330 core"
-   :uniforms {:u_mvp :mat4 :u_time [:float 0.0]}
-   :attribs  {:a_pos [:vec3 0] :a_normal [:vec3 1]}
+   :uniforms {:u_mvp :mat4
+              :u_time [:float 0.0]}
+   :attribs  {:a_pos [:vec3 0]
+              :a_normal [:vec3 1]}
    :varying  {:v_normal :vec3}
    :fs-out   {:frag :vec4}
    :vs-main  [[:set :gl_Position [:* :u_mvp [:vec4 :a_pos 1.0]]]
@@ -192,4 +194,4 @@
               "  frag_color = vec4(col, 1.0);\n"
               "}")
          (sh/compile-main [[:let :N :vec3 [:normalize :v_normal]]
-                          [:set :frag_color [:vec4 :col 1.0]]]))))
+                           [:set :frag_color [:vec4 :col 1.0]]]))))

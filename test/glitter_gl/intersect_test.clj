@@ -1,8 +1,8 @@
 (ns glitter-gl.intersect-test
   (:require [clojure.test :refer [deftest is testing]]
             [glitter-gl.intersect :as ix]
-            [glitter-gl.vector :as v3]
-            [glitter-gl.plane :as pl]))
+            [glitter-gl.plane :as pl]
+            [glitter-gl.vector :as v3]))
 
 (defn approx
   ([a b] (approx a b 1e-9))

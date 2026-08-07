@@ -4,8 +4,8 @@
   Octa/icosa/dodeca vertices are normalized onto a sphere of the given radius;
   tetra vertices are scaled directly (regular tetrahedron of edge = radius).
   Default radius is 1.0. Compose with mesh ops: transform/merge/subdivide/->floats."
-  (:require [glitter-gl.vector :as v3 :refer [vec3 Vec3]]
-            [glitter-gl.mesh :as mesh]))
+  (:require [glitter-gl.mesh :as mesh]
+            [glitter-gl.vector :as v3 :refer [vec3 Vec3]]))
 
 (def ^:private ^double sqrt2 (Math/sqrt 2.0))
 (def ^:private ^double sqrt3 (Math/sqrt 3.0))
@@ -84,17 +84,17 @@
   ([^double scale]
    (let [[a b c d e f g h i j k l] (icosahedron-vertices scale)]
      (mesh/mesh
-       [[b a c] [c d b] [e d f] [g d e]
-        [h a i] [j a h] [k e l] [l h k]
-        [f c j] [j l f] [i b g] [g k i]
-        [f d c] [b d g] [c a j] [i a b]
-        [j h l] [k h i] [l e f] [g e k]]))))
+      [[b a c] [c d b] [e d f] [g d e]
+       [h a i] [j a h] [k e l] [l h k]
+       [f c j] [j l f] [i b g] [g k i]
+       [f d c] [b d g] [c a j] [i a b]
+       [j h l] [k h i] [l e f] [g e k]]))))
 
 (defn dodecahedron
   ([] (dodecahedron 1.0))
   ([^double scale]
    (let [[a b c d e f g h i j k l m n o p q r s t] (dodecahedron-vertices scale)]
      (mesh/mesh
-       [[e d c b a] [h g f a b] [m l k j i] [p o n i j]
-        [o d e q n] [d o p r c] [l g h s k] [g l m t f]
-        [e a f t q] [m i n q t] [p j k s r] [h b c r s]]))))
+      [[e d c b a] [h g f a b] [m l k j i] [p o n i j]
+       [o d e q n] [d o p r c] [l g h s k] [g l m t f]
+       [e a f t q] [m i n q t] [p j k s r] [h b c r s]]))))

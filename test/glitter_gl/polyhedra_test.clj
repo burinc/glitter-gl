@@ -1,7 +1,7 @@
 (ns glitter-gl.polyhedra-test
   (:require [clojure.test :refer [deftest is testing]]
-            [glitter-gl.polyhedra :as poly]
             [glitter-gl.mesh :as mesh]
+            [glitter-gl.polyhedra :as poly]
             [glitter-gl.vector :as v3]))
 
 (defn approx

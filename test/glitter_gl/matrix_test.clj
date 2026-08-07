@@ -15,14 +15,14 @@
 
 (deftest ident-is-column-major-diagonal
   (is (approx [1 0 0 0  0 1 0 0  0 0 1 0  0 0 0 1]
-           (m/->vec (m/ident)))))
+              (m/->vec (m/ident)))))
 
 (deftest multiply-by-identity-is-noop
   (let [id (m/ident)
         t  (m/translation 1 2 3)]
     (testing "identity * identity = identity"
       (is (approx [1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1]
-               (m/->vec (m/mul id id)))))
+                  (m/->vec (m/mul id id)))))
     (testing "identity * t = t"
       (is (approx (m/->vec t) (m/->vec (m/mul id t)))))
     (testing "t * identity = t"
@@ -31,18 +31,18 @@
 (deftest translation-populates-last-column
   ;; column-major: col3 = [tx ty tz 1]
   (is (approx [1 0 0 0  0 1 0 0  0 0 1 0  1 2 3 1]
-           (m/->vec (m/translation 1 2 3)))))
+              (m/->vec (m/translation 1 2 3)))))
 
 (deftest multiply-composes-translations
   (let [a (m/translation 1 0 0)
         b (m/translation 0 2 0)
         ab (m/mul a b)]
     (is (approx [1 0 0 0  0 1 0 0  0 0 1 0  1 2 0 1]
-             (m/->vec ab)))))
+                (m/->vec ab)))))
 
 (deftest scaling-scales-the-rotation-block
   (is (approx [2 0 0 0  0 3 0 0  0 0 4 0  0 0 0 1]
-           (m/->vec (m/scaling 2 3 4)))))
+              (m/->vec (m/scaling 2 3 4)))))
 
 (deftest perspective-known-answer
   ;; fovy=90°, aspect=1, near=0.1, far=100.
@@ -53,10 +53,10 @@
   (let [p (m/perspective 90.0 1.0 0.1 100.0)
         v (m/->vec p)]
     (is (approx [1.0 0 0 0
-              0 1.0 0 0
-              0 0 -1.002002002 -1.0
-              0 0 -0.2002002002 0]
-             v 1e-6))))
+                 0 1.0 0 0
+                 0 0 -1.002002002 -1.0
+                 0 0 -0.2002002002 0]
+                v 1e-6))))
 
 (deftest invert-roundtrips
   ;; M * invert(M) ≈ identity for an invertible M.
@@ -65,12 +65,12 @@
         inv (m/invert mat)]
     (is (some? inv))
     (is (approx [1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1]
-             (m/->vec (m/mul mat inv)) 1e-7))))
+                (m/->vec (m/mul mat inv)) 1e-7))))
 
 (deftest transpose-double-transpose-is-identity-op
   (let [mat (m/mul (m/translation 1 0 0) (m/scaling 5 1 1))]
     (is (approx (m/->vec mat)
-             (m/->vec (m/transpose (m/transpose mat)))))))
+                (m/->vec (m/transpose (m/transpose mat)))))))
 
 ;; --- rotation ---------------------------------------------------------------
 
@@ -97,7 +97,7 @@
 
 (deftest rotate-z-half-turn-negates-xy
   (is (approx [-1 0 0 0  0 -1 0 0  0 0 1 0  0 0 0 1]
-           (m/->vec (m/rotate-z Math/PI)) 1e-9)))
+              (m/->vec (m/rotate-z Math/PI)) 1e-9)))
 
 ;; --- camera / light projection ----------------------------------------------
 
@@ -105,7 +105,7 @@
   ;; eye (0,0,5) looking at origin, up +Y. f=(0,0,-1), s=(1,0,0), u=(0,1,0),
   ;; so this reduces to a pure translation by -5 in z (camera 5 units back).
   (is (approx [1 0 0 0  0 1 0 0  0 0 1 0  0 0 -5 1]
-           (m/->vec (m/look-at [0 0 5] [0 0 0] [0 1 0])) 1e-9)))
+              (m/->vec (m/look-at [0 0 5] [0 0 0] [0 1 0])) 1e-9)))
 
 (deftest look-at-maps-world-into-front-of-camera
   ;; origin sits 5 units in front of the eye -> view-space z = -5 (looking -Z).
@@ -118,4 +118,4 @@
 (deftest ortho-symmetric-unit-cube-is-axis-z-flip
   ;; ortho(-1,1,-1,1,-1,1): x,y identity, z negated; no translation.
   (is (approx [1 0 0 0  0 1 0 0  0 0 -1 0  0 0 0 1]
-           (m/->vec (m/ortho -1 1 -1 1 -1 1)) 1e-9)))
+              (m/->vec (m/ortho -1 1 -1 1 -1 1)) 1e-9)))

@@ -8,8 +8,8 @@
   + the VAO into one draw call. The data is Clojure all the way down — the only
   raw GL lives behind these entry points."
   (:require [glitter-gl.gl :as gl]
-            [glitter-gl.shader :as shader]
             [glitter-gl.mesh :as mesh]
+            [glitter-gl.shader :as shader]
             [glitter-gl.vector :as v]
             [jolt.ffi :as ffi]))
 
@@ -23,7 +23,8 @@
     :shading :flat   each triangle's 3 verts carry its face normal (default)
     :shading :smooth each vert carries its averaged vertex normal"
   ([m] (as-gl-buffer-spec m {}))
-  ([m {:keys [shading] :or {shading :flat}}]
+  ([m {:keys [shading]
+       :or {shading :flat}}]
    (let [tris   (mesh/triangles m)
          vn     (when (= shading :smooth) (mesh/vertex-normals m))
          nrm-of (if vn (fn [_ p] (get vn p)) (fn [tri _] (mesh/face-normal tri)))]
@@ -40,8 +41,10 @@
                       (conj (v/x na)) (conj (v/y na)) (conj (v/z na))
                       (conj (v/x nb)) (conj (v/y nb)) (conj (v/z nb))
                       (conj (v/x nc)) (conj (v/y nc)) (conj (v/z nc)))))
-         {:attribs     {:position {:data pos :size 3}
-                        :normal   {:data nrm :size 3}}
+         {:attribs     {:position {:data pos
+                                   :size 3}
+                        :normal   {:data nrm
+                                   :size 3}}
           :num-vertices (* 3 (count tris))
           :mode         gl/GL-TRIANGLES})))))
 

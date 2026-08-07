@@ -1,8 +1,8 @@
 (ns glitter-gl.polygon-test
   (:require [clojure.test :refer [deftest is testing]]
             [glitter-gl.polygon :as poly]
-            [glitter-gl.vec2 :as v2]
-            [glitter-gl.rect :as r]))
+            [glitter-gl.rect :as r]
+            [glitter-gl.vec2 :as v2]))
 
 (defn approx
   ([a b] (approx a b 1e-9))

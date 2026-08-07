@@ -9,8 +9,12 @@
 
 (deftest reactive-area-returns-a-gl-area-prop-map
   (let [state (atom {:zoom 1.0})
-        scene-fn (fn [_state] (scene/camera {:eye [0 0 5] :target [0 0 0] :up [0 1 0]
-                                             :fov 50 :near 0.1 :far 100}))
+        scene-fn (fn [_state] (scene/camera {:eye [0 0 5]
+                                             :target [0 0 0]
+                                             :up [0 1 0]
+                                             :fov 50
+                                             :near 0.1
+                                             :far 100}))
         props (app/reactive-area state scene-fn)]
     (testing "the standard :gl-area handler keys are all present as functions"
       (is (fn? (:on-realize props)))
@@ -25,9 +29,14 @@
 
 (deftest reactive-area-honors-explicit-opts
   (let [state (atom {})
-        scene-fn (fn [_state] (scene/camera {:eye [0 0 5] :target [0 0 0] :up [0 1 0]
-                                             :fov 50 :near 0.1 :far 100}))
-        props (app/reactive-area state scene-fn {:version [4 1] :depth-buffer false})]
+        scene-fn (fn [_state] (scene/camera {:eye [0 0 5]
+                                             :target [0 0 0]
+                                             :up [0 1 0]
+                                             :fov 50
+                                             :near 0.1
+                                             :far 100}))
+        props (app/reactive-area state scene-fn {:version [4 1]
+                                                 :depth-buffer false})]
     (is (= [4 1] (:version props)))
     (is (false? (:depth-buffer props)))))
 

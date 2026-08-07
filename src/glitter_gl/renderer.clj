@@ -77,7 +77,7 @@
               ;; outside the shadow frustum: treat as fully lit (no occluder there)
               [:let :shadow :float 1.0]
               [:if [:and [:>= [:. :sc :x] 0.0] [:<= [:. :sc :x] 1.0]
-                         [:>= [:. :sc :y] 0.0] [:<= [:. :sc :y] 1.0] [:<= [:. :sc :z] 1.0]]
+                    [:>= [:. :sc :y] 0.0] [:<= [:. :sc :y] 1.0] [:<= [:. :sc :z] 1.0]]
                [[:set :shadow [:texture :u_shadow_map
                                [:vec3 [:. :sc :xy] [:- [:. :sc :z] :u_shadow_bias]]]]]]
               [:let :N     :vec3  [:normalize :v_normal]]
@@ -114,7 +114,8 @@
 (defn- upload-mesh [geom]
   (let [vao (gen-one gl/gl-gen-vertex-arrays)
         vbo (gen-one gl/gl-gen-buffers)
-        {:keys [data] cnt :count} (mesh/->floats geom {:shading :flat})
+        {:keys [data]
+         cnt :count} (mesh/->floats geom {:shading :flat})
         ptr (gl/write-floats data)]
     (gl/gl-bind-vertex-array vao)
     (gl/gl-bind-buffer gl/GL-ARRAY-BUFFER vbo)
@@ -125,7 +126,9 @@
     (gl/gl-enable-vertex-attrib-array 1)            ; a_normal @ loc 1
     (gl/gl-vertex-attrib-pointer 1 3 gl/GL-FLOAT gl/GL-FALSE stride-bytes (* 3 float-size))
     (gl/gl-bind-vertex-array 0)
-    {:vao vao :vbo vbo :count cnt}))
+    {:vao vao
+     :vbo vbo
+     :count cnt}))
 
 ;; A depth-only framebuffer + depth texture configured as a shadow sampler
 ;; (hardware compare, LEQUAL, white border so out-of-frustum reads as lit).
@@ -150,7 +153,8 @@
       (when (not= status gl/GL-FRAMEBUFFER-COMPLETE)
         (println "[renderer] shadow framebuffer incomplete, status =" status)))
     (gl/gl-bind-framebuffer gl/GL-FRAMEBUFFER 0)
-    {:fbo fbo :tex tex}))
+    {:fbo fbo
+     :tex tex}))
 
 ;; Compile both programs and create the shadow map. Requires a current GL context.
 ;; opts: {:depth-spec <shader spec> :lit-spec <shader spec>} — default to the
@@ -158,7 +162,8 @@
 (defn make-renderer!
   ([] (make-renderer! {}))
   ([{:keys [depth-spec lit-spec]
-     :or   {depth-spec depth-spec lit-spec lit-spec}}]
+     :or   {depth-spec depth-spec
+            lit-spec lit-spec}}]
    (atom {:depth  (sh/program depth-spec)
           :lit    (sh/program lit-spec)
           :shadow (make-shadow-map!)
@@ -214,21 +219,21 @@
       (gl/gl-bind-texture gl/GL-TEXTURE-2D (:tex shadow))
       (gl/gl-use-program (:program lit))
       (sh/set-uniforms! lit
-        {:u_light_dir   dir
-         :u_light_color color
-         :u_ambient     (:ambient ctx)
-         :u_camera_pos  (:eye ctx)
-         :u_shadow_map  0
-         :u_shadow_bias (:shadow-bias ctx)
-         :u_fog_near    (get-in ctx [:fog :near])
-         :u_fog_far     (get-in ctx [:fog :far])
-         :u_fog_color   (get-in ctx [:fog :color])})
+                        {:u_light_dir   dir
+                         :u_light_color color
+                         :u_ambient     (:ambient ctx)
+                         :u_camera_pos  (:eye ctx)
+                         :u_shadow_map  0
+                         :u_shadow_bias (:shadow-bias ctx)
+                         :u_fog_near    (get-in ctx [:fog :near])
+                         :u_fog_far     (get-in ctx [:fog :far])
+                         :u_fog_color   (get-in ctx [:fog :color])})
       (doseq [{:keys [geom world material cast-shadow]} items]
         (let [upload (get meshes geom)]
           (gl/gl-bind-vertex-array (:vao upload))
           (sh/set-uniforms! lit
-            {:u_mvp       (m/mul vp world)
-             :u_model     world
-             :u_light_mvp (m/mul lvp world)
-             :u_color     (get materials material [0.5 0.5 0.5])})
+                            {:u_mvp       (m/mul vp world)
+                             :u_model     world
+                             :u_light_mvp (m/mul lvp world)
+                             :u_color     (get materials material [0.5 0.5 0.5])})
           (gl/gl-draw-arrays gl/GL-TRIANGLES 0 (:count upload)))))))

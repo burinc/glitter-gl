@@ -59,9 +59,18 @@
 (def ^:private infix-op
   "GLSL symbol for each infix operator node. Any op not in this map is emitted
   as a function/constructor call."
-  {:+ "+" :- "-" :* "*" :/ "/"
-   :> ">" :< "<" :>= ">=" :<= "<=" :== "==" :!= "!="
-   :and "&&" :or "||"})
+  {:+ "+"
+   :- "-"
+   :* "*"
+   :/ "/"
+   :> ">"
+   :< "<"
+   :>= ">="
+   :<= "<="
+   :== "=="
+   :!= "!="
+   :and "&&"
+   :or "||"})
 
 (defn- fmt-num
   "Emit a GLSL float literal: coerce to double and ensure a fractional part
@@ -143,15 +152,15 @@
   (let [tag (nth node 0)]
     (cond
       (= tag :let) (let [sym (nth node 1) ty (nth node 2) x (nth node 3)]
-                    (str (name ty) " " (name sym) " = " (compile-expr x) ";"))
+                     (str (name ty) " " (name sym) " = " (compile-expr x) ";"))
       (= tag :set) (let [sym (nth node 1) x (nth node 2)]
-                    (str (name sym) " = " (compile-expr x) ";"))
+                     (str (name sym) " = " (compile-expr x) ";"))
       (= tag :if)  (let [cond (nth node 1) then (nth node 2)
                          body (str "if (" (compile-expr cond) ") {\n"
                                    (indent-lines (compile-stmts then) 2) "\n}")]
-                    (if-let [els (nth node 3 nil)]
-                      (str body " else {\n" (indent-lines (compile-stmts els) 2) "\n}")
-                      body))
+                     (if-let [els (nth node 3 nil)]
+                       (str body " else {\n" (indent-lines (compile-stmts els) 2) "\n}")
+                       body))
       :else (throw (ex-info "shader: cannot compile statement node" {:node node})))))
 
 (defn compile-main
@@ -187,7 +196,7 @@
              :fs-out    (merge (:fs-out a) (:fs-out b))
              :vs-main   (into (vec (:vs-main a)) (:vs-main b))
              :fs-main   (into (vec (:fs-main a)) (:fs-main b))})
-           {} specs))
+          {} specs))
 
 (def ^:private gles-sampler-types
   "Sampler types that have no default precision in a GLSL ES fragment shader."

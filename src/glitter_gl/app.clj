@@ -41,8 +41,8 @@
   (:require [glitter-gl.gl       :as gl]
             [glitter-gl.gtk      :as gtk]
             [glitter-gl.matrix   :as m]
-            [glitter-gl.scene    :as scene]
-            [glitter-gl.renderer :as renderer]))
+            [glitter-gl.renderer :as renderer]
+            [glitter-gl.scene    :as scene]))
 
 ;; Shadow frustum for a directional light. The light node carries the direction
 ;; the light travels (`:dir`) plus optional frustum tuning; `target` is the scene
@@ -68,10 +68,21 @@
 
 (def ^:private keyval-kw
   "GDK keyval -> movement keyword."
-  {0xff52 :up, 0xff54 :down, 0xff51 :left, 0xff53 :right   ; arrows
-   0x77 :w, 0x57 :w, 0x61 :a, 0x41 :a                     ; w a (lower/upper)
-   0x73 :s, 0x53 :s, 0x64 :d, 0x44 :d                     ; s d
-   0xff1b :escape, 0x20 :space, 0xff0d :enter})
+  {0xff52 :up,
+   0xff54 :down,
+   0xff51 :left,
+   0xff53 :right   ; arrows
+   0x77 :w,
+   0x57 :w,
+   0x61 :a,
+   0x41 :a                     ; w a (lower/upper)
+   0x73 :s,
+   0x53 :s,
+   0x64 :d,
+   0x44 :d                     ; s d
+   0xff1b :escape,
+   0x20 :space,
+   0xff0d :enter})
 
 (defn keyval->kw
   "Map a GDK keyval to a movement-friendly keyword, or nil when not one we
@@ -112,7 +123,8 @@
          vp (atom [960 600])]
      {:version     (or (:version opts) [3 2])
       :depth-buffer (if (nil? (:depth-buffer opts)) true (:depth-buffer opts))
-      :hexpand true :vexpand true
+      :hexpand true
+      :vexpand true
       :on-realize
       (fn [_area]
         (gl/gl-enable gl/GL-DEPTH-TEST)
@@ -155,7 +167,9 @@
                     amb    (or (:ambient opts) 0.1)
                     amb3   (if (number? amb) [amb amb amb] amb)
                     bias   (or (:shadow-bias opts) 0.002)
-                    fog    (or (:fog opts) {:near 8.0 :far 50.0 :color [0.0 0.0 0.0]})]
+                    fog    (or (:fog opts) {:near 8.0
+                                            :far 50.0
+                                            :color [0.0 0.0 0.0]})]
                 (renderer/draw! s
                                 {:plan        plan
                                  :view        (:view cam2)

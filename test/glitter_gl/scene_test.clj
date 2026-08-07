@@ -11,7 +11,8 @@
 (defn tx [mat] (mapv double (subvec (m/->vec mat) 12 15)))
 
 (deftest single-mesh-gets-identity-world
-  (let [plan (scene/flatten [:mesh {:geom ::cube :material :stone}])]
+  (let [plan (scene/flatten [:mesh {:geom ::cube
+                                    :material :stone}])]
     (is (= 1 (count (:items plan))))
     (let [item (first (:items plan))]
       (is (= ::cube (:geom item)))
@@ -22,7 +23,8 @@
 (deftest group-transform-threads-to-children
   (let [plan (scene/flatten
               [:group {:transform (m/translation 1 2 3)}
-               [:mesh {:geom ::cube :material :stone}]])]
+               [:mesh {:geom ::cube
+                       :material :stone}]])]
     (is (= [1.0 2.0 3.0] (tx (:world (first (:items plan))))))))
 
 (deftest nested-groups-compose-matrices
@@ -30,35 +32,51 @@
   (let [plan (scene/flatten
               [:group {:transform (m/translation 1 0 0)}
                [:group {:transform (m/translation 0 2 0)}
-                [:mesh {:geom ::cube :material :stone}]]])]
+                [:mesh {:geom ::cube
+                        :material :stone}]]])]
     (is (= [1.0 2.0 0.0] (tx (:world (first (:items plan))))))))
 
 (deftest multiple-meshes-collect-in-order
   (let [plan (scene/flatten
               [:group {:transform (m/ident)}
-               [:mesh {:geom ::a :material :stone}]
-               [:mesh {:geom ::b :material :metal :cast-shadow false}]
-               [:mesh {:geom ::c :material :stone}]])]
+               [:mesh {:geom ::a
+                       :material :stone}]
+               [:mesh {:geom ::b
+                       :material :metal
+                       :cast-shadow false}]
+               [:mesh {:geom ::c
+                       :material :stone}]])]
     (is (= [::a ::b ::c] (map :geom (:items plan))))
     (is (= [true false true] (map :cast-shadow (:items plan))))))
 
 (deftest camera-and-lights-extracted
   (let [plan (scene/flatten
-              [:camera {:eye [0 0 10] :target [0 0 0] :up [0 1 0]
-                        :fov 50 :near 0.1 :far 100}]
+              [:camera {:eye [0 0 10]
+                        :target [0 0 0]
+                        :up [0 1 0]
+                        :fov 50
+                        :near 0.1
+                        :far 100}]
                ;; camera may be wrapped or standalone; also test lights
               )]
-    (is (= {:eye [0 0 10] :target [0 0 0] :up [0 1 0]
-            :fov 50 :near 0.1 :far 100}
+    (is (= {:eye [0 0 10]
+            :target [0 0 0]
+            :up [0 1 0]
+            :fov 50
+            :near 0.1
+            :far 100}
            (:camera plan)))))
 
 (deftest lights-collect-from-anywhere-in-tree
   (let [plan (scene/flatten
               [:group {:transform (m/ident)}
-               [:light {:dir [1 0 0] :color [1 1 1]}]
+               [:light {:dir [1 0 0]
+                        :color [1 1 1]}]
                [:group {:transform (m/ident)}
-                [:light {:dir [0 -1 0] :color [0.2 0.2 0.4]}]
-                [:mesh {:geom ::cube :material :stone}]]])]
+                [:light {:dir [0 -1 0]
+                         :color [0.2 0.2 0.4]}]
+                [:mesh {:geom ::cube
+                        :material :stone}]]])]
     (is (= 2 (count (:lights plan))))
     (is (= [[1 0 0] [0 -1 0]] (map :dir (:lights plan))))))
 
@@ -70,8 +88,10 @@
   ;; seqable final child (every child node is a vector) into siblings, which
   ;; corrupts the tree. A two-child group must flatten to two items, in order.
   (let [node (scene/group (m/ident)
-                          [:mesh {:geom ::a :material :stone}]
-                          [:mesh {:geom ::b :material :stone}])
+                          [:mesh {:geom ::a
+                                  :material :stone}]
+                          [:mesh {:geom ::b
+                                  :material :stone}])
         items (:items (scene/flatten node))]
     (is (= [::a ::b] (map :geom items)))))
 
@@ -81,7 +101,8 @@
 ;; what lets a scene be authored exactly like reagent web UI.
 
 (deftest component-invocation-expands-to-native-hiccup
-  (let [box (fn [material] [:mesh {:geom ::cube :material material}])
+  (let [box (fn [material] [:mesh {:geom ::cube
+                                   :material material}])
         items (:items (scene/flatten (scene/expand [box :stone])))]
     (is (= [::cube] (map :geom items)))
     (is (= [:stone] (map :material items)))))
@@ -90,7 +111,8 @@
   ;; a component may itself return a tree containing more component invocations;
   ;; expansion recurses until only native nodes remain, and group transforms
   ;; still thread through to the leaf mesh.
-  (let [cube  (fn [mat] [:mesh {:geom ::c :material mat}])
+  (let [cube  (fn [mat] [:mesh {:geom ::c
+                                :material mat}])
         box   (fn [mat] [:group {:transform (m/translation 1 0 0)} [cube mat]])
         items (:items (scene/flatten (scene/expand [box :stone])))
         item  (first items)]
@@ -102,17 +124,21 @@
   (let [p (scene/flatten
            (scene/expand
             [:group {:transform (m/ident)}
-             (for [i [::a ::b ::c]] [:mesh {:geom i :material :stone}])]))]
+             (for [i [::a ::b ::c]] [:mesh {:geom i
+                                            :material :stone}])]))]
     (is (= [::a ::b ::c] (map :geom (:items p))))))
 
 (deftest nil-children-are-dropped
   (let [p (scene/flatten
            (scene/expand
             [:group {:transform (m/ident)}
-             [:mesh {:geom ::a :material :stone}]
+             [:mesh {:geom ::a
+                     :material :stone}]
              nil
-             (when false [:mesh {:geom ::x :material :stone}])
-             [:mesh {:geom ::b :material :stone}]]))]
+             (when false [:mesh {:geom ::x
+                                 :material :stone}])
+             [:mesh {:geom ::b
+                     :material :stone}]]))]
     (is (= [::a ::b] (map :geom (:items p))))))
 
 ;; --- plan (state -> render plan, no reactive wrapper) -------------------------
@@ -124,14 +150,16 @@
 
 (deftest plan-reflects-the-current-state-on-each-call
   (let [box (fn [state] [:group {:transform (:xform state)}
-                         [:mesh {:geom ::cube :material :stone}]])]
+                         [:mesh {:geom ::cube
+                                 :material :stone}]])]
     (is (= [0.0 0.0 0.0]
            (tx (:world (first (:items (scene/plan {:xform (m/ident)} box)))))))
     (is (= [5.0 0.0 0.0]
            (tx (:world (first (:items (scene/plan {:xform (m/translation 5 0 0)} box)))))))))
 
 (deftest plan-reflects-the-latest-of-many-state-values
-  (let [cube (fn [state] [:mesh {:geom ::c :material (:material state)}])]
+  (let [cube (fn [state] [:mesh {:geom ::c
+                                 :material (:material state)}])]
     (is (= [:stone] (map :material (:items (scene/plan {:material :stone} cube)))))
     (is (= [:metal] (map :material (:items (scene/plan {:material :metal} cube)))))
     (is (= [:glass] (map :material (:items (scene/plan {:material :glass} cube)))))))

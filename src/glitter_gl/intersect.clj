@@ -4,8 +4,8 @@
   `t` along the (assumed unit) direction vector — nil when there's no forward
   hit — so the hit point is `(+ origin (scale dir t))`. Decoupled from the
   shape records: only vector + plane."
-  (:require [glitter-gl.vector :as v3 :refer [vec3 Vec3]]
-            [glitter-gl.plane :as pl]))
+  (:require [glitter-gl.plane :as pl]
+            [glitter-gl.vector :as v3 :refer [vec3 Vec3]]))
 
 (def ^:private ^double eps 1e-9)
 

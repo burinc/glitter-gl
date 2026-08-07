@@ -8,7 +8,7 @@
   ([a b eps]
    (and (== (count a) (count b))
         (every? (fn [[x y]] (< (Math/abs (- x y)) eps))
-                 (map vector a b)))))
+                (map vector a b)))))
 
 (deftest construct
   (let [x (c/circle (v2/vec2 1 2) 5)]

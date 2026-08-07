@@ -113,7 +113,8 @@
                       (gdk-gl-context-get-version ctx maj mnr)
                       (let [v [(ffi/read maj :int 0) (ffi/read mnr :int 0)]]
                         (ffi/free maj) (ffi/free mnr)
-                        {:context ctx :version v}))))))))))))
+                        {:context ctx
+                         :version v}))))))))))))
 
 (def ^:private the-context (atom nil))
 

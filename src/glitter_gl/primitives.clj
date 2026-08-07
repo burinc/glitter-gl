@@ -3,8 +3,8 @@
   tetrahedron, sphere, plane). Each returns a `glitter-gl.mesh` whose faces wind
   counter-clockwise so face normals point outward. Compose them with
   `mesh/transform`, `mesh/merge-meshes`, and `mesh/subdivide`."
-  (:require [glitter-gl.vector :as v]
-            [glitter-gl.mesh :as mesh]))
+  (:require [glitter-gl.mesh :as mesh]
+            [glitter-gl.vector :as v]))
 
 ;; --- cuboid ------------------------------------------------------------------
 ;; Vertex layout and face winding are thi.ng/geom's (thi.ng.geom.cuboid):
@@ -30,12 +30,12 @@
          a  (v/vec3 x1 y1 z1) b (v/vec3 x1 y1 z2) c (v/vec3 x2 y1 z2) d (v/vec3 x2 y1 z1)
          e  (v/vec3 x1 y2 z1) f (v/vec3 x1 y2 z2) g (v/vec3 x2 y2 z2) h (v/vec3 x2 y2 z1)]
      (mesh/mesh
-       [[c d h g]    ;; east  (+X)
-        [a b f e]    ;; west  (-X)
-        [f g h e]    ;; north (+Y)
-        [a d c b]    ;; south (-Y)
-        [b c g f]    ;; front (+Z)
-        [d a e h]])))) ;; back  (-Z)
+      [[c d h g]    ;; east  (+X)
+       [a b f e]    ;; west  (-X)
+       [f g h e]    ;; north (+Y)
+       [a d c b]    ;; south (-Y)
+       [b c g f]    ;; front (+Z)
+       [d a e h]])))) ;; back  (-Z)
 
 ;; --- tetrahedron -------------------------------------------------------------
 (defn- ortho-normal [a b c]
@@ -73,8 +73,8 @@
          step (/ size res) h (* 0.5 size)
          vert (fn [i j] (v/vec3 (- (* i step) h) (- (* j step) h) 0.0))]
      (mesh/mesh
-       (for [i (range res) j (range res)]
-         [(vert i j) (vert (inc i) j) (vert (inc i) (inc j)) (vert i (inc j))])))))
+      (for [i (range res) j (range res)]
+        [(vert i j) (vert (inc i) j) (vert (inc i) (inc j)) (vert i (inc j))])))))
 
 (defn quad
   "A single quad face in the XY plane, centered at the origin, `size` on a side.
@@ -107,11 +107,11 @@
                            (* (nth cp w) r)
                            (* (nth st u) (nth sp w) r)))]
      (mesh/mesh
-       (for [j (range stacks)
-             i (range slices)
-             :let [ii (inc i) jj (inc j)
-                   idx (cond
-                         (zero? j)         [[i j] [ii jj] [i jj]]      ;; south pole fan
-                         (< j stacks')     [[i j] [ii j] [ii jj] [i jj]] ;; quad band
-                         :else             [[i j] [ii j] [i jj]])]]     ;; north pole fan
-         (mapv (fn [[u w]] (pt u w)) idx))))))
+      (for [j (range stacks)
+            i (range slices)
+            :let [ii (inc i) jj (inc j)
+                  idx (cond
+                        (zero? j)         [[i j] [ii jj] [i jj]]      ;; south pole fan
+                        (< j stacks')     [[i j] [ii j] [ii jj] [i jj]] ;; quad band
+                        :else             [[i j] [ii j] [i jj]])]]     ;; north pole fan
+        (mapv (fn [[u w]] (pt u w)) idx))))))
