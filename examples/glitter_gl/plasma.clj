@@ -198,6 +198,18 @@
 (core/set-dispatch! execute-actions)
 
 (defn -main [& _]
+  ;; :gl-area's :on-realize/:on-render/:on-resize/:on-tick trip a cosmetic
+  ;; dev-time hiccup warning on every render (glitter.core, ported from
+  ;; Replicant, flags any prop key starting with "on" as a probable :on {}
+  ;; mistake) — harmless, see AGENTS.md gotcha #10 and docs/guide/
+  ;; gl-area-widget-layer.md for why there's no practical way to silence it
+  ;; from here: glitter.assert's checks are macro-expanded into glitter.core
+  ;; at glitter.core's OWN compile time, which happens the moment this ns
+  ;; form's own :require of glitter.app/glitter.gtk runs — before any code
+  ;; in this file, -main included, ever executes. (glitter.env/configure!
+  ;; :glitter/asserts? false) genuinely works, but only if called before
+  ;; glitter.core is first required anywhere in the process — not reachable
+  ;; from inside this namespace's own -main.
   ;; GLITTER_GL_DEMO_QUIT_MS auto-closes the window after N ms (smoke
   ;; testing); unset, the window stays open until closed. Mirrors the
   ;; original's GLIMMER_GL_DEMO_QUIT_MS.

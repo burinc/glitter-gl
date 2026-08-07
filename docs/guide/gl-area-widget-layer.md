@@ -338,3 +338,49 @@ own `:switch`/`:list-box` signal generalization hit and documented in its
 own `docs/guide/gtk-widget-layer.md`), so there is no data-driven table
 here either; adding a ninth `:gl-area` handler with yet another shape
 means adding its own literal branch by hand.
+
+## A cosmetic side effect: dev-time hiccup warnings on every render
+
+`:gl-area`'s `:on-realize`/`:on-render`/`:on-resize`/`:on-tick` props all
+have names starting with `"on"` — the exact pattern glitter's ported
+Replicant hiccup validation (`glitter.asserts/assert-no-event-attribute`)
+flags as a likely `:on {}` mistake, printing "Set event listeners in the
+:on map... Instead of :on-realize set :on {:realize ,,,}" once per prop
+key, per render. The warning does not affect anything — `create-node`'s
+`set-attributes` call still routes the value through `set-attr-val` to
+`r/set-attribute` → `glitter.widget/apply-props!` → `gl-area-apply!`
+exactly as described above, regardless of the console noise — it's a
+false positive specific to this widget's non-standard prop shape, not a
+sign anything is broken.
+
+There is no way to exempt `:gl-area`'s specific props from this check
+without modifying `glitter.core`/`glitter.asserts` themselves (out of
+scope for `glitter-gl`).
+
+`(glitter.env/configure! :glitter/asserts? false)` looks like the
+obvious escape hatch, but it does NOT work when called from an app's own
+`-main` — verified live, not just read. `glitter.assert`'s `enter-node`/
+`assert` are macros whose `(when (assert? ) ...)` gate runs at
+MACROEXPANSION time: once, when `glitter.core` itself is compiled, not
+per-call at runtime. `glitter.core` gets compiled the moment any
+namespace `:require`s `glitter.app`/`glitter.gtk` (both pull it in
+transitively) — which happens as part of processing the `ns` form
+itself, before any of that file's own code, `-main` included, ever runs.
+So by the time `-main` calls `configure!`, `glitter.core`'s macros have
+already expanded with asserts baked in; the call is a no-op. Confirmed
+with a two-line probe: `(configure! ...) (require '[glitter.core])` then
+checking `glitter.assert/assert?` reports `false` when `configure!` runs
+first, but calling it in the opposite order (the only order a single
+namespace's `-main` can actually achieve, since its own `ns` form's
+`:require` already ran before `-main` exists to call anything) leaves
+`assert?` at its default `true` — the check simply never sees the
+config change in time.
+
+Making `configure!` actually take effect needs a genuinely separate
+bootstrap namespace: one that requires *only* `glitter.env`, calls
+`configure!` first, and only then dynamically `(require 'the-app-ns)` —
+so `glitter.core`'s compilation happens after the config change, not
+before. `glitter-gl` doesn't ship one (the added entry-point complexity
+wasn't judged worth it for a cosmetic wart); `examples/glitter_gl/
+plasma.clj` and `examples/glitter_gl/gl_area_smoke.clj` both just leave
+the warnings on.
