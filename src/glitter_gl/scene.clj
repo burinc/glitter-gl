@@ -27,6 +27,8 @@
 (defn camera [props]            [:camera props])
 (defn light  [props]            [:light props])
 (defn mesh   [props]            [:mesh props])
+;; NB: must use `into`, NOT `(vec (list* …))` — list* splices a seqable final
+;; child (every child node is a vector), flattening its contents into siblings.
 (defn group  [transform & kids] (into [:group {:transform transform}] kids))
 
 ;; --- compiler ----------------------------------------------------------------
@@ -60,6 +62,9 @@
 (declare expand)
 
 (defn- expand-children
+  "Normalize a parent's child forms into a flat vector of expanded hiccup
+  elements: splice (possibly nested) seqs, drop nils, expand each survivor. A
+  bare vector is one child, not spliced (standard hiccup)."
   [xs]
   (letfn [(walk [acc x]
             (cond
@@ -74,8 +79,9 @@
   head (fn?, not ifn? — hiccup vectors are themselves callable, so ifn? would
   misclassify native nodes). This scene-graph mini-hiccup is independent of
   glitter's own widget hiccup (it's consumed by glitter-gl.renderer, never by
-  glitter.core/reconcile), so glitter's own no-function-tags convention
-  (AGENTS.md #10) does not apply here."
+  glitter.core/reconcile), so glitter's own no-function-tags convention —
+  glitter's AGENTS.md convention #10 (not glitter-gl's own gotcha list,
+  which numbers things differently) — does not apply here."
   [node]
   (cond
     (nil? node) nil
