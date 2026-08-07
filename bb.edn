@@ -5,7 +5,7 @@
 ;;   bb plasma               interactive demo: rotating primitive + plasma/stripes shader
 ;;   bb check                 headless sanity check: shader compiles, geometry buffers valid
 ;;   bb gl-area-smoke          live-GTK smoke: :gl-area construct/realize/render/resize
-;;   bb smokes                  gl-area-smoke (CI-safe entry point, mirrors glitter's bb smokes)
+;;   bb smokes                  gl-area-smoke + check (CI-safe entry point, mirrors glitter's bb smokes)
 ;;   bb lint | lint:strict      clj-kondo over glitter-gl-authored code; :strict propagates findings
 ;;   bb lsp:format | lsp:format-check       clojure-lsp format (mutate | dry-run)
 ;;   bb lsp:clean-ns | lsp:clean-ns-check   clojure-lsp clean-ns (mutate | dry-run)
@@ -32,7 +32,7 @@
           (row "check" "headless sanity check: shader compiles, geometry buffers valid")
           (hdr "Smoke (live GTK, exits non-zero on failure)")
           (row "gl-area-smoke" ":gl-area construct/realize/render/resize against real GTK")
-          (row "smokes" "run every live-GTK smoke in sequence; stops at first failure")
+          (row "smokes" "run every automated smoke/check in sequence; stops at first failure")
           (hdr "Quality — lint/format/checks")
           (row "lint" "clj-kondo over glitter-gl-authored code (report only)")
           (row "lint:strict" "bb lint, but exit non-zero if any findings")
@@ -57,8 +57,9 @@
   gl-area-smoke {:doc "Live-GTK smoke: :gl-area construct/realize/render/resize"
                  :task (shell "jolt" "-M:gl-area-smoke")}
 
-  smokes {:doc "Run every live-GTK smoke in sequence; stops at the first failure"
-          :task (shell "jolt" "-M:gl-area-smoke")}
+  smokes {:doc "Run every live-GTK smoke and headless check in sequence; stops at the first failure"
+          :task (do (shell "jolt" "-M:gl-area-smoke")
+                    (shell "jolt" "-M:check"))}
 
   lint {:doc "clj-kondo over glitter-gl-authored code (report only)"
         :task (shell {:continue true} "clj-kondo" "--lint" "src" "test" "examples")}
