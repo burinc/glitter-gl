@@ -14,8 +14,9 @@ model, tessellation, and primitive vertex/face definitions
 (thi.ng.geom.{basicmesh,utils,cuboid,tetrahedron,sphere,plane}); and the
 shader-spec model (thi.ng.geom.gl.shaders).
 
-glitter-gl is licensed under the Apache License, Version 2.0 (see
-./LICENSE), which is compatible with jolt's Eclipse Public License 1.0.
+Copyright 2026 Burin Choomnuan. glitter-gl is licensed under the Apache
+License, Version 2.0 (see ./LICENSE), which is compatible with jolt's
+Eclipse Public License 1.0.
 
 ## Porting ledger: glimmer-gl → glitter-gl (2026-08-06 arc)
 
@@ -24,7 +25,9 @@ Port Procedure"): `vector.clj`, `vec2.clj`, `matrix.clj`, `quaternion.clj`,
 `aabb.clj`, `rect.clj`, `circle.clj`, `line.clj`, `plane.clj`,
 `triangle.clj`, `sphere.clj`, `polygon.clj`, `bezier.clj`, `intersect.clj`,
 `mesh.clj`, `glmesh.clj`, `primitives.clj`, `polyhedra.clj`, `shader.clj`,
-`gl.clj`, `offscreen.clj`, `renderer.clj` (+ every corresponding test file).
+`gl.clj`, `offscreen.clj`, `renderer.clj` (+ every corresponding test file,
+**except `renderer.clj`'s** — its SOURCE is verbatim but its test is new,
+added in this port, since glimmer-gl ships none; see below).
 `gl.clj` landed before `shader.clj`, the reverse of the plan's original
 task order — `shader.clj` itself requires `glitter-gl.gl`, so the plan's
 numbering was swapped to match the real dependency direction; the ported
@@ -54,10 +57,18 @@ read/write — its `shape-button` helper is called directly,
 `[shape-button ...]`; glitter has no function-as-hiccup-tag convention
 (see `AGENTS.md`'s Conventions & gotchas).
 
+Tooling config adapted from glitter (same author/org, no license file, no
+attribution obligation, listed here for provenance only), diffing cleanly
+against glitter's own copies modulo project-name renames:
+`.clj-kondo/hooks/jolt_ffi.clj`, `.clj-kondo/config.edn`, `.lsp/config.edn`.
+glitter's own `NOTICE.md` in turn credits b12n-rljlt for the original
+`jolt_ffi.clj` hook.
+
 New, not present in glimmer-gl: `examples/glitter_gl/gl_area_smoke.clj`
-(live-GTK smoke), `test/glitter_gl/renderer_test.clj` and
-`test/glitter_gl/app_test.clj` (glimmer-gl ships no test for either
-`renderer.clj` or `app.clj`).
+(live-GTK smoke), `test/glitter_gl/renderer_test.clj` (glimmer-gl ships
+no test for `renderer.clj` — its source above is verbatim, its test is
+not) and `test/glitter_gl/app_test.clj` (glimmer-gl ships no test for
+`app.clj` either).
 
 `glitter-gl.glmesh-test` briefly failed to `require` partway through this
 arc: `glmesh.clj`'s real transitive dependencies (`gl.clj`, `shader.clj`,
