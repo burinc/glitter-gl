@@ -1,5 +1,5 @@
 (ns glitter-gl.scene-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is]]
             [glitter-gl.matrix :as m]
             [glitter-gl.scene :as scene]))
 
@@ -90,12 +90,12 @@
   ;; a component may itself return a tree containing more component invocations;
   ;; expansion recurses until only native nodes remain, and group transforms
   ;; still thread through to the leaf mesh.
-  (let [cube (fn [mat] [:mesh {:geom ::c :material mat}])
-        box  (fn [mat] [:group {:transform (m/translation 1 0 0)} [cube mat]])]
-    (let [items (:items (scene/flatten (scene/expand [box :stone])))
-          item  (first items)]
-      (is (= [::c] (map :geom items)))
-      (is (= [1.0 0.0 0.0] (tx (:world item)))))))
+  (let [cube  (fn [mat] [:mesh {:geom ::c :material mat}])
+        box   (fn [mat] [:group {:transform (m/translation 1 0 0)} [cube mat]])
+        items (:items (scene/flatten (scene/expand [box :stone])))
+        item  (first items)]
+    (is (= [::c] (map :geom items)))
+    (is (= [1.0 0.0 0.0] (tx (:world item))))))
 
 (deftest seq-children-splice-into-multiple-nodes
   ;; (for ...) yields one node per item; a bare vector is a single child.

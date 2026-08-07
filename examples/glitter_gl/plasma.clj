@@ -108,7 +108,7 @@
 
 (defn on-render [area]
   (when-let [st (get @gl-state area)]
-    (let [{:keys [shape smooth speed zoom p-scale warp blend]} @state
+    (let [{:keys [shape smooth zoom p-scale warp blend]} @state
           st (if (or (not= (:shape st) shape) (not= (:smooth st) smooth))
                (let [n (upload! (:vbo st) shape smooth)
                      st' (assoc st :count n :shape shape :smooth smooth)]

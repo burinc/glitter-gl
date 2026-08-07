@@ -51,6 +51,11 @@
       :camera [items lights (nth node 1)]
       [items lights camera])))
 
+;; Deliberately shadows clojure.core/flatten (mirrors glimmer-gl's/thi.ng.geom's
+;; own naming) — this is the scene-graph compiler's public entry point, not a
+;; sequence-flattening helper, and renaming it would be an API change beyond
+;; what a lint pass warrants.
+#_{:clj-kondo/ignore [:redefined-var]}
 (defn flatten
   "Compile a declarative scene tree into a render plan. The root may be any
   node; wrap several top-level nodes in a :group."

@@ -4,4 +4,29 @@
 ;; through the macro, so hooks/jolt_ffi.clj rewrites each call into an
 ;; equivalent `defn` — see that file for why. Without it every gl-*/gtk-*
 ;; binding in glitter-gl.gl / glitter-gl.gtk is a false "Unresolved symbol".
-{:hooks {:analyze-call {jolt.ffi/defcfn hooks.jolt-ffi/defcfn}}}
+;;
+;; The verbatim-ported library layer (glimmer-gl's geometry/matrix/shader/GL
+;; modules, namespace-renamed only — see NOTICE.md's porting ledger and the
+;; Standard Verbatim Port Procedure in PRIVATE-PLANNING-DOC/
+;; 2026-08-06-glimmer-gl-port.md) carries a handful of inherited clj-kondo
+;; findings from upstream: shadowed core names (min/max/identity — deliberate
+;; in the original thi.ng/geom-derived design), an unresolved clojure.math
+;; require (a false positive — glitter-gl.vec2/heading resolves and runs
+;; correctly under Jolt; clj-kondo's clojure.math stub just doesn't know
+;; about Jolt's own math namespace), an unresolved glitter-gl.matrix
+;; reference in quaternion_test.clj (also a false positive — it resolves
+;; transitively through quaternion.clj's own require), a couple of unused
+;; `vec3`/`testing` refers, and a few redundant-expression style notes. Every
+;; one of these is confirmed identical to glimmer-gl's own source via the
+;; Standard Verbatim Port Procedure's diff check — "fixing" any of them here
+;; would mean deviating from a file this project's whole porting discipline
+;; depends on staying byte-for-byte identical to upstream. This is the same
+;; call glitter's own .clj-kondo/config.edn makes for its Replicant-ported
+;; files (see that file's :output :exclude-files comment): permanent,
+;; harmless, out-of-scope findings for a deliberate porting strategy, not
+;; defects to silently patch around.
+{:hooks {:analyze-call {jolt.ffi/defcfn hooks.jolt-ffi/defcfn}}
+ :output
+ {:exclude-files
+  ["glitter_gl/(vector|vec2|matrix|quaternion|aabb|rect|circle|line|plane|triangle|sphere|polygon|bezier|intersect|mesh|glmesh|primitives|polyhedra|shader|gl|offscreen|renderer)\\.clj$"
+   "glitter_gl/(vector|vec2|matrix|quaternion|aabb|rect|circle|line|plane|triangle|sphere|polygon|bezier|intersect|mesh|glmesh|primitives|polyhedra|shader|gl|offscreen)_test\\.clj$"]}}
