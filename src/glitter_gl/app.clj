@@ -22,8 +22,22 @@
   glitter-gl.app' section for the full rationale.
 
   opts' values are now plain (no more 'may be a reactive cell' affordance) —
-  the caller already recomputes everything from `state` on every render, so
-  there's nothing left for a cell-deref to buy."
+  but this is NOT the same as saying opts/closures get re-read on every
+  render. `:gl-area`'s handler props (`:on-realize`/`:on-render`/etc.) wire
+  through the widget spec's `:apply` closure, guarded idempotent per
+  `[area event]` (see gtk.clj's `wired` atom): each event only ever connects
+  the FIRST closure it sees for a given `:gl-area` widget, and every later
+  `:apply` call for that same event is a no-op, no matter what closure it
+  carries. So `reactive-area` must be called exactly ONCE per `:gl-area`
+  mount point — its returned prop map handed to a single, stable
+  `[:gl-area ...]` hiccup position (built once outside the view fn, or the
+  view fn returning the SAME `reactive-area` call's result across renders)
+  — not called fresh on every render expecting new opts/closures to take
+  over; they will not. `opts`' values are captured once, at that single
+  call. `:on-render`'s own body is unaffected by this: it derefs `state`
+  fresh on every GTK-driven call regardless, since that deref happens
+  inside the one closure that DID get wired, not by re-wiring a new one.
+  Full mechanics: docs/guide/gl-area-widget-layer.md."
   (:require [glitter-gl.gl       :as gl]
             [glitter-gl.gtk      :as gtk]
             [glitter-gl.matrix   :as m]

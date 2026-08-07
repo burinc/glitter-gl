@@ -3,7 +3,7 @@
   port of glimmer-gl's GtkGLArea integration (see glitter-gl.gtk). Verifies:
 
   1. [:gl-area ...] mounts through glitter's real reconciler (glitter.gtk),
-     using the :connect hook glitter.widget/register-widget! provides.
+     using the :apply hook glitter.widget/register-widget! provides.
   2. :on-realize fires (a GL context is made current, no GError).
   3. :on-render fires at least once without an exception escaping.
   4. :on-resize fires with the window's actual allocated size.

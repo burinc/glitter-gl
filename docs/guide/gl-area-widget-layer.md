@@ -143,6 +143,24 @@ callbacks, each firing independently. `wire-once!` gates every branch on
 `gtk_widget_add_tick_callback`) call happens exactly once per widget per
 event.
 
+**Write-once contract for callers, distinct from `:apply`'s general
+per-key mechanism above:** the general mechanism (`:apply` runs once per
+prop key, both at construction and on every re-render) is what lets most
+widgets — `:scale`'s min/max/step, for instance — pick up fresh values on
+every render. `:gl-area` specifically does NOT get that benefit for its
+event-handler props, because `wire-once!` only reacts to the FIRST arrival
+of each event key: once `:on-realize`/`:on-render`/`:on-resize`/`:on-tick`/
+`:on-motion`/`:on-key`/`:on-button` has been wired once for a given
+`:gl-area` widget, every subsequent `:apply` call for that same event key
+is a guarded no-op — the closure connected on first arrival keeps running
+for the widget's entire life, even if a later render supplies a different
+closure for the same key. Concretely: if a caller (e.g.
+`glitter-gl.app/reactive-area`) is invoked again for what's meant to be
+the same `:gl-area` mount point, expecting its new opts/closures to
+replace the old ones, they will not — the original closures keep running.
+Callers must build a `:gl-area` prop map once, at a stable point, and
+reuse the same result across renders.
+
 **Known v1 limitation, found during review, not fixed:** `wired` is keyed
 by the raw `GtkGLArea` pointer — a plain machine address — with no
 release path when a widget is destroyed. If GTK/GLib ever reuses a freed
