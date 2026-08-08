@@ -12,22 +12,35 @@
   rather than going through dispatch — the same 'plain atom, not reactive
   cell' treatment the original already gave its GL-plumbing-only atoms
   (clock/viewport/gl-state), now just applied to the WHOLE state map instead
-  of a handful of separate atoms."
-  (:require [glitter.app     :as app]
+  of a handful of separate atoms. The dispatch mechanism itself is
+  glitter.nexus (see glitter's docs/guide/nexus.md) — the control panel's
+  :effect/assoc-in passthroughs and :action/toggle-smooth/
+  :action/toggle-paused expansions mirror the same effect/action split
+  glitter's own todo.clj/crud.clj retrofit onto the same engine, not a
+  hand-written case form."
+  (:require [clojure.tools.logging :as log]
+            [glitter-gl.gl   :as gl]
+            [glitter-gl.gtk  :as glx]
+            [glitter-gl.matrix :as m]
+            [glitter-gl.mesh :as mesh]
+            [glitter-gl.plasma-shader :as pshader]
+            [glitter-gl.primitives :as p]
+            [glitter-gl.shader :as sh]
+            [glitter.app     :as app]
             [glitter.core    :as core]
             [glitter.gtk     :as gtk]
-            [glitter-gl.gtk  :as glx]
-            [glitter-gl.gl   :as gl]
-            [glitter-gl.mesh :as mesh]
-            [glitter-gl.primitives :as p]
-            [glitter-gl.matrix :as m]
-            [glitter-gl.shader :as sh]
-            [glitter-gl.plasma-shader :as pshader]
+            [glitter.nexus.registry :as nxr]
             [jolt.ffi :as ffi]))
 
 ;; --- app state (glitter: ONE atom, pure view fn, data-driven dispatch) ------
-(defonce state (atom {:shape :cube :speed 1.0 :zoom 1.0 :p-scale 3.0
-                      :warp 0.5 :blend 0.5 :smooth false :paused false}))
+(defonce state (atom {:shape :cube
+                      :speed 1.0
+                      :zoom 1.0
+                      :p-scale 3.0
+                      :warp 0.5
+                      :blend 0.5
+                      :smooth false
+                      :paused false}))
 
 ;; --- GL-plumbing-only state (not part of the reconciled view; read/written
 ;; directly by the :gl-area handlers, exactly like the original's plain
@@ -55,7 +68,8 @@
   "(Re)fill the bound VBO from the mesh for `shape`/`smooth?`. Returns the
   vertex count to draw."
   [vbo shape smooth?]
-  (let [{:keys [data] vcount :count} (buffer-for shape smooth?)
+  (let [{:keys [data]
+         vcount :count} (buffer-for shape smooth?)
         ptr (gl/write-floats data)]
     (gl/gl-bind-buffer gl/GL-ARRAY-BUFFER vbo)
     (gl/gl-buffer-data gl/GL-ARRAY-BUFFER
@@ -97,8 +111,12 @@
             (let [n (upload! vbo shape smooth)]
               (setup-attribs! shader)
               (swap! gl-state assoc area
-                     {:shader shader :vao vao :vbo vbo :count n
-                      :shape shape :smooth smooth})
+                     {:shader shader
+                      :vao vao
+                      :vbo vbo
+                      :count n
+                      :shape shape
+                      :smooth smooth})
               (println "glitter-gl.plasma: GL ready — program" (:program shader)
                        "vao" vao "verts" n))))))))
 
@@ -146,56 +164,75 @@
 ;; --- reactive control panel (glitter: DATA, dispatched through one fn) ------
 (defn- slider [label-text lo hi step value key]
   [:box {:spacing 8}
-   [:label {:label label-text :width-chars 6 :xalign 0.0}]
-   [:scale {:min lo :max hi :step step :value value :digits 2 :hexpand true
-            :on {:value-changed [[key]]}}]])
+   [:label {:label label-text
+            :width-chars 6
+            :xalign 0.0}]
+   [:scale {:min lo
+            :max hi
+            :step step
+            :value value
+            :digits 2
+            :hexpand true
+            :on {:value-changed [[:effect/assoc-in [key] [:glitter/value]]]}}]])
 
 (defn- shape-button [label kw current-shape]
   [:button {:label label
             :sensitive (not= current-shape kw)
-            :on {:click [[:action/set-shape kw]]}}])
+            :on {:click [[:effect/assoc-in [:shape] kw]]}}])
 
 (defn- control-panel [{:keys [shape speed zoom p-scale warp blend smooth paused]}]
-  [:box {:spacing 6 :margin 8 :orientation :vertical}
+  [:box {:spacing 6
+         :margin 8
+         :orientation :vertical}
    [:box {:spacing 6}
     (shape-button "Cube" :cube shape)
     (shape-button "Sphere" :sphere shape)
     (shape-button "Tetra" :tetra shape)]
-   (slider "Speed" 0.0 4.0 0.05 speed :action/set-speed)
-   (slider "Zoom"  0.3 2.5 0.05 zoom :action/set-zoom)
-   (slider "Scale" 0.5 8.0 0.1  p-scale :action/set-p-scale)
-   (slider "Warp"  0.0 1.5 0.05 warp :action/set-warp)
-   (slider "Blend" 0.0 1.0 0.05 blend :action/set-blend)
+   (slider "Speed" 0.0 4.0 0.05 speed :speed)
+   (slider "Zoom"  0.3 2.5 0.05 zoom :zoom)
+   (slider "Scale" 0.5 8.0 0.1  p-scale :p-scale)
+   (slider "Warp"  0.0 1.5 0.05 warp :warp)
+   (slider "Blend" 0.0 1.0 0.05 blend :blend)
    [:box {:spacing 12}
-    [:checkbutton {:label "Smooth shading" :active smooth
+    [:checkbutton {:label "Smooth shading"
+                   :active smooth
                    :on {:toggled [[:action/toggle-smooth]]}}]
     [:button {:label (if paused "Resume" "Pause")
               :on {:click [[:action/toggle-paused]]}}]]])
 
 (defn view [state]
-  [:box {:spacing 0 :orientation :vertical}
+  [:box {:spacing 0
+         :orientation :vertical}
    (control-panel state)
    [:separator {}]
-   [:gl-area {:version [3 2] :depth-buffer true :hexpand true :vexpand true
+   [:gl-area {:version [3 2]
+              :depth-buffer true
+              :hexpand true
+              :vexpand true
               :on-realize on-realize
               :on-render  on-render
               :on-resize  on-resize
               :on-tick    on-tick}]])
 
-(defn execute-actions [event actions]
-  (doseq [[kind arg] actions]
-    (case kind
-      :action/set-shape      (swap! state assoc :shape arg)
-      :action/set-speed      (swap! state assoc :speed (get-in event [:glitter/dom-event :glitter/value]))
-      :action/set-zoom       (swap! state assoc :zoom (get-in event [:glitter/dom-event :glitter/value]))
-      :action/set-p-scale    (swap! state assoc :p-scale (get-in event [:glitter/dom-event :glitter/value]))
-      :action/set-warp       (swap! state assoc :warp (get-in event [:glitter/dom-event :glitter/value]))
-      :action/set-blend      (swap! state assoc :blend (get-in event [:glitter/dom-event :glitter/value]))
-      :action/toggle-smooth  (swap! state update :smooth not)
-      :action/toggle-paused  (swap! state update :paused not)
-      nil)))
+(nxr/register-effect! :effect/assoc-in
+                      (fn [_ system path v] (swap! system assoc-in path v)))
 
-(core/set-dispatch! execute-actions)
+(nxr/register-placeholder! :glitter/value
+                           (fn [event] (get-in event [:glitter/dom-event :glitter/value])))
+
+(nxr/register-action! :action/toggle-smooth
+                      (fn [state] [[:effect/assoc-in [:smooth] (not (:smooth state))]]))
+
+(nxr/register-action! :action/toggle-paused
+                      (fn [state] [[:effect/assoc-in [:paused] (not (:paused state))]]))
+
+(nxr/register-system->state! deref)
+(nxr/on-error (fn [_ctx {:keys [err]
+                         :as error}]
+                (log/error err "glitter.nexus dispatch error" (dissoc error :err))))
+
+(core/set-dispatch!
+ (fn [event actions] (nxr/dispatch state event actions)))
 
 (defn -main [& _]
   ;; :gl-area's :on-realize/:on-render/:on-resize/:on-tick trip a cosmetic
