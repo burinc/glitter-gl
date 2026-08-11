@@ -7,8 +7,8 @@
 ;;
 ;; The verbatim-ported library layer (glimmer-gl's geometry/matrix/shader/GL
 ;; modules, namespace-renamed only — see NOTICE.md's porting ledger and the
-;; Standard Verbatim Port Procedure in PRIVATE-PLANNING-DOC/
-;; 2026-08-06-glimmer-gl-port.md) carries a handful of inherited clj-kondo
+;; Standard Verbatim Port Procedure in the port plan, private planning
+;; store) carries a handful of inherited clj-kondo
 ;; findings from upstream: shadowed core names (min/max/identity — deliberate
 ;; in the original thi.ng/geom-derived design), an unresolved clojure.math
 ;; require (a false positive — glitter-gl.vec2/heading resolves and runs

@@ -102,8 +102,9 @@ glitter-gl.gtk (:gl-area, wired via glitter.widget's
 - **[`docs/guide/index.md`](docs/guide/index.md)** — the full guide.
 - **[`AGENTS.md`](AGENTS.md)** — canonical context for coding agents
   working in this repo. `CLAUDE.md` imports it.
-- Design spec / implementation plan:
-  `PRIVATE-PLANNING-DOC`.
+- Design spec / implementation plan: not included in this repo — they live
+  at `~/dev/b12n-sp-docs/glitter-gl/{specs,plans}/` (the centralized
+  superpowers planning store) for anyone with access to that store.
 
 ## Status
 

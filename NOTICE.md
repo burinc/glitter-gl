@@ -33,10 +33,10 @@ task order — `shader.clj` itself requires `glitter-gl.gl`, so the plan's
 numbering was swapped to match the real dependency direction; the ported
 code itself is unaffected.
 
-Adapted for glitter's Replicant-style model (see
-`PRIVATE-PLANNING-DOC` for the full
-rationale, and `docs/guide/gl-area-widget-layer.md` for a correction to
-one part of it): `gtk.clj` (`:gl-area`'s realize/render/resize/tick/
+Adapted for glitter's Replicant-style model (see the port design spec in
+the private planning store — `~/dev/b12n-sp-docs/glitter-gl/specs/` — for
+the full rationale, and `docs/guide/gl-area-widget-layer.md` for a
+correction to one part of it): `gtk.clj` (`:gl-area`'s realize/render/resize/tick/
 motion/key/button handlers wire from the widget spec's `:apply` closure,
 guarded idempotent per `[area event]` via a `wired` atom — **not** via
 glitter.widget's `:connect` hook, which the design spec originally called

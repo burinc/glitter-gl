@@ -45,11 +45,6 @@ each call, exactly like any other glitter view function.
 
 ### Orientation
 - **This page** — the guide map.
-- Design spec / implementation plan:
-  [`PRIVATE-PLANNING-DOC`](PRIVATE-PLANNING-DOC) /
-  [`PRIVATE-PLANNING-DOC`](PRIVATE-PLANNING-DOC)
-  — the full rationale for every port decision, plus per-task
-  `CORRECTION` notes recording what was found live and fixed mid-arc.
 
 ### GTK integration
 - [`gl-area-widget-layer.md`](gl-area-widget-layer.md) — the `:gl-area`
