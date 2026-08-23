@@ -1,0 +1,89 @@
+name: Bug report
+description: A shape renders wrong, a shader misbehaves, a :gl-area handler doesn't fire, or something crashes
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please check [`docs/guide/limitations.md`](https://github.com/burinc/glitter-gl/blob/main/docs/guide/limitations.md)
+        first. A couple of behaviours that look like bugs are documented,
+        deliberate v1 scope calls with the reasoning recorded — for example,
+        `reactive-area` has no live demo exercising it yet, and `:gl-area`'s
+        `:on-*` props emit a cosmetic dev-time hiccup warning on every render
+        that cannot be silenced from application code (see `AGENTS.md` /
+        `CONTRIBUTING.md` invariant #10).
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened, and what did you expect?
+      description: Paste the full error output if there is one.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal code that reproduces it
+      description: |
+        The smallest geometry/shader/scene snippet that shows the problem, plus
+        any state transition that triggers it. A reproduction that runs is
+        worth far more than a description.
+      render: clojure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reproduces
+    attributes:
+      label: Does this reproduce headlessly, or only with live GTK?
+      description: |
+        `bb check` is headless (shader compiles, geometry buffers valid, no
+        display needed). `bb smokes` opens a real GtkGLArea window. These two
+        paths have completely different debugging stories, so narrowing this
+        down first is the most useful triage step.
+      options:
+        - Headless (bb check) — no display needed
+        - Only with live GTK (bb smokes / a real app)
+        - Both
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: |
+        Please paste the output of these commands, plus the GL renderer string
+        if you know it (e.g. from `glGetString(GL_RENDERER)` or your system's
+        GL info tool).
+      value: |
+        ```
+        $ uname -sm
+        (paste here — OS and CPU architecture)
+
+        $ jolt --version
+        (paste here)
+
+        $ pkg-config --modversion gtk4
+        (paste here)
+        ```
+
+        GL renderer string (if known):
+    validations:
+      required: true
+
+  - type: textarea
+    id: unit-suite
+    attributes:
+      label: Does the unit suite pass?
+      description: |
+        `bb test` runs headlessly — no display needed. If it fails too, the
+        problem is probably in the geometry/matrix/mesh/shader layer rather
+        than the GTK widget layer, which is a useful thing to know up front.
+      value: |
+        ```
+        $ bb test
+        (paste here)
+        ```

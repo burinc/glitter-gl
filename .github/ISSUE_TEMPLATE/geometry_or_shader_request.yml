@@ -1,0 +1,82 @@
+name: Geometry / shader request
+description: Propose a geometry primitive, shader-spec feature, or GL binding this library doesn't have yet
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The 22 files making up the geometry/matrix/mesh/shader/GL layer
+        (`vector.clj` through `renderer.clj`) are verbatim ports from
+        glimmer-gl, held byte-stable on purpose — see `AGENTS.md` /
+        `CONTRIBUTING.md` invariant #1. A request to *change* one of those
+        files' behavior is a different, more careful conversation than a
+        request to *add* a new file — say which kind this is below.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What should it do?
+      description: The primitive, shader feature, or GL binding you want, and what it's for.
+    validations:
+      required: true
+
+  - type: textarea
+    id: upstream
+    attributes:
+      label: Does an equivalent already exist upstream?
+      description: |
+        Check [thi.ng/geom](https://github.com/thi-ng/geom) and
+        [glimmer-gl](https://github.com/jolt-lang/glimmer-gl) first. If either
+        already has it, link the source — a verbatim port is a much cheaper,
+        faster conversation than new code written from scratch.
+      placeholder: "Link, or \"not that I could find\""
+    validations:
+      required: true
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which layer does it belong in?
+      options:
+        - Geometry / math (vector, matrix, quaternion, aabb, rect, circle, line, plane, triangle, sphere, polygon, bezier, intersect)
+        - Mesh (mesh, glmesh, primitives, polyhedra)
+        - Shader spec (shader.clj)
+        - GL bindings (gl.clj, offscreen.clj)
+        - Renderer (renderer.clj)
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: existing-file
+    attributes:
+      label: Does this add a new file, or change an existing verbatim-port file's behavior?
+      description: |
+        A behavioral change to one of the 22 existing verbatim-port files needs
+        its own reviewed commit and a `NOTICE.md` update — it can't be folded
+        into another change (invariant #1). A new file has no such constraint.
+      options:
+        - Adds a new file
+        - Changes an existing verbatim-port file's behavior
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: implement
+    attributes:
+      label: Do you intend to implement this yourself?
+      options:
+        - "Yes, I'd like to open a PR"
+        - "No, just proposing it"
+        - Maybe, depending on feedback
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
+      description: |
+        Particularly welcome: a pointer to how thi.ng/geom or glimmer-gl solved
+        this, or any GLSL/GL-spec detail relevant to a shader/GL request.
