@@ -130,7 +130,9 @@ and the only hit is `glmesh_test.clj` — which, per its own comment,
 exercises just the context-free half. `renderer.clj`'s private
 `upload-mesh` instead calls `mesh/->floats` directly (the *interleaved*
 single-buffer shape above, not `glmesh`'s separate-attribute one) and
-hand-rolls the upload with three raw `glitter-gl.gl` calls: one
+hand-rolls the upload with eleven raw `glitter-gl.gl` calls in total —
+VAO/VBO generation, bind/unbind, and attrib-array enables among them —
+but the three that matter for the vertex layout are: one
 `gl-buffer-data` to copy the whole interleaved blob into a single VBO,
 then two `gl-vertex-attrib-pointer` calls describing that one buffer to
 the GPU as two attributes — location 0 (`a_pos`) reads 3 floats at byte
