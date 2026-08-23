@@ -44,19 +44,91 @@ each call, exactly like any other glitter view function.
 ## Pages
 
 ### Orientation
-- **This page** — the guide map.
+
+- [`examples.md`](examples.md) — the four namespaces under
+  `examples/glitter_gl/`, split by what each is for: `check.clj` and
+  `gl_area_smoke.clj` exist to fail when a regression lands (the only two
+  wired into `bb smokes`), `plasma_shader.clj` exists to be composed and
+  read (the shader-composition worked example), and `plasma.clj` exists
+  to be watched — a rotating-shape demo with no assertions of its own.
+  Also covers the four touchpoints (namespace, `deps.edn` alias, `bb.edn`
+  task, `smokes` entry) a new example needs so it doesn't go silently
+  unexercised.
+- [`architecture.md`](architecture.md) — how thin the seam to glitter
+  actually is: of 25 files under `src/glitter_gl/`, only `gtk.clj` has a
+  literal `:require` on `glitter.*`, and `scene.clj` has none at all.
+  Traces, against the real source, why a `:gl-area` keeps redrawing —
+  `queue-render` has exactly one call site in the whole project, buried
+  inside `reactive-area`'s always-installed tick callback, and a bare
+  state `swap!` alone never triggers a repaint — plus why `:gl-area`
+  bypasses glitter's uniform signal table entirely and where GL-plumbing
+  state deliberately breaks glitter's one-atom/action-dispatch
+  discipline.
+- [`porting-and-attribution.md`](porting-and-attribution.md) — the three
+  sourcing buckets `NOTICE.md` tracks (22 verbatim glimmer-gl files, 3
+  adapted core files plus demo material, and what's genuinely new), and
+  the two-hop lineage back through glimmer-gl to thi.ng/geom. Explains
+  the Standard Verbatim Port Procedure's sed-diff check that makes
+  "verbatim port" a checkable claim rather than an assertion, the
+  formatting-pass exemption that lets project-wide `clojure-lsp
+  format`/`clean-ns` touch those 22 files without violating it, and the
+  one documented live-found correction — `:gl-area`'s `:apply`-vs-
+  `:connect` fix — told from the provenance angle.
+
+### The library layer
+
+- [`geometry-and-shaders.md`](geometry-and-shaders.md) — orientation, not
+  reference, over the 22 verbatim-ported namespaces: the three groups (14
+  pure geometry/math, 4 mesh, 4 GL plumbing), and the two design
+  decisions — column-major matrices, shaders as mergeable data — a new
+  reader would otherwise have to reconstruct by hand. Traces where a mesh
+  becomes GL data and finds a real surprise along the way:
+  `glmesh.clj`'s documented mesh → GL pipeline has no caller anywhere but
+  its own test; the shipped renderer hand-rolls the actual upload via
+  `mesh/->floats` and eleven raw `gl.clj` calls instead.
 
 ### GTK integration
+
 - [`gl-area-widget-layer.md`](gl-area-widget-layer.md) — the `:gl-area`
-  widget in depth: why its handlers wire from the widget spec's `:apply`
-  closure rather than glitter.widget's `:connect` hook (a real correction
-  to the original design, found live), and the signal shapes that don't
-  fit glitter's uniform `void(widget,data)` path — `"render"`'s non-void
-  return, `"resize"`'s extra int arguments, `on-tick`'s separate
-  `gtk_widget_add_tick_callback` path (not a GTK signal at all), and the
-  motion/key/button controllers layered on top.
+  widget's mechanics in full: the `:apply`-vs-`:connect` correction,
+  traced through `create-node`/`set-attributes` to the exact reason a
+  `:connect` closure never sees a real prop map under glitter's
+  reconciler. Catalogs every GTK4 signal shape that doesn't fit
+  glitter's uniform `void(widget,data)` path — `"render"`'s non-void
+  return, `"resize"`'s extra int arguments, `on-tick`'s frame-clock API
+  that isn't a signal at all, and the controllers `on-motion`/`on-key`/
+  `on-button` layer onto the widget or its root window.
+- [`scene-and-app.md`](scene-and-app.md) — `glitter-gl.scene`'s
+  mini-hiccup dialect, and why it's not glitter's hiccup: `[fn
+  args...]` is a first-class component invocation here, a real trap in
+  both directions the page states plainly with a live example
+  (`plasma.clj`'s once-broken `shape-button` calls). Explains why `plan`
+  is a plain function with no reactive-cell tracking, the write-once
+  handler contract `gtk.clj`'s `wired` atom enforces, and gives
+  `reactive-area` an honest status note: unit-tested, but never
+  exercised end to end against a live `:gl-area`.
+
+### Verify
+
+- [`testing-and-tasks.md`](testing-and-tasks.md) — the unit suite (`jolt
+  -M:test`, 177 tests / 556 assertions) and the two live-GTK smokes `bb
+  smokes` runs, plus `offscreen_test.clj`'s real render-to-texture round
+  trip and its designed-to-skip behavior on a display-less machine.
+  Documents the `jolt -M:<alias>` vs `jolt <task>` exit-code trap —
+  reverified fresh against the currently-installed `v0.7.23`, not just
+  carried forward from the original `v0.6.3` finding — and the
+  quality-tooling surface (`bb lint`, `bb lsp:*`, the FFI-aware
+  clj-kondo hook, `bb verify` vs. the stricter git pre-commit hook).
+- [`limitations.md`](limitations.md) — every known v1 gap, each with the
+  reason it was left rather than fixed: `reactive-area`'s missing
+  live-render demo, `"render"`'s 2-arg `foreign-callable` declaration
+  against GTK4's real 3-argument signal (harmless — traced through the
+  calling convention, not just asserted), the dev-time hiccup warning
+  that has no application-level silencer, and why `:scale` is
+  deliberately not registered here.
 
 ### See also
+
 - [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (repo root) — how to build,
   test, and submit changes, plus the ten numbered invariants this project
   does not regress (the `:gl-area` correction is invariant #2 there, in
