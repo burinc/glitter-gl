@@ -238,7 +238,7 @@
   ;; :gl-area's :on-realize/:on-render/:on-resize/:on-tick trip a cosmetic
   ;; dev-time hiccup warning on every render (glitter.core, ported from
   ;; Replicant, flags any prop key starting with "on" as a probable :on {}
-  ;; mistake) — harmless, see AGENTS.md gotcha #10 and docs/guide/
+  ;; mistake) — harmless, see CONTRIBUTING.md invariant #10 and docs/guide/
   ;; gl-area-widget-layer.md for why there's no practical way to silence it
   ;; from here: glitter.assert's checks are macro-expanded into glitter.core
   ;; at glitter.core's OWN compile time, which happens the moment this ns

@@ -55,10 +55,11 @@ bb hooks:install / :install:full / :uninstall  # git pre-commit hook: fast | +te
 `bb hooks:install` sets up a fast pre-commit hook (lint errors + format +
 ns cleanliness) that gates every commit on staying `bb lsp:format-check`-
 clean — the whole codebase is formatted uniformly, including the 22 files
-ported verbatim from glimmer-gl. See `AGENTS.md`'s gotcha #1 for why a
-project-wide `clojure-lsp format` pass doesn't conflict with the "don't
-improve ported files" porting discipline — it mirrors glitter's identical
-resolution of the same tension for its own Replicant-ported files.
+ported verbatim from glimmer-gl. See [`CONTRIBUTING.md`](CONTRIBUTING.md)'s
+invariant #1 for why a project-wide `clojure-lsp format` pass doesn't conflict
+with the "don't improve ported files" porting discipline — it mirrors
+glitter's identical resolution of the same tension for its own
+Replicant-ported files.
 
 ## Architecture
 
@@ -100,11 +101,9 @@ glitter-gl.gtk (:gl-area, wired via glitter.widget's
 ## Documentation
 
 - **[`docs/guide/index.md`](docs/guide/index.md)** — the full guide.
-- **[`AGENTS.md`](AGENTS.md)** — canonical context for coding agents
-  working in this repo. `CLAUDE.md` imports it.
-- Design spec / implementation plan: not included in this repo — they live
-  at `~/dev/b12n-sp-docs/glitter-gl/{specs,plans}/` (the centralized
-  superpowers planning store) for anyone with access to that store.
+- **[`CONTRIBUTING.md`](CONTRIBUTING.md)** — how to build, test, and submit
+  changes, and the ten invariants this project does not regress.
+- **[`NOTICE.md`](NOTICE.md)** — file-by-file attribution for the ported code.
 
 ## Status
 

@@ -55,7 +55,7 @@ dispatch, keeping the GL render-loop plumbing's direct state-atom
 read/write — its `shape-button` helper is called directly,
 `(shape-button ...)`, not as a bracket-vector hiccup tag
 `[shape-button ...]`; glitter has no function-as-hiccup-tag convention
-(see `AGENTS.md`'s Conventions & gotchas).
+(see `CONTRIBUTING.md`'s Invariants).
 
 Tooling config adapted from glitter (same author/org, no license file, no
 attribution obligation, listed here for provenance only): `.clj-kondo/

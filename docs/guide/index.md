@@ -57,9 +57,10 @@ each call, exactly like any other glitter view function.
   motion/key/button controllers layered on top.
 
 ### See also
-- `AGENTS.md` (repo root) — canonical agent context: build/run commands,
-  file map, and the full numbered list of conventions & gotchas (the
-  `:gl-area` correction is gotcha #2 there, in summary form).
+- [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (repo root) — how to build,
+  test, and submit changes, plus the ten numbered invariants this project
+  does not regress (the `:gl-area` correction is invariant #2 there, in
+  summary form).
 - `NOTICE.md` (repo root) — the file-by-file attribution ledger and
   porting summary (verbatim / adapted / new buckets).
 - [glimmer-gl](https://github.com/jolt-lang/glimmer-gl) — the library

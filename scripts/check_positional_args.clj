@@ -44,7 +44,7 @@
 ;; upstream fn's exact signature).
 ;;
 ;; Pre-populated with every finding whose only appearance is inside one of
-;; the 22 glimmer-gl verbatim-port files (AGENTS.md gotcha #1: byte-for-byte
+;; the 22 glimmer-gl verbatim-port files (CONTRIBUTING.md invariant #1: byte-for-byte
 ;; port, no behavioral changes — refactoring these to a kwargs map would
 ;; violate that discipline). The 2 genuinely-adapted-layer findings
 ;; (glitter_gl.gtk/connect!, glitter_gl.scene/walk) are deliberately NOT

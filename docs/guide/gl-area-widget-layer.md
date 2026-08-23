@@ -186,7 +186,7 @@ Almost every GTK signal glitter's own `set-event-handler` connects is
 match, wired directly by `glitter-gl.gtk` itself (it does not go through
 `glitter.widget/signals`/`signal-value` at all — every `:gl-area` handler
 is application-supplied, not routed through glitter's action-dispatch
-system; see `AGENTS.md`'s gotcha #4 for why).
+system; see [`scene-and-app.md`](scene-and-app.md) for why).
 
 **`"render"` — non-void return.** `GtkGLArea`'s `"render"` signal is
 `gboolean render(GtkGLArea*, GdkGLContext*, gpointer)`. glitter-gl's
