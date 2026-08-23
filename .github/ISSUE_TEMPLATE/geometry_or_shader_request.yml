@@ -7,7 +7,7 @@ body:
       value: |
         The 22 files making up the geometry/matrix/mesh/shader/GL layer
         (`vector.clj` through `renderer.clj`) are verbatim ports from
-        glimmer-gl, held byte-stable on purpose — see `AGENTS.md` /
+        glimmer-gl, held byte-stable on purpose — see
         `CONTRIBUTING.md` invariant #1. A request to *change* one of those
         files' behavior is a different, more careful conversation than a
         request to *add* a new file — say which kind this is below.

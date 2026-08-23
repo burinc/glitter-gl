@@ -101,10 +101,9 @@ Full breakdown: [`docs/guide/architecture.md`](docs/guide/architecture.md).
 ## Invariants: please don't regress these
 
 Each of these was real — most were found live, several the hard way.
-Numbering matches `AGENTS.md`, the file that carries the agent-facing
-superset of this same list; the two are maintained in parallel, neither
-generated from the other, so a citation like "gotcha #2" means the same
-thing in either file.
+This numbering is stable: entries are never reordered or renumbered, so
+a citation like "invariant #2" elsewhere in this repo always means this
+entry.
 
 1. **Verbatim-port files are namespace-rename-only.** The 22 files making
    up the geometry/matrix/mesh/shader/GL layer (`vector.clj` through

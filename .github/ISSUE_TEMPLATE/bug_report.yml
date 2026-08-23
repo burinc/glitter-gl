@@ -10,7 +10,7 @@ body:
         deliberate v1 scope calls with the reasoning recorded — for example,
         `reactive-area` has no live demo exercising it yet, and `:gl-area`'s
         `:on-*` props emit a cosmetic dev-time hiccup warning on every render
-        that cannot be silenced from application code (see `AGENTS.md` /
+        that cannot be silenced from application code (see
         `CONTRIBUTING.md` invariant #10).
 
   - type: textarea
