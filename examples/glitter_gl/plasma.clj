@@ -161,6 +161,12 @@
   (when-not (:paused @state)
     (swap! clock + (* (double (:speed @state)) frame-dt))))
 
+(defn- parse-shape
+  "GLITTER_GL_DEMO_SHAPE -> shape keyword; nil/unrecognised input returns nil
+  so the caller can leave today's default in place."
+  [s]
+  (case s "cube" :cube "sphere" :sphere "tetra" :tetra nil))
+
 ;; --- reactive control panel (glitter: DATA, dispatched through one fn) ------
 (defn- slider [label-text lo hi step value key]
   [:box {:spacing 8}
@@ -250,7 +256,14 @@
   ;; GLITTER_GL_DEMO_QUIT_MS auto-closes the window after N ms (smoke
   ;; testing); unset, the window stays open until closed. Mirrors the
   ;; original's GLIMMER_GL_DEMO_QUIT_MS.
-  (let [quit-ms (some-> (System/getenv "GLITTER_GL_DEMO_QUIT_MS") Integer/parseInt)]
+  ;; GLITTER_GL_DEMO_SHAPE / GLITTER_GL_DEMO_SMOOTH seed the initial shape
+  ;; and shading for deterministic demo captures; unset/unrecognised values
+  ;; leave today's defaults (:cube, flat) unchanged.
+  (let [quit-ms (some-> (System/getenv "GLITTER_GL_DEMO_QUIT_MS") Integer/parseInt)
+        shape   (parse-shape (System/getenv "GLITTER_GL_DEMO_SHAPE"))
+        smooth? (contains? #{"1" "true"} (System/getenv "GLITTER_GL_DEMO_SMOOTH"))]
+    (when shape (swap! state assoc :shape shape))
+    (when smooth? (swap! state assoc :smooth true))
     (apply app/run (fn [window] (gtk/mount! window view state))
            :app-id "glitter-gl.plasma"
            :title  "glitter-gl • plasma mesh"
