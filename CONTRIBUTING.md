@@ -3,9 +3,9 @@
 Thanks for taking an interest. glitter-gl is an OpenGL geometry, matrix,
 and shader library for [glitter](https://github.com/burinc/glitter) (a
 Replicant-style GTK4 renderer for
-[Jolt](https://github.com/jolt-lang/jolt) — native Clojure on a Chez
+[Jolt](https://github.com/jolt-lang/jolt): native Clojure on a Chez
 Scheme host, no JVM), ported from
-[glimmer-gl](https://github.com/jolt-lang/glimmer-gl) — the same library
+[glimmer-gl](https://github.com/jolt-lang/glimmer-gl), the same library
 for glimmer, glitter's Reagent-style sibling.
 
 The deep documentation lives in [`docs/guide/`](docs/guide/index.md).
@@ -37,30 +37,30 @@ some-parent-dir/
 
 [babashka](https://babashka.org) is optional but makes everything
 friendlier: `bb info` prints a grouped cheat-sheet of every task. Without
-it, use `jolt -M:<alias>` directly — see the aliases in `deps.edn`.
+it, use `jolt -M:<alias>` directly; see the aliases in `deps.edn`.
 
 `clj-kondo` and `clojure-lsp` on your `PATH` are optional, but every `bb
 lint*`/`bb lsp:*`/`bb verify`/`bb hooks:install*` task needs them to run
-at all. Without them you lose the fast local lint/format/clean-ns loop —
-including the git pre-commit hook described below — but the unit suite
+at all. Without them you lose the fast local lint/format/clean-ns loop
+(including the git pre-commit hook described below), but the unit suite
 and every demo/smoke still work fine.
 
 ## Before you open a PR
 
 ```sh
-bb test              # unit suite (headless — no display needed)
+bb test              # unit suite (headless, no display needed)
 bb lint              # clj-kondo over glitter-gl-authored code (report only)
 bb lsp:format-check  # clojure-lsp formatting, dry run
 bb smokes            # every live-GTK smoke/check in sequence (needs a display)
 ```
 
 `bb smokes` drives real GTK4 rather than reasoning about a widget's
-lifecycle in the abstract — GTK4 is a live, stateful system with a
+lifecycle in the abstract. GTK4 is a live, stateful system with a
 blocking main loop, and this project's one real bug (see Invariant #2)
 was "obviously correct" on paper and wrong only when actually run.
 
 **CI is not yet wired for this project.** These four local gates are the
-whole gate for now — please run them yourself before opening a PR.
+whole gate for now, so please run them yourself before opening a PR.
 
 `bb verify` bundles a lint report plus `jolt -M:test` (which must pass)
 into one pre-commit-shaped command, but **it does not check formatting**.
@@ -68,30 +68,37 @@ The installed git hook (`bb hooks:install`) is a separate, stricter gate
 that runs on every `git commit`: lint errors-only, `clojure-lsp format
 --dry`, and `clojure-lsp clean-ns --dry` (`bb hooks:install:full` adds the
 unit suite on top). A clean `bb verify` is **not** a guarantee the hook
-will also pass — format drift is only caught by the hook.
+will also pass: format drift is only caught by the hook.
 
 ## Architecture
 
-```
-glitter-gl.vector/.matrix/.quaternion/.aabb/.rect/.circle/.line/.plane/
-.triangle/.sphere/.polygon/.bezier/.intersect  — pure geometry/math,
-                                                  no glitter dependency
-    │
-    ▼
-glitter-gl.mesh/.glmesh/.primitives/.polyhedra   — mesh model & composition
-    │
-    ▼
-glitter-gl.shader/.gl/.offscreen/.renderer       — GL plumbing
-    │
-    ▼
-glitter-gl.gtk (:gl-area, wired via the widget    glitter-gl.scene/.app
-  spec's :apply closure — see Invariant #2)         (declarative scene
-                                                      graph, state-atom
-                                                      driven)
+```mermaid
+flowchart TD
+  subgraph pure["Pure library: no glitter dependency, usable from any Jolt + OpenGL program"]
+    geom["Geometry and math (14 files)<br/>vector, vec2, matrix, quaternion<br/>aabb, rect, circle, line, plane<br/>triangle, sphere, polygon<br/>bezier, intersect"]
+    mesh["Mesh model (4 files)<br/>mesh, glmesh<br/>primitives, polyhedra"]
+    glplumb["GL plumbing (4 files)<br/>shader, gl<br/>offscreen, renderer"]
+    scene["scene.clj<br/>scene tree to render plan<br/>(requires glitter-gl.matrix only)"]
+  end
+
+  subgraph bridge["glitter integration"]
+    gtk["gtk.clj<br/>registers the :gl-area widget<br/>handlers wire from :apply,<br/>never :connect"]
+    app["app.clj<br/>reactive-area builds the<br/>:gl-area prop map bound to<br/>glitter's state atom"]
+  end
+
+  glitter["glitter<br/>glitter.ffi, glitter.widget"]
+
+  geom --> mesh
+  mesh --> glplumb
+  geom --> scene
+  glplumb --> app
+  scene --> app
+  gtk --> app
+  glitter -.->|"required by gtk.clj alone,<br/>1 of 25 files in src/glitter_gl"| gtk
 ```
 
 Two independent halves. The geometry/matrix/mesh/shader/GL layer has no
-dependency on glitter at all — it's usable from any Jolt program with an
+dependency on glitter at all; it's usable from any Jolt program with an
 OpenGL context, glitter or not. `glitter-gl.gtk`/`.scene`/`.app` are the
 glitter-specific layer: a `:gl-area` widget and a declarative scene-graph
 that plug into glitter's own hiccup/state-atom model.
@@ -100,7 +107,7 @@ Full breakdown: [`docs/guide/architecture.md`](docs/guide/architecture.md).
 
 ## Invariants: please don't regress these
 
-Each of these was real — most were found live, several the hard way.
+Each of these was real: most were found live, several the hard way.
 This numbering is stable: entries are never reordered or renumbered, so
 a citation like "invariant #2" elsewhere in this repo always means this
 entry.
@@ -119,7 +126,7 @@ entry.
 
 2. **`:gl-area`'s lifecycle handlers wire from the widget spec's `:apply`
    closure, not from glitter.widget's `:connect` hook.** This is a
-   correction, not the original design — and it's easy to get wrong again,
+   correction, not the original design, and it's easy to get wrong again,
    because glitter's own `register-widget!` docstring names a `GtkGLArea`'s
    realize/render/resize as `:connect`'s motivating example. In practice,
    glitter's reconciler never hands an element's real hiccup props to
@@ -129,7 +136,7 @@ entry.
    mechanics: [`gl-area-widget-layer.md`](docs/guide/gl-area-widget-layer.md).
 
 3. **`glitter-gl.scene`'s `plan` and `glitter-gl.app`'s `reactive-area`
-   take glitter's state atom directly — there is no reactive-cell
+   take glitter's state atom directly; there is no reactive-cell
    tracking.** glimmer-gl's originals wrap the compiled scene plan in a
    dependency-tracked reaction. glitter has no equivalent: its state-atom
    watcher already recomputes the whole view on every change, so the scene
@@ -138,7 +145,7 @@ entry.
    [`scene-and-app.md`](docs/guide/scene-and-app.md).
 
 4. **`reactive-area`'s own `:gl-area` handlers read and write glitter's
-   state atom directly — they do not go through action-dispatch.**
+   state atom directly; they do not go through action-dispatch.**
    Ordinary UI chrome (buttons, sliders) dispatches `[[:action/foo arg]]`
    tuples through one global function. GL-plumbing state that can change
    60 times a second has no business round-tripping through that path, so
@@ -146,7 +153,7 @@ entry.
    shared state atom directly instead. See
    [`scene-and-app.md`](docs/guide/scene-and-app.md).
 
-5. **There's no function-as-hiccup-tag convention — same as glitter
+5. **There's no function-as-hiccup-tag convention, same as glitter
    itself.** A helper that builds a UI hiccup fragment must be called as a
    plain function spliced into the parent vector, `(my-fn args…)`, never
    embedded as `[my-fn args…]`. A vector whose head is a function value
@@ -164,8 +171,8 @@ entry.
    glitter itself, not by glitter-gl.
 
 7. **Stage files by explicit path when committing; never `git add -A`/
-   `.`/`-u`.** A broad add sweeps up unrelated untracked files — stale
-   notes, editor backups — into a feature commit.
+   `.`/`-u`.** A broad add sweeps up unrelated untracked files (stale
+   notes, editor backups) into a feature commit.
 
 8. **`bb.edn`/`deps.edn` `:tasks` bodies are EDN-parsed.** No `#"regex"`,
    `@deref`, or `#(...)` reader macros: use `(re-pattern …)`, `(deref …)`,
@@ -173,7 +180,7 @@ entry.
    the edited task.
 
 9. **`:gl-area`'s lifecycle handlers wire once, on the first `:apply` call
-   per event per widget — a later render supplying different closures for
+   per event per widget; a later render supplying different closures for
    the same element has no effect.** Unlike most other widgets (whose
    props re-apply on every render), `:gl-area` guards each event so only
    the first closure it sees ever connects; every later `:apply` call for
@@ -186,8 +193,8 @@ entry.
     every render, and it cannot be silenced from application code.**
     glitter flags any prop key starting with `"on"` as a probable mistake,
     with no way to exempt one widget's non-event `on-*` props from that
-    check. The warning is cosmetic — the value is still applied correctly
-    — but `glitter.env/configure!`, which looks like the escape hatch,
+    check. The warning is cosmetic (the value is still applied correctly),
+    but `glitter.env/configure!`, which looks like the escape hatch,
     only works if called before `glitter.core` is `require`d anywhere in
     the process, which no single application namespace's own `-main` can
     arrange on its own. Full explanation:
@@ -201,14 +208,14 @@ strategy; `register-widget!` adds one from outside the library, the same
 mechanism `glitter-gl.gtk` itself uses.
 
 Before writing a new one, read
-[`gl-area-widget-layer.md`](docs/guide/gl-area-widget-layer.md) — the
+[`gl-area-widget-layer.md`](docs/guide/gl-area-widget-layer.md). The
 `:apply`-vs-`:connect` correction (Invariant #2) is the single most
 important thing to know, because it looks wrong: `:connect` reads as the
 natural place to wire a widget's signal handlers, and glitter's own
 docstring says so. It doesn't work, and the failure is silent. Once
 handlers are wired through `:apply` instead, remember Invariant #9: guard
 each event so only the first closure that arrives ever connects, the way
-`gtk.clj`'s `wired` atom does — otherwise a later render's closures are
+`gtk.clj`'s `wired` atom does; otherwise a later render's closures are
 silently dropped rather than replacing the earlier ones.
 
 ## Known limitations
