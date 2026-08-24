@@ -133,8 +133,9 @@ one topic per page:
   `examples/glitter_gl/` namespaces is for, and which two are actually
   wired into regression coverage.
 - [`testing-and-tasks.md`](docs/guide/testing-and-tasks.md) — the unit
-  suite, the two live-GTK smokes, and the quality-tooling task surface
-  (lint, format, `clj-kondo`'s FFI hook, the git pre-commit gate).
+  suite, the live-GTK smoke and headless check `bb smokes` runs, and the
+  quality-tooling task surface (lint, format, `clj-kondo`'s FFI hook, the
+  git pre-commit gate).
 - [`limitations.md`](docs/guide/limitations.md) — every known v1 gap,
   each with the reason it was left rather than fixed.
 - [`index.md`](docs/guide/index.md) — the guide's own nav map, if
@@ -162,8 +163,10 @@ for the full verbatim/adapted/new breakdown, including a real live-found
 correction to `:gl-area`'s original wiring design (see
 [`docs/guide/gl-area-widget-layer.md`](docs/guide/gl-area-widget-layer.md)).
 The unit suite currently stands at 177 tests / 556 assertions (`bb test`),
-plus two live-GTK smokes (`bb smokes`) that drive a real `GtkGLArea`
-under the real reconciler rather than a fake renderer. Known gaps
+plus `bb smokes`' live-GTK smoke (`gl-area-smoke`, which drives a real
+`GtkGLArea` under the real reconciler rather than a fake renderer) and its
+headless check (`check`, which needs no GL context or display at all).
+Known gaps
 carried forward from the design spec: `glitter-gl.app`'s
 scene-graph/shadow-mapping renderer path (`reactive-area`) is ported and
 unit-tested but has no live demo exercising it end to end — the shipped

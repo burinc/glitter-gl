@@ -1,13 +1,14 @@
 # Testing and tasks
 
 glitter-gl has two layers of verification that catch different classes of
-bug: a headless unit suite, and two live-GTK smokes that drive a real
-window. Both matter for the same reason glitter's own guide gives: this
-project's one real bug — `:gl-area`'s handlers silently never firing under
-the `:connect` hook glitter's own docstring recommends — was "obviously
+bug: a headless unit suite, and `bb smokes` — a live-GTK smoke that opens
+a real window, immediately followed by a second headless check. Both
+matter for the same reason glitter's own guide gives: this project's one
+real bug — `:gl-area`'s handlers silently never firing under the
+`:connect` hook glitter's own docstring recommends — was "obviously
 correct" against the headless suite and wrong only when actually run
-against live GTK. See [`examples.md`](examples.md) for what each smoke
-individually pins.
+against live GTK. See [`examples.md`](examples.md) for what each of the
+two `bb smokes` steps individually pins.
 
 ## Unit suite: `jolt -M:test` / `bb test`
 
@@ -71,7 +72,7 @@ you see a *skip* printed here, that's the offscreen path degrading
 correctly, not the library breaking; a `:fail`/`:error` assertion actually
 firing is the real signal to chase.
 
-## The live-GTK smokes: `bb smokes`
+## `bb smokes`: the live-GTK smoke and headless check
 
 ```sh
 bb smokes     # jolt -M:gl-area-smoke, then jolt -M:check

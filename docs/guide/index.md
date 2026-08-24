@@ -111,9 +111,10 @@ each call, exactly like any other glitter view function.
 ### Verify
 
 - [`testing-and-tasks.md`](testing-and-tasks.md) — the unit suite (`jolt
-  -M:test`, 177 tests / 556 assertions) and the two live-GTK smokes `bb
-  smokes` runs, plus `offscreen_test.clj`'s real render-to-texture round
-  trip and its designed-to-skip behavior on a display-less machine.
+  -M:test`, 177 tests / 556 assertions) and the live-GTK smoke plus
+  headless check `bb smokes` runs, plus `offscreen_test.clj`'s real
+  render-to-texture round trip and its designed-to-skip behavior on a
+  display-less machine.
   Documents the `jolt -M:<alias>` vs `jolt <task>` exit-code trap —
   reverified fresh against the currently-installed `v0.7.23`, not just
   carried forward from the original `v0.6.3` finding — and the
