@@ -127,7 +127,7 @@ each call, exactly like any other glitter view function.
   that has no application-level silencer, and why `:scale` is
   deliberately not registered here.
 
-### See also
+## See also
 
 - [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (repo root) — how to build,
   test, and submit changes, plus the ten numbered invariants this project
