@@ -57,6 +57,9 @@
           (row "hooks:install" "install FAST pre-commit hook (lint errors + format + clean-ns, ~2s)")
           (row "hooks:install:full" "install FULL pre-commit hook (+ unit tests, slower)")
           (row "hooks:uninstall" "remove the git pre-commit hook")
+          (hdr "Demos")
+          (row "record" "batch-record a demo GIF for every take (needs internal screen-grab CLI)")
+          (row "demos:examples" "print the four take ids as EDN (used by bb record)")
           (hdr "Dev")
           (row "nrepl [port]" "start a jolt nREPL server (default 7888)")
           (hdr "Docs")
@@ -163,6 +166,38 @@
                            (if (fs/exists? hook)
                              (do (fs/delete hook) (println "OK pre-commit hook removed"))
                              (println ">> no pre-commit hook found")))}
+
+  ;; --- Demo GIFs ------------------------------------------------------------
+  demos:examples
+  {:doc "Print the demo item list as EDN for screen-grab (used by bb record)"
+   :task
+   (prn (vec (for [row [["plasma-cube"   "the default cube, rotating under the composable plasma/stripes shader"]
+                        ["plasma-sphere" "switching shape to the sphere from the control panel"]
+                        ["plasma-tetra"  "switching shape to the tetrahedron"]
+                        ["plasma-smooth" "flat versus smooth shading on the same solid"]]]
+               {:id (nth row 0)
+                :group "plasma"
+                :desc (nth row 1)
+                :src "examples/glitter_gl/plasma.clj"
+                :run "jolt -M:plasma"})))}
+
+  record
+  {:doc "Batch-record a demo GIF for every take: bb record [--only a,b] [--force] [--dry-run]"
+   ;; Maintainer-only. The capture CLI is not publicly released yet, and
+   ;; recording takes the screen over for a few minutes. Contributors never
+   ;; need it: every GIF is committed under docs/demos/.
+   :task (if-not (fs/which "screen-grab")
+           (binding [*out* *err*]
+             (println "bb record needs the `screen-grab` capture CLI on your PATH.")
+             (println "That tool is internal and not publicly released yet, so this")
+             (println "task is maintainer-only. You do not need it to view the demos:")
+             (println "every GIF is committed under docs/demos/ - see docs/demos/README.md.")
+             (System/exit 1))
+           (let [{:keys [exit]} (apply shell {:continue true}
+                                       "screen-grab" "record"
+                                       "--manifest" "scripts/demo_manifest.edn"
+                                       *command-line-args*)]
+             (System/exit exit)))}
 
   nrepl {:doc "Start a jolt nREPL server for interactive dev: bb nrepl [port] (default 7888)"
          :task (shell "jolt" "nrepl-server" (or (first *command-line-args*) "7888"))}

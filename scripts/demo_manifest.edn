@@ -1,0 +1,36 @@
+;; screen-grab manifest for glitter-gl's plasma demo — four takes of one demo.
+;; https://github.com/burinc/b12n-screen-grab
+;;
+;; Driver is :spawn — each take is launched fresh via `jolt -M:plasma`, captured,
+;; and torn down. Steering is KEYBOARD ONLY: screen-grab's own README is
+;; explicit that :click/:move/:drag move the cursor but their press is never
+;; processed by the target app, so a GTK button cannot be clicked this way.
+;; Tab/Space/Enter/typing all work, and GTK's focus ring makes the keyboard
+;; path legible on screen anyway. (No take here types anything, but for the
+;; record: :type repeats characters against GTK on this setup — single
+;; characters only, never a whole word.)
+{:driver  :spawn
+ :capture :cgevent-gif
+
+ :examples-cmd "bb demos:examples"
+
+ :out-dir "docs/demos"
+ :ledger  "docs/demos/ledger.edn"
+ :readme  "docs/demos/README.md"
+ :title   "Demos"
+ :preamble "Animated previews of glitter-gl's plasma demo. Regenerate with `bb record` (maintainer-only: it needs an internal capture tool that is not publicly released). The GIFs here are committed, so you do not need it to browse them."
+
+ :groups [{:key "plasma" :title "the plasma demo"}]
+
+ ;; warmup is higher than glitter's 12 — a GtkGLArea has to realize and start
+ ;; its own frame clock before there is anything on screen to capture; 20 was
+ ;; verified against the running app by the 2026-08-24 capture probe.
+ :defaults {:duration 8 :fps 10 :width 560 :warmup 20}
+
+ ;; Left empty deliberately. T1 changed the control panel's shape-button and
+ ;; checkbutton/Pause rows from vertical to horizontal, so any Tab count read
+ ;; off the hiccup tree is likely wrong — a wrong count silently steers the
+ ;; wrong widget and still produces a plausible-looking GIF. The next task
+ ;; fills this in after Tabbing through the real running app and recording
+ ;; the observed focus order.
+ :overrides {}}
