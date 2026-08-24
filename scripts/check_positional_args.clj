@@ -44,9 +44,10 @@
 ;; upstream fn's exact signature).
 ;;
 ;; Pre-populated with every finding whose only appearance is inside one of
-;; the 22 glimmer-gl verbatim-port files (CONTRIBUTING.md invariant #1: byte-for-byte
-;; port, no behavioral changes — refactoring these to a kwargs map would
-;; violate that discipline). The 2 genuinely-adapted-layer findings
+;; the 22 glimmer-gl verbatim-port files (CONTRIBUTING.md invariant #1:
+;; namespace-rename-only — refactoring these to a kwargs map would be a
+;; real behavioral change, which the invariant reserves for its own
+;; reviewed commit, not a silent refactor). The 2 genuinely-adapted-layer findings
 ;; (glitter_gl.gtk/connect!, glitter_gl.scene/walk) are deliberately NOT
 ;; here — they stay flagged as legitimately refactorable later.
 ;;
