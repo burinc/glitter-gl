@@ -184,7 +184,7 @@
   [:box {:spacing 6
          :margin 8
          :orientation :vertical}
-   [:box {:spacing 6}
+   [:hbox {:spacing 6}
     (shape-button "Cube" :cube shape)
     (shape-button "Sphere" :sphere shape)
     (shape-button "Tetra" :tetra shape)]
@@ -193,7 +193,7 @@
    (slider "Scale" 0.5 8.0 0.1  p-scale :p-scale)
    (slider "Warp"  0.0 1.5 0.05 warp :warp)
    (slider "Blend" 0.0 1.0 0.05 blend :blend)
-   [:box {:spacing 12}
+   [:hbox {:spacing 12}
     [:checkbutton {:label "Smooth shading"
                    :active smooth
                    :on {:toggled [[:action/toggle-smooth]]}}]
