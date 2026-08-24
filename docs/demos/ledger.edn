@@ -1,0 +1,6 @@
+{
+  "plasma-cube" {:sha "ba4f9ce7c97041de14f5024da3d7d43d1d3aff068bfa59df938aba0d4b111b3a", :settings [8 10 560 "gif"], :bytes 308927, :at "2026-08-24T22:17:22.170819Z"}
+  "plasma-smooth" {:sha "ba4f9ce7c97041de14f5024da3d7d43d1d3aff068bfa59df938aba0d4b111b3a", :settings [8 10 560 "gif"], :bytes 295615, :at "2026-08-24T22:17:22.171389Z"}
+  "plasma-sphere" {:sha "ba4f9ce7c97041de14f5024da3d7d43d1d3aff068bfa59df938aba0d4b111b3a", :settings [8 10 560 "gif"], :bytes 271247, :at "2026-08-24T22:17:22.171352Z"}
+  "plasma-tetra" {:sha "ba4f9ce7c97041de14f5024da3d7d43d1d3aff068bfa59df938aba0d4b111b3a", :settings [8 10 560 "gif"], :bytes 195373, :at "2026-08-24T22:20:53.861630Z"}
+}

@@ -171,15 +171,24 @@
   demos:examples
   {:doc "Print the demo item list as EDN for screen-grab (used by bb record)"
    :task
-   (prn (vec (for [row [["plasma-cube"   "the default cube, rotating under the composable plasma/stripes shader"]
-                        ["plasma-sphere" "switching shape to the sphere from the control panel"]
-                        ["plasma-tetra"  "switching shape to the tetrahedron"]
-                        ["plasma-smooth" "flat versus smooth shading on the same solid"]]]
+   ;; Each take launches ALREADY in the state it shows, via the demo's
+   ;; GLITTER_GL_DEMO_SHAPE / _SMOOTH env vars, so no take needs a steering
+   ;; timeline. Synthetic keystroke steering was measured and rejected: a
+   ;; multi-step :key timeline skips widgets and toggles controls it never
+   ;; touched (burinc/b12n-screen-grab#5). `env` is spelled out because
+   ;; screen-grab spawns via p/process, which tokenizes without a shell —
+   ;; a bare VAR=x prefix would be exec'd as a binary name.
+   (prn (vec (for [row [["plasma-cube"   "the default cube, rotating under the composable plasma/stripes shader" ""]
+                        ["plasma-sphere" "the same shader on a sphere"                                           "GLITTER_GL_DEMO_SHAPE=sphere"]
+                        ["plasma-tetra"  "the same shader on a tetrahedron"                                      "GLITTER_GL_DEMO_SHAPE=tetra"]
+                        ["plasma-smooth" "smooth shading, against the flat shading of the takes above"           "GLITTER_GL_DEMO_SMOOTH=1"]]]
                {:id (nth row 0)
                 :group "plasma"
                 :desc (nth row 1)
                 :src "examples/glitter_gl/plasma.clj"
-                :run "jolt -M:plasma"})))}
+                :run (if (= "" (nth row 2))
+                       "jolt -M:plasma"
+                       (str "env " (nth row 2) " jolt -M:plasma"))})))}
 
   record
   {:doc "Batch-record a demo GIF for every take: bb record [--only a,b] [--force] [--dry-run]"
