@@ -5,13 +5,13 @@
 ## Gates
 
 <!-- The first three are headless and fast. `bb smokes` opens a real GTK4
-     window, so it needs a display — run it locally if you touched
+     window, so it needs a display. Run it locally if you touched
      glitter_gl/gtk.clj, scene.clj, or app.clj. -->
 
 - [ ] `bb test` passes (unit suite, headless)
 - [ ] `bb lint` passes (clj-kondo)
 - [ ] `bb lsp:format-check` passes (clojure-lsp formatting, **not** cljfmt)
-- [ ] `bb smokes` passes, or N/A (live-GTK — needed if you touched
+- [ ] `bb smokes` passes, or N/A (live-GTK; needed if you touched
       `glitter_gl/gtk.clj`, `scene.clj`, or `app.clj`)
 
 ## If this touches a ported library file
@@ -41,4 +41,4 @@
 
 <!-- Anything surprising, any deliberate deviation, anything you're unsure
      about. If you verified something against real GTK behaviour rather than
-     reasoning about it, say so — that's the standard here. -->
+     reasoning about it, say so. That's the standard here. -->

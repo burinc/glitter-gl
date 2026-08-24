@@ -18,21 +18,21 @@ shapes it has to handle that don't fit glitter's uniform
            :on-button  (fn [area btn pressed? x y] ...)}]
 ```
 
-## Why `:apply`, not `:connect` — a corrected design
+## Why `:apply`, not `:connect`: a corrected design
 
 `glitter.widget/register-widget!`'s own docstring describes a `:connect`
 key on a widget spec: *"the optional `:connect` runs at `create!` time
 after the generic `:on-*` wiring, for widgets whose signals don't fit the
 uniform `void(widget,data)` shape (e.g. a `GtkGLArea`'s
 realize/render/resize)."* `:gl-area` is that docstring's own motivating
-example — so the original port design (see the design spec's
+example, so the original port design (see the design spec's
 `glitter-gl.gtk` section) naturally called for registering `:gl-area` with
 a `:connect` closure that wires realize/render/resize/tick once, at
 construction.
 
 **This does not work, and the reason is specific to how `glitter.core`
-actually drives widget creation.** `:connect` genuinely runs — the bug
-isn't in `:connect` itself — but it never sees any of `:gl-area`'s real
+actually drives widget creation.** `:connect` genuinely runs (the bug
+isn't in `:connect` itself), but it never sees any of `:gl-area`'s real
 props, so it has nothing to wire.
 
 ### Tracing why
@@ -51,8 +51,8 @@ ever called, and it passes almost nothing:
   ...)
 ```
 
-The `options` argument `create-element` receives is `(when ns {:ns ns})`
-— an XML-namespace hint for SVG-style tags, `nil` for everything else.
+The `options` argument `create-element` receives is `(when ns {:ns ns})`,
+an XML-namespace hint for SVG-style tags, `nil` for everything else.
 **Never** the hiccup element's own attribute map. `glitter.gtk`'s
 `create-element` passes that same near-empty map straight through to
 `glitter.widget/create!`:
@@ -77,33 +77,33 @@ The `options` argument `create-element` receives is `(when ns {:ns ns})`
 ```
 
 `:connect`'s own `props` argument is exactly the `options` value threaded
-all the way from `create-node` — at most `{:ns "..."}`, never
+all the way from `create-node`: at most `{:ns "..."}`, never
 `:on-realize`/`:on-render`/etc. A `:connect` closure registered for
 `:gl-area` runs, once, with an empty (or near-empty) prop map, finds none
-of the handler keys it's looking for, and does nothing. Silently — no
+of the handler keys it's looking for, and does nothing. Silently: no
 exception, no warning, just a `GtkGLArea` that never realizes.
 
 The real props arrive through a **separate** path, right after
 `create-element` returns: `create-node`'s own `(set-attributes renderer
 node (or mounting-attrs attrs))` call. `set-attributes` iterates the
-attribute map and calls `set-attr` **once per key**, which — for any key
-that isn't `:style`/`:classes`/`:on` — calls `set-attr-val`, which
+attribute map and calls `set-attr` **once per key**, which (for any key
+that isn't `:style`/`:classes`/`:on`) calls `set-attr-val`, which
 ultimately routes through `glitter.widget/apply-props!` to the widget
 spec's `:apply` closure. `:apply` runs once per prop key, both at
-construction and on every re-render — `glitter.gtk`'s `set-attribute`
+construction and on every re-render. `glitter.gtk`'s `set-attribute`
 (the only caller of `apply-props!` outside `create!` itself) always
 passes a single-key map, `{(keyword a) v}`, never the full prop map;
 `apply-props!`'s own docstring confirms this is exactly the shape it's
 designed for ("safe to call with a single-key partial map"). This is the
 exact same path `:scale`'s `:apply` already relies on to re-range its
-min/max/step on every render (its `:ctor` doesn't see real props either)
-— found live while tracing this, and cited directly as precedent in
+min/max/step on every render (its `:ctor` doesn't see real props either),
+found live while tracing this, and cited directly as precedent in
 `gtk.clj`'s own `CORRECTION` comment.
 
 So: **`:apply` is the only widget-spec closure that ever sees a hiccup
 element's real prop values, at any point in its lifecycle.** `:connect`
 runs at the right *time* (once, at construction) but with the wrong
-*data* (never the real props) — it's not a usable extension point for
+*data* (never the real props): it's not a usable extension point for
 wiring event handlers under glitter's actual reconcile flow, regardless
 of what its docstring promises. This was found live via Task 17's smoke:
 the first version of `:gl-area`, wired through `:connect` exactly as the
@@ -132,9 +132,9 @@ against GTK.
     ...))
 ```
 
-`:apply` can run several times over a `:gl-area`'s life — once per prop
+`:apply` can run several times over a `:gl-area`'s life, once per prop
 key, both at construction and on every re-render (never with the whole
-prop map in one call) — but each signal must only ever be connected
+prop map in one call), but each signal must only ever be connected
 **once**;
 reconnecting `"realize"` on every render would pile up duplicate
 callbacks, each firing independently. `wire-once!` gates every branch on
@@ -146,33 +146,33 @@ event.
 **Write-once contract for callers, distinct from `:apply`'s general
 per-key mechanism above:** the general mechanism (`:apply` runs once per
 prop key, both at construction and on every re-render) is what lets most
-widgets — `:scale`'s min/max/step, for instance — pick up fresh values on
+widgets (`:scale`'s min/max/step, for instance) pick up fresh values on
 every render. `:gl-area` specifically does NOT get that benefit for its
 event-handler props, because `wire-once!` only reacts to the FIRST arrival
 of each event key: once `:on-realize`/`:on-render`/`:on-resize`/`:on-tick`/
 `:on-motion`/`:on-key`/`:on-button` has been wired once for a given
 `:gl-area` widget, every subsequent `:apply` call for that same event key
-is a guarded no-op — the closure connected on first arrival keeps running
+is a guarded no-op; the closure connected on first arrival keeps running
 for the widget's entire life, even if a later render supplies a different
 closure for the same key. Concretely: if a caller (e.g.
 `glitter-gl.app/reactive-area`) is invoked again for what's meant to be
 the same `:gl-area` mount point, expecting its new opts/closures to
-replace the old ones, they will not — the original closures keep running.
+replace the old ones, they will not; the original closures keep running.
 Callers must build a `:gl-area` prop map once, at a stable point, and
 reuse the same result across renders.
 
 **Known v1 limitation, found during review, not fixed:** `wired` is keyed
-by the raw `GtkGLArea` pointer — a plain machine address — with no
+by the raw `GtkGLArea` pointer (a plain machine address) with no
 release path when a widget is destroyed. If GTK/GLib ever reuses a freed
 `:gl-area`'s address for a brand-new widget, the new widget would
 silently inherit the old one's `wired` entries and never get its handlers
-connected — no exception, just a GL area that never realizes. `glitter.gtk`'s
+connected: no exception, just a GL area that never realizes. `glitter.gtk`'s
 own `memory` atom sidesteps this exact trap by keying off a tracking
 atom's Clojure identity instead of a raw pointer; that pattern isn't
 available here without changing `glitter.widget`'s `:apply` contract to
 pass a stable identity alongside the raw widget pointer, which is out of
-scope for this fix. Not currently a live risk — every call site in this
-project mounts one `:gl-area` for the app's lifetime — but revisit if a
+scope for this fix. Not currently a live risk (every call site in this
+project mounts one `:gl-area` for the app's lifetime), but revisit if a
 future task introduces dynamic `:gl-area` mount/unmount.
 
 **What this means for extending `:gl-area`, or registering a different
@@ -184,15 +184,15 @@ wire from `:apply`, guarded idempotent, never from `:connect`.**
 Almost every GTK signal glitter's own `set-event-handler` connects is
 `void(widget, user_data)`. `:gl-area` needs several shapes that don't
 match, wired directly by `glitter-gl.gtk` itself (it does not go through
-`glitter.widget/signals`/`signal-value` at all — every `:gl-area` handler
+`glitter.widget/signals`/`signal-value` at all; every `:gl-area` handler
 is application-supplied, not routed through glitter's action-dispatch
 system; see [`scene-and-app.md`](scene-and-app.md) for why).
 
-**`"render"` — non-void return.** `GtkGLArea`'s `"render"` signal is
+**`"render"`: non-void return.** `GtkGLArea`'s `"render"` signal is
 `gboolean render(GtkGLArea*, GdkGLContext*, gpointer)`. glitter-gl's
-`foreign-callable` declares it as `[:pointer :pointer] :void` — 2 args
+`foreign-callable` declares it as `[:pointer :pointer] :void`, 2 args
 (the extra `GdkGLContext*` is simply not read, a harmless simplification
-inherited unchanged from glimmer-gl's own file) — but with an **`:int`**
+inherited unchanged from glimmer-gl's own file), but with an **`:int`**
 return, not `:void`:
 
 ```clojure
@@ -203,9 +203,9 @@ return, not `:void`:
 Always returning `1` (`TRUE`) tells GTK the draw call is handled and
 nothing further needs to run.
 
-**`"resize"` — extra `int` arguments.** `GtkGLArea`'s `"resize"` signal
+**`"resize"`: extra `int` arguments.** `GtkGLArea`'s `"resize"` signal
 carries the new width/height directly as signal arguments:
-`void resize(GtkGLArea*, gint width, gint height, gpointer)` — 4
+`void resize(GtkGLArea*, gint width, gint height, gpointer)`: 4
 parameters, not 2:
 
 ```clojure
@@ -213,8 +213,8 @@ parameters, not 2:
                       [:pointer :int :int :pointer] :void :collect-safe)
 ```
 
-**`"realize"` is the one signal here that IS the standard shape** —
-`void realize(GtkGLArea*, gpointer)` — wired exactly like any other
+**`"realize"` is the one signal here that IS the standard shape**:
+`void realize(GtkGLArea*, gpointer)`, wired exactly like any other
 glitter signal.
 
 **`on-tick` isn't a GTK *signal* at all.** There is no
@@ -240,7 +240,7 @@ so an app using it gets a continuous render loop for free without having
 to call `queue-render` itself.
 
 **`on-motion` layers a `GtkEventControllerMotion` onto the area**, since
-`GtkGLArea` itself has no pointer-motion signal — controllers are GTK4's
+`GtkGLArea` itself has no pointer-motion signal; controllers are GTK4's
 mechanism for attaching extra input handling to any widget:
 
 ```clojure
@@ -252,19 +252,19 @@ mechanism for attaching extra input handling to any widget:
 ```
 
 `"motion"`'s real signature is `void motion(GtkEventControllerMotion*,
-gdouble x, gdouble y, gpointer)` — the two `gdouble` coordinates arrive
+gdouble x, gdouble y, gpointer)`: the two `gdouble` coordinates arrive
 as direct signal arguments, same shape class as `"resize"`'s extra ints
 but with `:double` instead of `:int`.
 
 **`on-key` needs a controller on the *root window*, not the GLArea
-itself** — `GtkGLArea` can't hold keyboard focus
+itself**. `GtkGLArea` can't hold keyboard focus
 (`gtk_widget_grab_focus` returns `FALSE` even with `:can-focus` set), so
 a `GtkEventControllerKey` attached directly to the area never receives
 key events. The fix wires a small self-arming handler onto `:gl-area`'s
 OWN `"realize"` signal (a second, independent `"realize"` connection,
 alongside whatever the caller's own `:on-realize` does) that looks up the
-root window via `gtk_widget_get_root` — which only resolves once the
-widget is actually realized and attached to a window — and attaches the
+root window via `gtk_widget_get_root` (which only resolves once the
+widget is actually realized and attached to a window) and attaches the
 key controller there, once:
 
 ```clojure
@@ -285,7 +285,7 @@ key controller there, once:
 
 `"key-pressed"`'s real signature is `gboolean key_pressed
 (GtkEventControllerKey*, guint keyval, guint keycode, GdkModifierType
-state, gpointer)` — 4 args, **non-void return** (a third distinct
+state, gpointer)`: 4 args, **non-void return** (a third distinct
 callable shape in this file, alongside `"render"`'s 2-arg/non-void and
 `"resize"`'s 4-arg/void):
 
@@ -297,7 +297,7 @@ callable shape in this file, alongside `"render"`'s 2-arg/non-void and
 Returning `0` (`GDK_EVENT_PROPAGATE`) lets the key event continue past
 this handler to any other consumer (e.g. GTK's own focus-navigation
 keys). `"key-released"` carries the identical 4 arguments but IS
-`void`-returning — the pressed/released pair is asymmetric in GTK4's own
+`void`-returning; the pressed/released pair is asymmetric in GTK4's own
 API, not a glitter-gl inconsistency.
 
 **`on-button` layers a `GtkGestureClick`**, GTK4's gesture-based mouse
@@ -313,7 +313,7 @@ button API, the same controller-attachment pattern as `on-motion`:
 ```
 
 `"pressed"`/`"released"`'s real signature is `void pressed
-(GtkGestureClick*, gint n_press, gdouble x, gdouble y, gpointer)` — 5
+(GtkGestureClick*, gint n_press, gdouble x, gdouble y, gpointer)`: 5
 args, void return; the `n_press` (click-count) argument is read but
 discarded, and `on-button` is always called reporting button `1` (no
 button-index disambiguation in this version).
@@ -325,14 +325,14 @@ button-index disambiguation in this version).
 | `"realize"` | 2 (standard) | void | The one signal that fits glitter's default shape |
 | `"render"` | 2 | **int** | Non-void return; always returns 1 |
 | `"resize"` | **4** | void | Width/height as direct int args |
-| tick callback | 3 (not a signal — `gtk_widget_add_tick_callback`) | **int** | Frame-clock API, not `g_signal_connect_data`; returns 1 to keep ticking |
+| tick callback | 3 (not a signal, `gtk_widget_add_tick_callback`) | **int** | Frame-clock API, not `g_signal_connect_data`; returns 1 to keep ticking |
 | `"motion"` (on a controller) | **4** | void | x/y as direct double args |
 | `"key-pressed"` (on a controller, attached to root) | **5** | **int** | Non-void; returns 0 to propagate |
 | `"key-released"` (same controller) | **5** | void | Same args as key-pressed, void return |
 | `"pressed"`/`"released"` (on a `GtkGestureClick`) | **5** | void | n_press + x/y as direct args |
 
 Every one of these is wired with its own literal `foreign-callable` call
-inside `gl-area-apply!` — `jolt.ffi/foreign-callable`'s `argtypes`/
+inside `gl-area-apply!`; `jolt.ffi/foreign-callable`'s `argtypes`/
 `rettype` must be compile-time literals (the same constraint glitter's
 own `:switch`/`:list-box` signal generalization hit and documented in its
 own `docs/guide/gtk-widget-layer.md`), so there is no data-driven table
@@ -342,14 +342,14 @@ means adding its own literal branch by hand.
 ## A cosmetic side effect: dev-time hiccup warnings on every render
 
 `:gl-area`'s `:on-realize`/`:on-render`/`:on-resize`/`:on-tick` props all
-have names starting with `"on"` — the exact pattern glitter's ported
+have names starting with `"on"`, the exact pattern glitter's ported
 Replicant hiccup validation (`glitter.asserts/assert-no-event-attribute`)
 flags as a likely `:on {}` mistake, printing "Set event listeners in the
 :on map... Instead of :on-realize set :on {:realize ,,,}" once per prop
-key, per render. The warning does not affect anything — `create-node`'s
+key, per render. The warning does not affect anything: `create-node`'s
 `set-attributes` call still routes the value through `set-attr-val` to
 `r/set-attribute` → `glitter.widget/apply-props!` → `gl-area-apply!`
-exactly as described above, regardless of the console noise — it's a
+exactly as described above, regardless of the console noise. It's a
 false positive specific to this widget's non-standard prop shape, not a
 sign anything is broken.
 
@@ -359,12 +359,12 @@ scope for `glitter-gl`).
 
 `(glitter.env/configure! :glitter/asserts? false)` looks like the
 obvious escape hatch, but it does NOT work when called from an app's own
-`-main` — verified live, not just read. `glitter.assert`'s `enter-node`/
+`-main`, verified live, not just read. `glitter.assert`'s `enter-node`/
 `assert` are macros whose `(when (assert? ) ...)` gate runs at
 MACROEXPANSION time: once, when `glitter.core` itself is compiled, not
 per-call at runtime. `glitter.core` gets compiled the moment any
 namespace `:require`s `glitter.app`/`glitter.gtk` (both pull it in
-transitively) — which happens as part of processing the `ns` form
+transitively), which happens as part of processing the `ns` form
 itself, before any of that file's own code, `-main` included, ever runs.
 So by the time `-main` calls `configure!`, `glitter.core`'s macros have
 already expanded with asserts baked in; the call is a no-op. Confirmed
@@ -373,12 +373,12 @@ checking `glitter.assert/assert?` reports `false` when `configure!` runs
 first, but calling it in the opposite order (the only order a single
 namespace's `-main` can actually achieve, since its own `ns` form's
 `:require` already ran before `-main` exists to call anything) leaves
-`assert?` at its default `true` — the check simply never sees the
+`assert?` at its default `true`; the check simply never sees the
 config change in time.
 
 Making `configure!` actually take effect needs a genuinely separate
 bootstrap namespace: one that requires *only* `glitter.env`, calls
-`configure!` first, and only then dynamically `(require 'the-app-ns)` —
+`configure!` first, and only then dynamically `(require 'the-app-ns)`, so
 so `glitter.core`'s compilation happens after the config change, not
 before. `glitter-gl` doesn't ship one (the added entry-point complexity
 wasn't judged worth it for a cosmetic wart); `examples/glitter_gl/

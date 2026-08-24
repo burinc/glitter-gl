@@ -7,7 +7,7 @@ rather than what a commit did.
 
 Nothing has been released yet, so there is a single `Unreleased` section. It
 covers the project from its first commit (2026-08-06) to now, grouped by
-theme rather than dated per change — the whole thing is one continuous first
+theme rather than dated per change; the whole thing is one continuous first
 pass.
 
 ## Unreleased
@@ -19,22 +19,22 @@ pass.
   [thi.ng/geom](https://thi.ng/geom): unboxed 3D vectors, column-major 4×4
   matrices and quaternions, one record type per geometric primitive (AABB,
   rect, circle, line, plane, triangle, sphere, polygon, Bézier/Catmull-Rom
-  curve), and ray-intersection tests for picking — all plain functions over
+  curve), and ray-intersection tests for picking: all plain functions over
   immutable records, no protocols, no mutation.
 - **A mesh model and primitive/polyhedron constructors** (`mesh`, `glmesh`,
   `primitives`, `polyhedra`): build a mesh as a sequence of faces, transform
   it (translate, scale, tessellate, subdivide, compute normals), and
   construct cuboids, spheres, tetrahedra, octahedra, icosahedra, and
   dodecahedra directly.
-- **Shaders as data** (`glitter-gl.shader`): a shader's interface —
-  uniforms, attributes, varyings, an optional GLSL prelude, `:vs-main`/
-  `:fs-main` bodies as data — is a plain map, so composing shaders is just
+- **Shaders as data** (`glitter-gl.shader`): a shader's interface
+  (uniforms, attributes, varyings, an optional GLSL prelude, `:vs-main`/
+  `:fs-main` bodies as data) is a plain map, so composing shaders is just
   map composition. `merge-specs` combines fragments, with later entries
   winning on key conflicts and statement vectors concatenating. GLSL text is
   only generated when you call `sources` or `program`.
 - **A worked composition example** (`examples/glitter_gl/plasma_shader.clj`):
   a shared vertex/framing base, a domain-warped plasma module, an animated
-  stripes module, and a lighting module merged into one shader — drop a
+  stripes module, and a lighting module merged into one shader. Drop a
   module from the merge, or add a fourth, and the composed shader changes
   shape with no edits to the others.
 
@@ -46,10 +46,10 @@ pass.
   handlers) into glitter's widget registry, so a GL pane lives in the same
   reconciled hiccup tree as the rest of a glitter UI.
 - **`:gl-area`'s handlers wire from the widget spec's `:apply` closure, not
-  `:connect` — a real, live-found correction, not the original design.**
+  `:connect`. A real, live-found correction, not the original design.**
   Every other glitter widget's non-standard signals are documented to wire
   through `:connect`, and that's exactly what the first version of `:gl-area`
-  did — it passed every unit test and then never fired a single handler
+  did: it passed every unit test and then never fired a single handler
   against a real window, because `:connect` never actually receives a hiccup
   element's real props under glitter's reconciler. Handlers now wire from
   `:apply` instead (called once per prop key, at construction and on every
@@ -77,11 +77,11 @@ pass.
   dependency-tracked reaction; glitter has no equivalent, since its
   state-atom watcher already recomputes the whole view on every change. The
   ported `plan` is a plain function of `state`, called fresh on every
-  render — no reaction, no deref-tracking, no cache.
+  render: no reaction, no deref-tracking, no cache.
 - **`reactive-area`** builds a ready-made `:gl-area` prop map from a scene
   function and glitter's shared state atom. Its own tick/motion/key/button
   handlers read and write that state atom directly rather than dispatching
-  action tuples — deliberately, since GL-plumbing state can change 60 times
+  action tuples. This is deliberate, since GL-plumbing state can change 60 times
   a second and has no business round-tripping through a full hiccup
   recompute on every frame.
 
@@ -92,23 +92,23 @@ pass.
   (runs both live-GTK checks in sequence, stopping at the first failure).
   `jolt -M:test` never actually failed CI before this: its exit path relied
   on an interop form that always resolved to nil, so a failing suite still
-  printed its failure count and exited 0 — fixed to call `System/exit`
+  printed its failure count and exited 0. Fixed to call `System/exit`
   directly.
 - **Quality gates**: `bb lint`/`lint:strict` (clj-kondo), `bb
   lsp:format`/`format-check` and `lsp:clean-ns`/`clean-ns-check`
   (clojure-lsp), `bb verify` as a pre-commit-shaped bundle, and `bb
   check:positional-args`/`:strict` flagging functions with 3+ positional
   arguments. The codebase is uniformly formatted, including the 22 files
-  ported verbatim from glimmer-gl — a project-wide reformat changes
+  ported verbatim from glimmer-gl, since a project-wide reformat changes
   whitespace and `:require` ordering only, never logic.
 - **`.clj-kondo/hooks/jolt_ffi.clj`** rewrites `jolt.ffi/defcfn` into an
   equivalent `defn` so clj-kondo and clojure-lsp can see through the FFI
-  macro — without it, every FFI-bound name in `gl.clj`/`gtk.clj` reports as
+  macro. Without it, every FFI-bound name in `gl.clj`/`gtk.clj` reports as
   unresolved.
 - **`bb hooks:install`/`:install:full`/`:uninstall`** install a git
-  pre-commit hook — lint errors plus `clojure-lsp format --dry` and
+  pre-commit hook (lint errors plus `clojure-lsp format --dry` and
   `clean-ns --dry` by default, with `:install:full` adding the full unit
-  suite — so formatting and namespace hygiene stay enforced on every
+  suite), so formatting and namespace hygiene stay enforced on every
   commit, not just when someone remembers to run `bb verify` by hand.
 - **`bb nrepl`** starts a Jolt nREPL server for interactive development.
 
@@ -120,9 +120,9 @@ pass.
   testing and tasks, and every known v1 limitation with the reasoning
   behind leaving it.
 - **`CONTRIBUTING.md`** with ten numbered invariants this project does not
-  regress — build/test setup, the four local PR gates, the architecture
+  regress, plus build/test setup, the four local PR gates, the architecture
   diagram, and how to add a widget.
-- **`NOTICE.md`** — a file-by-file attribution ledger tracking which files
+- **`NOTICE.md`**: a file-by-file attribution ledger tracking which files
   are verbatim ports (22, from glimmer-gl, itself from thi.ng/geom), which
   are adapted for glitter's model, and which are new to this project.
 - **Issue and pull-request templates**, and a filled-in `LICENSE` copyright

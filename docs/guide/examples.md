@@ -6,40 +6,40 @@ three of them with their own `jolt -M:<alias>`/`bb <name>` entry point, one
 split cleanly along one axis: two exist to **fail when a regression lands**
 (`check.clj`, `gl_area_smoke.clj`), one exists to be **composed and read**
 (`plasma_shader.clj`), and one exists to be **watched** (`plasma.clj`). Only
-the first two are part of the project's actual regression coverage — say so
+the first two are part of the project's actual regression coverage; say so
 plainly rather than letting a reader assume the demo is tested because it
 runs.
 
-## `check.clj` — headless, and the one that pins the widest surface
+## `check.clj`: headless, and the one that pins the widest surface
 
 ```sh
 jolt -M:check     # or: bb check
 ```
 
-Needs no GL context and no display — it's the fastest thing in the project
-to run, and the only example safe to call from a machine with no windowing
-system at all. It asserts three unrelated things in one process:
+Needs no GL context and no display, so it's the fastest thing in the
+project to run, and the only example safe to call from a machine with no
+windowing system at all. It asserts three unrelated things in one process:
 
 1. `plasma-shader/shader-spec` compiles to GLSL with the declarations the
-   composition promised — `a_pos` attribute, `u_time` uniform, the `palette`
+   composition promised: `a_pos` attribute, `u_time` uniform, the `palette`
    and `plasma` prelude functions. If a future shader-module edit drops a
    uniform or forgets to thread a prelude function through
    `merge-specs`, this is what catches it, headlessly, before anyone opens
    the demo and notices the picture looks wrong.
-2. `mesh/->floats` produces a well-formed vertex buffer — positive vertex
-   count, buffer length exactly `count * stride` — for each of the three
+2. `mesh/->floats` produces a well-formed vertex buffer (positive vertex
+   count, buffer length exactly `count * stride`) for each of the three
    primitive shapes the demo can switch between (cube, sphere, tetra).
 3. `:gl-area` and `:scale` are both present in `glitter.widget/specs` after
    requiring `glitter-gl.gtk`.
 
-That third assertion is a **load-order check, not an ownership check** —
+That third assertion is a **load-order check, not an ownership check**,
 worth stating precisely because it's easy to misread. `:gl-area` is
 registered by this library; `:scale` is not (invariant #6 in
-[`CONTRIBUTING.md`](../../CONTRIBUTING.md) — glitter already ships a
+[`CONTRIBUTING.md`](../../CONTRIBUTING.md); glitter already ships a
 richer, first-party `:scale`, and glitter-gl deliberately doesn't shadow
 it). `check.clj`'s own docstring says as much: `:scale` "comes from
 glitter's own native widget, not from glitter-gl.gtk." So if `:scale` is
-missing when this runs, the bug is that **glitter itself never loaded** —
+missing when this runs, the bug is that **glitter itself never loaded**,
 not that glitter-gl broke something it owns.
 
 Measured, run just now:
@@ -55,11 +55,11 @@ check: ok
 ```
 
 **What it pins:** the shader-composition contract and the mesh-buffer
-contract, both without touching GTK at all — this is the one example a CI
+contract, both without touching GTK at all. This is the one example a CI
 runner could execute today with no display, once CI is wired (see
 [`testing-and-tasks.md`](testing-and-tasks.md)).
 
-## `gl_area_smoke.clj` — live GTK, and the one that pins the correction
+## `gl_area_smoke.clj`: live GTK, and the one that pins the correction
 
 ```sh
 jolt -M:gl-area-smoke     # or: bb gl-area-smoke
@@ -76,35 +76,35 @@ running it here, with a display available:
 :results {:realized? true, :rendered? true, :resized? [640 480], :error nil}
 ```
 
-**What it pins:** this is the one example that exercises invariant #2 —
+**What it pins:** this is the one example that exercises invariant #2,
 `:gl-area`'s handlers wiring through the widget spec's `:apply` closure
 rather than `glitter.widget`'s `:connect` hook. That correction was found
 *because* the original `:connect`-based design silently never fired under
 glitter's real reconciler; a fake in-memory renderer (the kind
 `test/glitter_gl/*_test.clj` uses) can't reproduce that failure, because it
 never routes props through the real `apply-props!` path at all. This is why
-the smoke exists as a separate live-GTK example rather than a unit test —
+the smoke exists as a separate live-GTK example rather than a unit test;
 see the smoke's own docstring, and
 [`gl-area-widget-layer.md`](gl-area-widget-layer.md) for the full mechanics.
 
 It's CI-safe in the sense that `bb.edn`'s `smokes` task runs it via
 `jolt -M:gl-area-smoke` (the exit-code-propagating alias form, not the task
-form — see [`testing-and-tasks.md`](testing-and-tasks.md)) — but CI isn't
+form; see [`testing-and-tasks.md`](testing-and-tasks.md)), but CI isn't
 actually wired for this project yet, so today it's a local gate a
 contributor runs by hand before opening a PR.
 
-## `plasma_shader.clj` — composed, not run
+## `plasma_shader.clj`: composed, not run
 
 This one has no `-main`, no `deps.edn` alias, no `bb.edn` task. It's the
 shared shader spec: four data maps (`base`, `plasma-module`,
-`stripes-module`, `main-module`) combined with a single call —
+`stripes-module`, `main-module`) combined with a single call:
 
 ```clojure
 (def shader-spec
   (sh/merge-specs base plasma-module stripes-module main-module))
 ```
 
-— demonstrating `glitter-gl.shader`'s composition model rather than
+This demonstrates `glitter-gl.shader`'s composition model rather than
 anything glitter-gl-specific. `base` supplies the vertex stage and framing
 uniforms; `plasma-module` contributes a domain-warped, 4-octave plasma
 field plus an Inigo Quilez cosine palette (both as GLSL text in
@@ -112,19 +112,19 @@ field plus an Inigo Quilez cosine palette (both as GLSL text in
 not free functions); `stripes-module` contributes an independent animated
 stripe pattern; `main-module` blends the two by `u_mix` and applies
 Blinn-Phong-style lighting to the result. Drop a module from the merge, or
-add a third, and the visual changes accordingly — that's the point being
+add a third, and the visual changes accordingly. That's the point being
 demonstrated.
 
-**What it pins:** nothing on its own — it's exercised, not asserted,
+**What it pins:** nothing on its own. It's exercised, not asserted,
 by `check.clj`'s shader-compile checks (does the merged spec still emit
 `a_pos`, `u_time`, `palette(`, `plasma(`) and rendered, not verified, by
 `plasma.clj`. If you're adding a new shader module to this codebase, this
-file plus `check.clj`'s three assertions are the pattern to copy — one
+file plus `check.clj`'s three assertions are the pattern to copy: one
 adds a data map to the merge, the other adds a `str/includes?` line
 asserting the thing that map was supposed to contribute is actually in the
 generated source.
 
-## `plasma.clj` — the one to watch, not the one to trust
+## `plasma.clj`: the one to watch, not the one to trust
 
 ```sh
 jolt -M:plasma     # or: bb plasma
@@ -138,11 +138,11 @@ pause/resume button.
 **Be honest about what this one is not**: it is not part of `bb.edn`'s
 `smokes` task, it makes no assertions, and nothing fails when its picture
 regresses except a human noticing it looks wrong. Per the organising
-principle for this whole guide — an example that exists only to be pretty
-is worth less than one that fails when a regression lands — this is the
+principle for this whole guide (an example that exists only to be pretty
+is worth less than one that fails when a regression lands), this is the
 "pretty" one. (It does support a `GLITTER_GL_DEMO_QUIT_MS` env var,
 mirroring the original's `GLIMMER_GL_DEMO_QUIT_MS`, that auto-closes the
-window after N ms — useful for confirming it launches without hanging, but
+window after N ms, useful for confirming it launches without hanging, but
 that's a liveness check, not a correctness one, and it isn't wired into
 any automated task today.)
 
@@ -152,7 +152,7 @@ anywhere in this codebase.
 ### Why it wires `:gl-area` directly instead of going through `reactive-area`
 
 `glitter-gl.app/reactive-area` exists precisely to keep GL plumbing out of
-application code — build a scene as data, hand it to `reactive-area`, get
+application code: build a scene as data, hand it to `reactive-area`, get
 back a ready-made `:gl-area` prop map. `plasma.clj` doesn't use it. It
 wires `on-realize`/`on-render`/`on-resize`/`on-tick` by hand, the same way
 `gl_area_smoke.clj` does.
@@ -161,7 +161,7 @@ The reason is provenance, not oversight: `plasma.clj`'s own docstring says
 it's "ported from `gl-demo.core`... converting its reactive-cell control
 panel... into glitter's single state atom + data-driven action dispatch,"
 while "the GL render-loop plumbing (on-realize/on-render/on-resize/on-tick)
-is otherwise unchanged" — direct wiring is how the upstream glimmer-gl demo
+is otherwise unchanged". Direct wiring is how the upstream glimmer-gl demo
 already worked, and the port kept that shape rather than routing it through
 the newer `reactive-area` layer built later in this project's history.
 
@@ -176,13 +176,13 @@ gaps.
 ### The two things it demonstrates about the state split
 
 `plasma.clj` is the clearest illustration of invariant #4 (`reactive-area`'s
-own handlers read/write state directly rather than dispatching — the same
+own handlers read/write state directly rather than dispatching, the same
 principle plasma.clj follows even though it bypasses `reactive-area`
 itself), because both halves of the split sit right next to each other in
 one file:
 
 1. **The GL handlers read and write plain atoms directly.** `on-tick`
-   doesn't dispatch anything — it just mutates:
+   doesn't dispatch anything; it just mutates:
 
    ```clojure
    (defn on-tick [_area]
@@ -192,7 +192,7 @@ one file:
 
    `clock`, `viewport`, and `gl-state` are all `defonce` atoms outside the
    reconciled view entirely, updated 60 times a second by GTK's frame
-   clock — exactly the kind of state invariant #4 says has no business
+   clock, exactly the kind of state invariant #4 says has no business
    round-tripping through `swap!`-then-re-render.
 
 2. **The control panel dispatches actions like any other glitter UI.**
@@ -217,7 +217,7 @@ person clicks or drags something, it's an action.
 
 ## Adding an example
 
-Four touchpoints, same as glitter's own convention — skip one and the
+Four touchpoints, same as glitter's own convention; skip one and the
 example is invisible to something:
 
 1. **The namespace**, under `examples/glitter_gl/`.
@@ -242,11 +242,11 @@ example is invisible to something:
                      (shell "jolt" "-M:check"))}
    ```
 
-   Skipping this step doesn't break the new example — it just means
+   Skipping this step doesn't break the new example; it just means
    nobody running `bb smokes` (or a future CI job built on it) ever
    exercises it, the same silent gap `plasma.clj` has today by design.
 
 A smoke's own `-main` must exit non-zero on failure and be invoked via
-`jolt -M:<alias>`, never the bare `jolt <task>` shorthand — see
+`jolt -M:<alias>`, never the bare `jolt <task>` shorthand; see
 [`testing-and-tasks.md`](testing-and-tasks.md) for why the task form can't
 be trusted to fail a build at all.
