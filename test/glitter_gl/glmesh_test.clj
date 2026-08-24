@@ -11,7 +11,10 @@
 ;; uploads them; make-vertex-array records attrib bindings into a VAO; draw-with-shader
 ;; composes a compiled shader + per-frame uniforms + the VAO into a draw call. The GL
 ;; side needs a context, so only the pure data transform (as-gl-buffer-spec) and the
-;; camera matrices are unit-tested here; the draw path is exercised by the demo.
+;; camera matrices are unit-tested here. make-buffers-in-spec/make-vertex-array/
+;; draw-with-shader have no caller anywhere in this repo outside glmesh.clj itself —
+;; renderer.clj's upload path takes a different route (mesh/->floats + hand-rolled
+;; gl.clj calls).
 
 (deftest as-gl-buffer-spec-cuboid
   (testing "flat-shaded cuboid: 6 quads -> 12 tris -> 36 verts, separate pos+norm"
