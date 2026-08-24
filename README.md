@@ -138,7 +138,8 @@ one topic per page:
   and the lineage back through glimmer-gl to thi.ng/geom.
 - [`examples.md`](docs/guide/examples.md): what each of the four
   `examples/glitter_gl/` namespaces is for, and which two are actually
-  wired into regression coverage.
+  wired into regression coverage. Includes a four-take gallery of the
+  `plasma` demo.
 - [`testing-and-tasks.md`](docs/guide/testing-and-tasks.md): the unit
   suite, the live-GTK smoke and headless check `bb smokes` runs, and the
   quality-tooling task surface (lint, format, `clj-kondo`'s FFI hook, the

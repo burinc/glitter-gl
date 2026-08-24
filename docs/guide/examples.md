@@ -135,6 +135,17 @@ shader, with a glitter-native control panel: shape buttons, five sliders
 (speed, zoom, scale, warp, blend), a smooth-shading checkbutton, a
 pause/resume button.
 
+| preview | take | what it shows |
+|---|---|---|
+| [<img src="../demos/plasma-cube.gif" width="150">](../demos/plasma-cube.gif) | `plasma-cube` | The default cube, rotating under the plasma/stripes shader with flat shading — each face reads as its own solid-color panel, bounded by a sharp edge. |
+| [<img src="../demos/plasma-sphere.gif" width="150">](../demos/plasma-sphere.gif) | `plasma-sphere` | The same shader on a sphere. Same flat-shading toggle (off), but the sphere's much higher facet count makes the color read as a continuous gradient instead of blocks. |
+| [<img src="../demos/plasma-tetra.gif" width="150">](../demos/plasma-tetra.gif) | `plasma-tetra` | The same shader on a tetrahedron — with only four large triangular faces, this is the clearest case for seeing exactly where flat shading draws the line between one face's color and the next. |
+| [<img src="../demos/plasma-smooth.gif" width="150">](../demos/plasma-smooth.gif) | `plasma-smooth` | The cube again, with the smooth-shading checkbutton on: the same plasma pattern now flows continuously across an edge instead of jumping between two flat blocks — the direct visual contrast with the take above. |
+
+Every preview is a real recording of the demo running, not a mockup. They
+are committed under `docs/demos/`, and each thumbnail links to the
+full-size recording.
+
 **Be honest about what this one is not**: it is not part of `bb.edn`'s
 `smokes` task, it makes no assertions, and nothing fails when its picture
 regresses except a human noticing it looks wrong. Per the organising
