@@ -29,6 +29,13 @@ need to compile shaders and fill buffers/VAOs/uniforms, and
 `glitter-gl.mesh` / `glitter-gl.primitives` are the thi.ng/geom-style
 composition layer.
 
+**Docs site:** [glitter-gl.b12n.app](https://glitter-gl.b12n.app)
+
+> The site is built but not yet published as of this arc — no DNS, no
+> bucket, no GitHub Pages. The URL will not resolve until the go-public
+> sequence runs; until then, browse the same content directly in
+> [`docs/guide/`](docs/guide/index.md).
+
 ## Quick start
 
 ```sh
@@ -100,10 +107,53 @@ glitter-gl.gtk (:gl-area, wired via glitter.widget's
 
 ## Documentation
 
-- **[`docs/guide/index.md`](docs/guide/index.md)** — the full guide.
+The full guide is nine pages under [`docs/guide/`](docs/guide/index.md),
+one topic per page:
+
+- [`architecture.md`](docs/guide/architecture.md) — the four-layer
+  stack, how thin the seam to glitter actually is (one file has a
+  literal `:require` on `glitter.*`), and why a `:gl-area` keeps
+  redrawing even though a bare state change doesn't cause it to.
+- [`geometry-and-shaders.md`](docs/guide/geometry-and-shaders.md) —
+  orientation over the 22 verbatim-ported namespaces: the three
+  groups, where a mesh becomes GL data, and why the matrices are
+  column-major.
+- [`gl-area-widget-layer.md`](docs/guide/gl-area-widget-layer.md) —
+  the `:gl-area` widget's mechanics in full: the `:apply`-vs-`:connect`
+  correction, traced through the actual reconciler code path, plus
+  every non-standard GTK4 signal shape it has to handle.
+- [`scene-and-app.md`](docs/guide/scene-and-app.md) — the declarative
+  scene graph's mini-hiccup dialect (and why it's not glitter's own
+  hiccup), why `plan` has no reactive-cell tracking, and the write-once
+  handler contract.
+- [`porting-and-attribution.md`](docs/guide/porting-and-attribution.md)
+  — the three sourcing buckets, the Standard Verbatim Port Procedure,
+  and the lineage back through glimmer-gl to thi.ng/geom.
+- [`examples.md`](docs/guide/examples.md) — what each of the four
+  `examples/glitter_gl/` namespaces is for, and which two are actually
+  wired into regression coverage.
+- [`testing-and-tasks.md`](docs/guide/testing-and-tasks.md) — the unit
+  suite, the two live-GTK smokes, and the quality-tooling task surface
+  (lint, format, `clj-kondo`'s FFI hook, the git pre-commit gate).
+- [`limitations.md`](docs/guide/limitations.md) — every known v1 gap,
+  each with the reason it was left rather than fixed.
+- [`index.md`](docs/guide/index.md) — the guide's own nav map, if
+  you'd rather start there.
+
+Plus:
+
 - **[`CONTRIBUTING.md`](CONTRIBUTING.md)** — how to build, test, and submit
   changes, and the ten invariants this project does not regress.
 - **[`NOTICE.md`](NOTICE.md)** — file-by-file attribution for the ported code.
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, the ten numbered
+invariants this project does not regress, and how to add a widget.
+Before opening a PR, run the four local gates: `bb test`, `bb lint`,
+`bb lsp:format-check`, and `bb smokes`. **CI is not wired up yet** —
+these four commands are the whole gate for now, so please run them
+yourself.
 
 ## Status
 
@@ -111,8 +161,13 @@ Ported from glimmer-gl (2026-08-06 arc) — see `NOTICE.md`'s porting ledger
 for the full verbatim/adapted/new breakdown, including a real live-found
 correction to `:gl-area`'s original wiring design (see
 [`docs/guide/gl-area-widget-layer.md`](docs/guide/gl-area-widget-layer.md)).
-Known gaps carried forward from the design spec: `glitter-gl.app`'s
+The unit suite currently stands at 177 tests / 556 assertions (`bb test`),
+plus two live-GTK smokes (`bb smokes`) that drive a real `GtkGLArea`
+under the real reconciler rather than a fake renderer. Known gaps
+carried forward from the design spec: `glitter-gl.app`'s
 scene-graph/shadow-mapping renderer path (`reactive-area`) is ported and
 unit-tested but has no live demo exercising it end to end — the shipped
 `plasma` demo wires `:gl-area` directly instead, the same way glimmer-gl's
-own upstream demo does.
+own upstream demo does. See
+[`docs/guide/limitations.md`](docs/guide/limitations.md) for this and
+every other known v1 gap.
