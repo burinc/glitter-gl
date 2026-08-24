@@ -48,10 +48,10 @@ and every demo/smoke still work fine.
 ## Before you open a PR
 
 ```sh
-bb test               # unit suite (headless — no display needed)
-bb lint                # clj-kondo over glitter-gl-authored code (report only)
-bb lsp:format-check    # clojure-lsp formatting, dry run
-bb smokes               # every live-GTK smoke/check in sequence (needs a display)
+bb test              # unit suite (headless — no display needed)
+bb lint              # clj-kondo over glitter-gl-authored code (report only)
+bb lsp:format-check  # clojure-lsp formatting, dry run
+bb smokes            # every live-GTK smoke/check in sequence (needs a display)
 ```
 
 `bb smokes` drives real GTK4 rather than reasoning about a widget's

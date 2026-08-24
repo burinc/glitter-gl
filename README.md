@@ -40,9 +40,9 @@ composition layer.
 
 ```sh
 jolt -M:plasma         # rotating cube/sphere/tetra + composable plasma/stripes shader
-jolt -M:check           # headless sanity check: shader compiles, geometry buffers valid
-jolt -M:test             # unit suite
-jolt -M:gl-area-smoke     # live-GTK smoke: :gl-area construct/realize/render/resize
+jolt -M:check          # headless sanity check: shader compiles, geometry buffers valid
+jolt -M:test           # unit suite
+jolt -M:gl-area-smoke  # live-GTK smoke: :gl-area construct/realize/render/resize
 ```
 
 **In CI, invoke the alias form** (`jolt -M:test`, not `jolt test`) — same
