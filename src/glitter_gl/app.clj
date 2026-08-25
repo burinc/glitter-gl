@@ -16,10 +16,10 @@
   :on-tick/:on-motion/:on-key/:on-button are plain closures that swap!/reset!
   the shared `state` atom directly, not routed through glitter.core's
   action-dispatch tuples — this mirrors glimmer-gl's shape closely (least new
-  surface area) and matches existing precedent in glitter's own AGENTS.md,
-  where value-bearing GTK signals already bypass the action-tuple system as a
-  documented exception. See the design spec's 'glitter-gl.scene /
-  glitter-gl.app' section for the full rationale.
+  surface area) and matches existing precedent in glitter's own
+  CONTRIBUTING.md (invariant #8), where value-bearing GTK signals already
+  bypass the action-tuple system as a documented exception. See the design
+  spec's 'glitter-gl.scene / glitter-gl.app' section for the full rationale.
 
   opts' values are now plain (no more 'may be a reactive cell' affordance) —
   but this is NOT the same as saying opts/closures get re-read on every

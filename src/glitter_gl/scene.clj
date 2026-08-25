@@ -87,8 +87,9 @@
   misclassify native nodes). This scene-graph mini-hiccup is independent of
   glitter's own widget hiccup (it's consumed by glitter-gl.renderer, never by
   glitter.core/reconcile), so glitter's own no-function-tags convention —
-  glitter's AGENTS.md convention #10 (not glitter-gl's own gotcha list,
-  which numbers things differently) — does not apply here."
+  glitter's CONTRIBUTING.md invariant #9 (not glitter-gl's own
+  CONTRIBUTING.md invariants, which number things differently) — does not
+  apply here."
   [node]
   (cond
     (nil? node) nil
