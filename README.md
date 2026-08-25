@@ -154,6 +154,8 @@ Plus:
 - **[`CONTRIBUTING.md`](CONTRIBUTING.md)**: how to build, test, and submit
   changes, and the ten invariants this project does not regress.
 - **[`NOTICE.md`](NOTICE.md)**: file-by-file attribution for the ported code.
+- Design spec and implementation plan are not part of this repo; they live in
+  a private planning store.
 
 ## Contributing
 
