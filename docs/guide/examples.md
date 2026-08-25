@@ -137,10 +137,10 @@ pause/resume button.
 
 | preview | what it shows |
 |---|---|
-| [<img src="../demos/plasma-cube.gif" width="220">](../demos/plasma-cube.gif) | **`plasma-cube`**: the default cube, rotating under the plasma/stripes shader with flat shading, so each face reads as its own solid-color panel, bounded by a sharp edge. |
-| [<img src="../demos/plasma-sphere.gif" width="220">](../demos/plasma-sphere.gif) | **`plasma-sphere`**: the same shader on a sphere. Same flat-shading toggle (off), but the sphere's much higher facet count makes the color read as a continuous gradient instead of blocks. |
-| [<img src="../demos/plasma-tetra.gif" width="220">](../demos/plasma-tetra.gif) | **`plasma-tetra`**: the same shader on a tetrahedron. With only four large triangular faces, this is the clearest case for seeing exactly where flat shading draws the line between one face's color and the next. |
-| [<img src="../demos/plasma-smooth.gif" width="220">](../demos/plasma-smooth.gif) | **`plasma-smooth`**: the cube again, with the smooth-shading checkbutton on: the same plasma pattern now flows continuously across an edge instead of jumping between two flat blocks. The direct visual contrast with the take above. |
+| [<img src="../demos/pane/plasma-cube.gif" width="300">](../demos/plasma-cube.gif) | **`plasma-cube`**: the default cube, rotating under the plasma/stripes shader with flat shading, so each face reads as its own solid-color panel, bounded by a sharp edge. |
+| [<img src="../demos/pane/plasma-sphere.gif" width="300">](../demos/plasma-sphere.gif) | **`plasma-sphere`**: the same shader on a sphere. Same flat-shading toggle (off), but the sphere's much higher facet count makes the color read as a continuous gradient instead of blocks. |
+| [<img src="../demos/pane/plasma-tetra.gif" width="300">](../demos/plasma-tetra.gif) | **`plasma-tetra`**: the same shader on a tetrahedron. With only four large triangular faces, this is the clearest case for seeing exactly where flat shading draws the line between one face's color and the next. |
+| [<img src="../demos/pane/plasma-smooth.gif" width="300">](../demos/plasma-smooth.gif) | **`plasma-smooth`**: the cube again, with the smooth-shading checkbutton on: the same plasma pattern now flows continuously across an edge instead of jumping between two flat blocks. The direct visual contrast with the take above. |
 
 Every preview is a real recording of the demo running, not a mockup. They
 are committed under `docs/demos/`, and each thumbnail links to the

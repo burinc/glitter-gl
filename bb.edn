@@ -13,6 +13,7 @@
 ;;   bb verify                pre-commit gate: lint (report) + test (must pass)
 ;;   bb check:positional-args | :strict   find fns with 3+ positional args (report | strict)
 ;;   bb hooks:install | hooks:install:full | hooks:uninstall   git pre-commit hook
+;;   bb demos:crop             crop docs/demos/plasma-*.gif to the GL pane -> docs/demos/pane/
 ;;   bb nrepl [port]           start a jolt nREPL server (default 7888)
 ;;   bb docs-sync [--no-push]  rebuild + mirror + deploy the docs site (maintainer-only)
 ;; NOTE: task bodies are EDN-parsed — no #"regex", @deref, or #(...) reader macros.
@@ -60,6 +61,7 @@
           (hdr "Demos")
           (row "record" "batch-record a demo GIF for every take (needs internal screen-grab CLI)")
           (row "demos:examples" "print the four take ids as EDN (used by bb record)")
+          (row "demos:crop" "crop docs/demos/plasma-*.gif to the GL pane -> docs/demos/pane/")
           (hdr "Dev")
           (row "nrepl [port]" "start a jolt nREPL server (default 7888)")
           (hdr "Docs")
@@ -195,6 +197,11 @@
    ;; Maintainer-only. The capture CLI is not publicly released yet, and
    ;; recording takes the screen over for a few minutes. Contributors never
    ;; need it: every GIF is committed under docs/demos/.
+   ;;
+   ;; Ordering: this regenerates the full-window originals only. It never
+   ;; touches docs/demos/pane/, so after any bb record run, follow up with
+   ;; bb demos:crop to refresh the cropped gallery set too - otherwise
+   ;; pane/ silently goes stale against the new originals.
    :task (if-not (fs/which "screen-grab")
            (binding [*out* *err*]
              (println "bb record needs the `screen-grab` capture CLI on your PATH.")
@@ -207,6 +214,57 @@
                                        "--manifest" "scripts/demo_manifest.edn"
                                        *command-line-args*)]
              (System/exit exit)))}
+
+  demos:crop
+  {:doc "Crop docs/demos/plasma-*.gif to the GL pane -> docs/demos/pane/ (for the guide's four-up gallery)"
+   ;; The four-up gallery in docs/guide/examples.md does not want the full
+   ;; window: the control panel (roughly the top two-thirds of the frame)
+   ;; is identical across all four takes and is pure noise repeated four
+   ;; times, while the actual subject, the rotating shaded solid, occupies
+   ;; only the bottom third. This crops each source down to just the dark
+   ;; GL pane and writes the result alongside, under pane/, leaving the
+   ;; full-window originals untouched.
+   ;;
+   ;; The crop window was measured by hand on a 560x418 source
+   ;; (docs/demos/plasma-sphere.gif, 2026-08-25, via `gifsicle --info` plus
+   ;; a mid-frame extracted with ffmpeg): the dark pane begins at y=275
+   ;; (275/418 = 0.6579, about 66% of the frame height) and runs 135px
+   ;; down to just above the window's drop shadow (275+135=410, leaving an
+   ;; 8px margin at the bottom). Both figures are kept as fractions of
+   ;; height below, not raw pixels, and reapplied to each source's ACTUAL
+   ;; height (read per file via `gifsicle --info`, not assumed to be 418),
+   ;; so a future re-record at a different capture size still crops
+   ;; correctly. If the demo's control-panel layout changes, re-derive:
+   ;; extract a mid-animation frame (`ffmpeg -i docs/demos/plasma-cube.gif
+   ;; -vf "select=eq(n\,20)" -update 1 -frames:v 1 /tmp/frame.png`), look
+   ;; at it, read off the y pixel where the dark pane starts and ends, and
+   ;; replace pane-y-frac / pane-h-frac below with the new ratios.
+   ;;
+   ;; gifsicle warns "too many colors, using local colormaps" on every
+   ;; file here - that is it preserving the plasma gradient's fidelity via
+   ;; a local colormap, not degrading it. Do not silence it with --colors;
+   ;; palette reduction visibly bands the exact gradients this crop exists
+   ;; to show.
+   :task
+   (let [pane-y-frac 0.6579
+         pane-h-frac 0.3230
+         src-dir "docs/demos"
+         out-dir "docs/demos/pane"
+         ids ["plasma-cube" "plasma-sphere" "plasma-tetra" "plasma-smooth"]]
+     (fs/create-dirs out-dir)
+     (doseq [id ids]
+       (let [src (str src-dir "/" id ".gif")
+             out (str out-dir "/" id ".gif")
+             info (:out (shell {:out :string} "gifsicle" "--info" src))
+             dims (re-find (re-pattern "logical screen (\\d+)x(\\d+)") info)
+             w (nth dims 1)
+             height (Integer/parseInt (nth dims 2))
+             pane-y (int (Math/round (* height pane-y-frac)))
+             pane-h (int (Math/round (* height pane-h-frac)))
+             crop (str "0," pane-y "+" w "x" pane-h)]
+         (println (str id ": " w "x" height " -> --crop " crop))
+         (shell "gifsicle" "--crop" crop "--resize-width" "400" "-O3" src "-o" out)))
+     (println (str "OK cropped " (count ids) " gif(s) -> " out-dir "/")))}
 
   nrepl {:doc "Start a jolt nREPL server for interactive dev: bb nrepl [port] (default 7888)"
          :task (shell "jolt" "nrepl-server" (or (first *command-line-args*) "7888"))}
