@@ -21,10 +21,12 @@
  ;; Replicant-style widget registry. See README.md.
  :aliases {:test          {:extra-paths ["test"]     :main-opts ["-m" "glitter-gl.test-runner"]}
            :plasma        {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.plasma"]}
+           :ripple        {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.ripple"]}
            :check         {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.check"]}
            :gl-area-smoke {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.gl-area-smoke"]}}
 
  :tasks {test          "jolt -M:test"
          plasma        "jolt -M:plasma"
+         ripple        "jolt -M:ripple"
          check         "jolt -M:check"
          gl-area-smoke "jolt -M:gl-area-smoke"}}

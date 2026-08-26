@@ -3,6 +3,7 @@
 ;;   bb info               grouped task cheat-sheet (start here)
 ;;   bb test                run the unit suite (jolt -M:test)
 ;;   bb plasma               interactive demo: rotating primitive + plasma/stripes shader
+;;   bb ripple                interactive demo: full-screen fragment shader, no mesh at all
 ;;   bb check                 headless sanity check: shader compiles, geometry buffers valid
 ;;   bb gl-area-smoke          live-GTK smoke: :gl-area construct/realize/render/resize
 ;;   bb smokes                  gl-area-smoke + check (CI-safe entry point, mirrors glitter's bb smokes)
@@ -38,6 +39,7 @@
           (row "verify" "lint (report) + test (must pass) — pre-commit gate")
           (hdr "Run")
           (row "plasma" "interactive demo: rotating primitive + plasma/stripes shader")
+          (row "ripple" "interactive demo: full-screen fragment shader, no mesh at all")
           (row "check" "headless sanity check: shader compiles, geometry buffers valid")
           (hdr "Smoke (live GTK, exits non-zero on failure)")
           (row "gl-area-smoke" ":gl-area construct/realize/render/resize against real GTK")
@@ -73,6 +75,9 @@
 
   plasma {:doc "Interactive demo: rotating primitive + plasma/stripes shader"
           :task (shell "jolt" "-M:plasma")}
+
+  ripple {:doc "Interactive demo: full-screen fragment shader, no mesh at all"
+          :task (shell "jolt" "-M:ripple")}
 
   check {:doc "Headless sanity check: shader compiles, geometry buffers valid"
          :task (shell "jolt" "-M:check")}
