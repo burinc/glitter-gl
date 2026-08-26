@@ -45,12 +45,13 @@ each call, exactly like any other glitter view function.
 
 ### Orientation
 
-- [`examples.md`](examples.md): the four namespaces under
+- [`examples.md`](examples.md): the seven namespaces under
   `examples/glitter_gl/`, split by what each is for: `check.clj` and
   `gl_area_smoke.clj` exist to fail when a regression lands (the only two
   wired into `bb smokes`), `plasma_shader.clj` exists to be composed and
-  read (the shader-composition worked example), and `plasma.clj` exists
-  to be watched: a rotating-shape demo with no assertions of its own.
+  read (the shader-composition worked example), and `plasma.clj`,
+  `ripple.clj`, `orbit.clj` and `knot.clj` exist to be watched: rotating-
+  shape and shader demos with no assertions of their own.
   Also covers the four touchpoints (namespace, `deps.edn` alias, `bb.edn`
   task, `smokes` entry) a new example needs so it doesn't go silently
   unexercised.
