@@ -234,6 +234,71 @@ effect needs. This is the intended reading of the shaders-as-data
 model: reusable GLSL logic as merge-able data fragments, GLSL text
 generated once at the very end.
 
+## The uniform `[type default]` pair is documentation, not an upload
+
+A uniform declaration can be a bare type (`{:u_time :float}`) or a
+`[type default]` pair (`{:u_freq [:float 12.0]}`), and reading the
+second form as "the value this uniform starts at if nothing sets it
+explicitly" is the natural assumption. It's wrong, and worth stating
+precisely because nothing about compiling or linking the shader reveals
+that it's wrong.
+
+Verified directly against the source, not restated from a plan:
+`program`'s private `located-uniforms` (`shader.clj:256-262`) is the
+only place `:default` is ever written. It destructures the pair,
+compiles the uniform's real GL location, and stores `:default` alongside
+`:loc`/`:type` in the returned `{name {:loc :type :default}}` map:
+
+```clojure
+;; shader.clj
+(defn- located-uniforms [prog uniforms]
+  (into {} (map (fn [[id t]]
+                  (let [[type default] (if (sequential? t) t [t])]
+                    [id {:loc     (gl/gl-get-uniform-location prog (name id))
+                         :type    type
+                         :default default}]))
+                uniforms)))
+```
+
+`set-uniform!` (`shader.clj:291-313`), the only function that ever
+uploads a value with `glUniform*f`/`glUniformMatrix4fv`, reads `:loc`
+and `:type` from that same map to dispatch the upload, but never reads
+`:default`. `set-uniforms!` (`shader.clj:315-319`) is just
+`set-uniform!` looped over whatever `{name value}` map the caller
+passes it. Grep the file for every reference to `:default`, and
+`located-uniforms`'s write is the only one; nothing downstream ever
+reads it back.
+
+The consequence: a uniform your spec declares but your `on-render`
+never includes in the map passed to `set-uniforms!` sits at GLSL's own
+zero-initialized default (`0.0`, `vec3(0)`, and so on) on the GPU,
+regardless of what the spec's `[type default]` pair says. There is no
+error at compile time or at render time: the shader compiles and links
+cleanly, because leaving a declared uniform unset is always legal GLSL.
+
+This cost `examples/glitter_gl/ripple.clj` a real debugging session,
+not a hypothetical one: its first version's `on-render` set `:u_time`
+and `:u_resolution` (the two uniforms that visibly needed a per-frame
+value) but left `:u_freq`, `:u_speed`, `:u_deep`, and `:u_bright` out of
+the `set-uniforms!` call, on the reasonable-looking assumption that
+their `[type default]` pairs already covered them. With `u_freq`/
+`u_speed` at zero, the ripple field's `sin(d * 0 - t * 0)` collapsed to
+a constant `0` for every pixel, every frame; with `u_deep`/`u_bright` at
+`vec3(0)`, the color mix output pure black regardless of that constant.
+The window opened, the shader compiled and linked, nothing threw, and
+the picture was a flat black rectangle. `plasma.clj` never hits this
+because its `on-render` already sets every uniform its shader declares,
+every frame, including the ones that read like fixed constants;
+`ripple.clj` and `knot.clj` now follow the same rule, and both say why
+in their own ns docstrings.
+
+**The rule:** set every uniform your spec declares, on every render
+call, even the ones that look like they should only need setting once.
+If a value is genuinely constant, define it as a module-level `def` and
+reference that same def from both the spec's `[type default]` pair and
+the `set-uniforms!` call, so the two can't silently drift apart the way
+two separate literals could.
+
 ## What `gl.clj` binds, and doesn't
 
 `gl.clj` is a minimal FFI surface, not a general OpenGL binding: it
