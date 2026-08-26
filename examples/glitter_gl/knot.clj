@@ -59,7 +59,7 @@
         rad (+ R (* r (Math/cos qt)))]
     (v/vec3 (* rad (Math/cos pt)) (* rad (Math/sin pt)) (* r (Math/sin qt)))))
 
-(def ^:private frame-dt (/ (* 2.0 Math/PI) 100000.0))
+(def ^:private tangent-eps (/ (* 2.0 Math/PI) 100000.0))
 
 (defn- torus-knot-frame
   "Position plus an orthonormal (normal, binormal) perpendicular to the
@@ -72,7 +72,7 @@
   and leave a visible twist at that seam."
   [p q R r t]
   (let [p0      (torus-knot-point p q R r t)
-        p1      (torus-knot-point p q R r (+ t frame-dt))
+        p1      (torus-knot-point p q R r (+ t tangent-eps))
         tangent (v/normalize (v/sub p1 p0))
         pt      (* (double p) t)
         ref     (v/vec3 (Math/cos pt) (Math/sin pt) 0.0)

@@ -302,7 +302,8 @@ jolt -M:knot     # or: bb knot
 
 A (2,3) trefoil torus knot, swept as a tube and rendered as a single
 rotating lit solid: 2400 quads generated from scratch by a pure function
-(`torus-knot-faces`) from a curve sample count and two tube radii, handed
+(`torus-knot-faces`) from three radii (major `R`, winding amplitude `r`,
+tube radius `tube-r`) and two counts (`samples`, `sides`), handed
 straight to `mesh/mesh`. Everything downstream of the generator, upload,
 shader, draw, is the exact single-mesh plumbing `plasma.clj` already
 established, wired directly to `:gl-area` rather than through
@@ -323,8 +324,7 @@ Like the other two, watched not trusted: no assertions, not part of
 
 ## Adding an example
 
-Four touchpoints, same as glitter's own convention; skip one and the
-example is invisible to something:
+Six touchpoints; skip one and the example is invisible to something:
 
 1. **The namespace**, under `examples/glitter_gl/`.
 2. **A `deps.edn` alias**, so `jolt -M:<name>` works without babashka:
@@ -338,7 +338,23 @@ example is invisible to something:
    gl-area-smoke {:doc "Live-GTK smoke: :gl-area construct/realize/render/resize"
                   :task (shell "jolt" "-M:gl-area-smoke")}
    ```
-4. **If it's a live-GTK example that asserts and exits non-zero on
+4. **A `bb.edn` `demos:examples` row**, so `bb record`'s gallery pipeline
+   knows the example exists:
+
+   ```clojure
+   {:id "orbit"
+    :group "orbit"
+    :desc "six distinct solids orbiting above a ground plane, lit and shadowed, mounted via reactive-area"
+    :src "examples/glitter_gl/orbit.clj"
+    :run "jolt -M:orbit"}
+   ```
+5. **A `scripts/demo_manifest.edn` group entry**, matching the row's
+   `:group` key, so the recorded GIF gets its own gallery heading:
+
+   ```clojure
+   {:key "orbit" :title "the orbit demo"}
+   ```
+6. **If it's a live-GTK example that asserts and exits non-zero on
    failure**, add it to `bb.edn`'s `smokes` task so `bb smokes` actually
    runs it:
 

@@ -40,6 +40,9 @@ composition layer.
 
 ```sh
 jolt -M:plasma         # rotating cube/sphere/tetra + composable plasma/stripes shader
+jolt -M:ripple         # full-screen fragment shader, no mesh at all
+jolt -M:orbit          # several solids orbiting a lit, shadowed ground plane
+jolt -M:knot           # a (2,3) torus knot, geometry generated from scratch
 jolt -M:check          # headless sanity check: shader compiles, geometry buffers valid
 jolt -M:test           # unit suite
 jolt -M:gl-area-smoke  # live-GTK smoke: :gl-area construct/realize/render/resize
@@ -54,6 +57,9 @@ exit-code caveat as glitter itself (see glitter's own README).
 bb info      # start here: grouped task list
 bb test      # jolt -M:test
 bb plasma    # interactive demo
+bb ripple    # interactive demo, no mesh
+bb orbit     # interactive demo, via app/reactive-area
+bb knot      # interactive demo, generated geometry
 bb check     # headless sanity check
 bb smokes    # live-GTK smoke, CI-safe
 bb hooks:install / :install:full / :uninstall  # git pre-commit hook: fast | +tests | remove
