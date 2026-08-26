@@ -252,10 +252,13 @@ half of the library involved at all.
 | [<img src="../demos/ripple.gif" width="300">](../demos/ripple.gif) | **`ripple`**: concentric rings drifting across a full-window quad, generated entirely by the fragment shader; there is no mesh visible because there is nothing to the geometry but the quad. |
 
 Like `plasma.clj`, this is watched, not trusted: it makes no assertions
-and is not part of `bb smokes` (`bb.edn`'s own comment on the `smokes`
-task explains why: none of the three new examples calls `System/exit` on
-failure, so a broken shader here would just print to stdout and the
-process would still exit 0).
+and is not part of `bb smokes`. `bb.edn`'s own comment on the `smokes`
+task explains why: what makes an example usable as a smoke is that it
+raises or exits non-zero when something is wrong, not that it calls
+`System/exit`. `ripple.clj` wraps program construction in `(try ...
+(catch Throwable _ nil))`, so a broken shader just prints and the
+process still exits 0; folding it into `smokes` would look like a gate
+that cannot fail.
 
 ## `orbit.clj`: the first live `reactive-area` demo
 

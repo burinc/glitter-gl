@@ -97,13 +97,19 @@
 
   ;; Considered adding ripple/orbit/knot here too: all three honour
   ;; GLITTER_GL_DEMO_QUIT_MS and exit cleanly under the same live-GTK
-  ;; arrangement gl-area-smoke uses. Not added: none of the three calls
-  ;; System/exit on failure (verified: grep "System/exit" across all
-  ;; three returns nothing) — a broken shader or a bad mesh just prints
-  ;; to stdout and the process still exits 0, so folding one in here
-  ;; would not actually gate anything. gl-area-smoke.clj and check.clj
-  ;; both assert and exit non-zero on failure; that is what makes them
-  ;; usable as a smoke, and none of the three new examples do.
+  ;; arrangement gl-area-smoke uses. Not added, and not because none of
+  ;; them calls System/exit: what makes an example usable as a smoke is
+  ;; that it raises or exits non-zero when something is wrong, not that
+  ;; it calls System/exit specifically. check.clj gates via a bare
+  ;; assert and no System/exit call at all; an uncaught assert failure
+  ;; still exits non-zero on its own. gl-area-smoke.clj gates via an
+  ;; explicit System/exit 1. ripple.clj and knot.clj wrap program
+  ;; construction in (try ... (catch Throwable _ nil)), so a broken
+  ;; shader or a bad mesh just prints and the process still exits 0.
+  ;; orbit.clj has no failure detection at all: no try/catch, no
+  ;; assert, no System/exit; it is an interactive GUI demo that runs
+  ;; until the window closes. Folding any of the three in here would
+  ;; look like a gate that cannot fail.
   smokes {:doc "Run every live-GTK smoke and headless check in sequence; stops at the first failure"
           :task (do (shell "jolt" "-M:gl-area-smoke")
                     (shell "jolt" "-M:check"))}
