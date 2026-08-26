@@ -37,6 +37,17 @@ pass.
   stripes module, and a lighting module merged into one shader. Drop a
   module from the merge, or add a fourth, and the composed shader changes
   shape with no edits to the others.
+- **A second worked example with no mesh at all**
+  (`examples/glitter_gl/ripple.clj`, `jolt -M:ripple` / `bb ripple`): a
+  single full-screen quad textured by a fragment shader composed from a
+  drifting-ripple module and a color module. Demonstrates that
+  `glitter-gl.shader`'s composition model is useful entirely on its own,
+  without the mesh half of the library.
+- **A parametric mesh example** (`examples/glitter_gl/knot.clj`,
+  `jolt -M:knot` / `bb knot`): a (2,3) trefoil torus knot swept as a
+  tube, 2400 quads generated from scratch and handed to `mesh/mesh`.
+  The first example to render geometry the library doesn't ship as a
+  built-in primitive.
 
 ### GTK integration
 
@@ -84,6 +95,13 @@ pass.
   action tuples. This is deliberate, since GL-plumbing state can change 60 times
   a second and has no business round-tripping through a full hiccup
   recompute on every frame.
+- **The first live `reactive-area` demo** (`examples/glitter_gl/orbit.clj`,
+  `jolt -M:orbit` / `bb orbit`): six distinct solids (cuboid, sphere,
+  tetrahedron, octahedron, icosahedron, dodecahedron) orbiting a lit,
+  shadowed ground plane, mounted through `reactive-area` and driven by
+  glitter's own shared state atom. Closes the gap
+  `docs/guide/limitations.md` previously recorded: `reactive-area` had
+  unit coverage but no example that mounted it end to end.
 
 ### Tooling
 

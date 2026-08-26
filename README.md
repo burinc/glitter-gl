@@ -136,10 +136,10 @@ one topic per page:
 - [`porting-and-attribution.md`](docs/guide/porting-and-attribution.md):
   the three sourcing buckets, the Standard Verbatim Port Procedure,
   and the lineage back through glimmer-gl to thi.ng/geom.
-- [`examples.md`](docs/guide/examples.md): what each of the four
+- [`examples.md`](docs/guide/examples.md): what each of the seven
   `examples/glitter_gl/` namespaces is for, and which two are actually
   wired into regression coverage. Includes a four-take gallery of the
-  `plasma` demo.
+  `plasma` demo, plus one take each of `ripple`, `orbit` and `knot`.
 - [`testing-and-tasks.md`](docs/guide/testing-and-tasks.md): the unit
   suite, the live-GTK smoke and headless check `bb smokes` runs, and the
   quality-tooling task surface (lint, format, `clj-kondo`'s FFI hook, the
@@ -176,11 +176,11 @@ The unit suite currently stands at 177 tests / 556 assertions (`bb test`),
 plus `bb smokes`' live-GTK smoke (`gl-area-smoke`, which drives a real
 `GtkGLArea` under the real reconciler rather than a fake renderer) and its
 headless check (`check`, which needs no GL context or display at all).
-Known gaps
-carried forward from the design spec: `glitter-gl.app`'s
-scene-graph/shadow-mapping renderer path (`reactive-area`) is ported and
-unit-tested but has no live demo exercising it end to end; the shipped
-`plasma` demo wires `:gl-area` directly instead, the same way glimmer-gl's
-own upstream demo does. See
+`glitter-gl.app`'s scene-graph/shadow-mapping renderer path
+(`reactive-area`) is ported, unit-tested, and, as of this arc, exercised
+live end to end by `examples/glitter_gl/orbit.clj`. The `plasma` demo
+still wires `:gl-area` directly, the same way glimmer-gl's own upstream
+demo does; `ripple` and `knot` do too, for reasons of their own (see
+`NOTICE.md`). See
 [`docs/guide/limitations.md`](docs/guide/limitations.md) for this and
 every other known v1 gap.
