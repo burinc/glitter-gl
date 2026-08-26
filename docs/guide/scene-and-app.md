@@ -172,6 +172,53 @@ atoms (`clock`, `viewport`, `gl-state`) directly, while its
 `[[:effect/assoc-in ...]]`/`[[:action/toggle-paused]]` tuples exactly
 like any other glitter view.
 
+## Ticking glitter's state atom costs a full view recompute, not just a frame
+
+Invariant #4 says `reactive-area`'s handlers read and write the shared
+`state` atom directly, and that's real: `:on-tick`'s own docstring
+contract is to "mutate state-driving cells here." What that contract
+doesn't spell out on its own is that *which* atom a caller chooses to
+tick from `:on-tick` has a cost, and the cost differs depending on the
+answer.
+
+`glitter.gtk/mount!`, the function every example's `-main` calls to
+start the reconciler, installs a watcher on whichever state atom it's
+handed:
+
+```clojure
+;; glitter/src/glitter/gtk.clj:409
+(add-watch state-atom ::render (fn [_ _ _ state] (app/on-gui (fn [] (render! state)))))
+```
+
+Any `swap!`/`reset!` on that specific atom fires this watcher, which
+re-runs `view` and reconciles the *whole* hiccup tree, whether or not
+anything outside the GL pane actually depends on what changed.
+`examples/glitter_gl/orbit.clj` advances orbit phase from `:on-tick` with
+`(swap! state update :t + frame-dt)` on exactly that atom: `orbit.clj`
+calls `(gtk/mount! window view state)` and passes the same `state` into
+`reactive-area`, deliberately, so that `scene-fn` is a genuine function
+of `state` rather than a closure over a private mutable, per this
+example's own brief. Every tick therefore drives a full `view` →
+reconcile pass, not just the GL render loop.
+
+`plasma.clj` and `ripple.clj` don't pay this cost, and not by accident:
+both advance a private `clock` atom from their own `:on-tick`, outside
+glitter's `state` entirely. `glitter.gtk/mount!` never watches `clock`,
+so nothing outside the render loop reruns when it changes.
+
+Neither choice is wrong. `orbit.clj` is the honest exercise of
+`reactive-area`, whose own docstring says it's "driven by glitter's
+shared top-level `state` atom" by design; a demo that routed around that
+to dodge the cost would prove nothing about the thing it exists to
+prove. But the cost is real and worth naming for anyone reaching for
+`reactive-area` in a busier reconciled tree than a single `:gl-area`
+pane: `orbit.clj`'s own build report saw no visible stutter in the
+recorded frames or the live run, but that's a single-widget view, not a
+claim the same approach scales once `view` has real work to do outside
+the GL pane. See
+[`limitations.md`](limitations.md#reactive-area-now-has-a-live-demo) for
+the rest of what `orbit.clj` did, and didn't, verify.
+
 ## The write-once handler contract (invariant #9)
 
 Every other glitter widget's `:apply` closure re-applies on every
@@ -240,17 +287,24 @@ defaults match the documented ones (`[3 2]` version, depth buffer on,
 also unit-tests `keyval->kw`'s GDK-keyval-to-movement-keyword mapping in
 isolation.
 
-What it does not have: a demo that mounts it and exercises it end to
-end against a live `:gl-area`. Grepping the whole tree for
-`reactive-area` outside its own definition and test file returns
-nothing; no example calls it. The shipped `plasma` demo
-(`examples/glitter_gl/plasma.clj`) wires `:gl-area` directly instead,
-matching its own upstream source: the demo's docstring describes
-itself as ported from `gl-demo.core`, with "the GL render-loop plumbing
-(on-realize/on-render/on-resize/on-tick) ... otherwise unchanged". The
-direct-wiring shape is how the original glimmer-gl demo already worked,
-not a shortcut taken during this port. `reactive-area` is consequently
-verified at the unit level (its prop map shape, its defaults) but not
-at the integration level (a real render loop actually driving a real
-`:gl-area` through it). See [`limitations.md`](limitations.md) for this
-project's other known gaps.
+What changed this arc: `examples/glitter_gl/orbit.clj` now mounts
+`reactive-area` against a real `:gl-area` and renders a frame through
+it: six solids orbiting a lit, shadowed ground plane, driven by
+glitter's own shared `state` atom. It's the only example built
+specifically to exercise `reactive-area`; every other example
+(`plasma.clj`, `ripple.clj`, `knot.clj`) wires `:gl-area` directly
+instead, matching `plasma.clj`'s own upstream source: its docstring
+describes itself as ported from `gl-demo.core`, with "the GL render-loop
+plumbing (on-realize/on-render/on-resize/on-tick) ... otherwise
+unchanged". `orbit.clj` mounted and rendered correctly on the first
+version that actually ran: no crash, no black window, no stalled scene.
+`reactive-area` is consequently verified at the unit level (its prop map
+shape, its defaults) AND, for the one scene shape `orbit.clj` builds, at
+the integration level: a real render loop actually driving a real
+`:gl-area` through it. It doesn't exercise every opt `reactive-area`
+accepts (`:fog`, `:shadow-bias`, `:depth-spec`/`:lit-spec`,
+`:on-motion`, `:on-key`, `:on-button`), and it pays a real cost for
+ticking glitter's watched `state` atom that a busier reconciled tree
+would need to weigh (see "Ticking glitter's state atom..." above). See
+[`limitations.md`](limitations.md#reactive-area-now-has-a-live-demo) for
+this project's other known gaps.
