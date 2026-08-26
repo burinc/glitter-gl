@@ -177,13 +177,15 @@ is otherwise unchanged". Direct wiring is how the upstream glimmer-gl demo
 already worked, and the port kept that shape rather than routing it through
 the newer `reactive-area` layer built later in this project's history.
 
-The honest cost of that choice: `reactive-area` has direct unit coverage
-(`app_test.clj` checks its returned prop map's shape and defaults) but no
-example that mounts it end to end against a real `:gl-area` and actually
-renders through it. See [`scene-and-app.md`](scene-and-app.md)'s "What `reactive-area`
-actually is" section for the full "honest status" note, and
-[`limitations.md`](limitations.md) for this and the project's other known
-gaps.
+The honest cost of that choice: until this arc, `reactive-area` had direct
+unit coverage (`app_test.clj` checks its returned prop map's shape and
+defaults) but no example that mounted it end to end against a real
+`:gl-area` and actually rendered through it. See
+[`orbit.clj`](#orbitclj-the-first-live-reactive-area-demo) below for the
+example that closes that gap, [`scene-and-app.md`](scene-and-app.md)'s
+"What `reactive-area` actually is" section for the full "honest status"
+note, and [`limitations.md`](limitations.md) for this and the project's
+other known gaps.
 
 ### The two things it demonstrates about the state split
 

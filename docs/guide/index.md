@@ -59,9 +59,10 @@ each call, exactly like any other glitter view function.
   actually is: of 25 files under `src/glitter_gl/`, only `gtk.clj` has a
   literal `:require` on `glitter.*`, and `scene.clj` has none at all.
   Traces, against the real source, why a `:gl-area` keeps redrawing
-  (`queue-render` has exactly one call site in the whole project, buried
-  inside `reactive-area`'s always-installed tick callback, and a bare
-  state `swap!` alone never triggers a repaint), plus why `:gl-area`
+  (`queue-render` has exactly one call site in the whole project:
+  `gtk.clj`'s `gl-area-apply!` tick wrapper, which `reactive-area` always
+  causes to be installed, and a bare state `swap!` alone never triggers a
+  repaint), plus why `:gl-area`
   bypasses glitter's uniform signal table entirely and where GL-plumbing
   state deliberately breaks glitter's one-atom/action-dispatch
   discipline.
@@ -106,8 +107,9 @@ each call, exactly like any other glitter view function.
   (`plasma.clj`'s once-broken `shape-button` calls). Explains why `plan`
   is a plain function with no reactive-cell tracking, the write-once
   handler contract `gtk.clj`'s `wired` atom enforces, and gives
-  `reactive-area` an honest status note: unit-tested, but never
-  exercised end to end against a live `:gl-area`.
+  `reactive-area` an honest status note: unit-tested, and now exercised
+  live end to end by `examples/glitter_gl/orbit.clj`, plus the per-tick
+  full-view-recompute cost that demo pays.
 
 ### Verify
 
@@ -122,12 +124,11 @@ each call, exactly like any other glitter view function.
   quality-tooling surface (`bb lint`, `bb lsp:*`, the FFI-aware
   clj-kondo hook, `bb verify` vs. the stricter git pre-commit hook).
 - [`limitations.md`](limitations.md): every known v1 gap, each with the
-  reason it was left rather than fixed: `reactive-area`'s missing
-  live-render demo, `"render"`'s 2-arg `foreign-callable` declaration
-  against GTK4's real 3-argument signal (harmless, traced through the
-  calling convention, not just asserted), the dev-time hiccup warning
-  that has no application-level silencer, and why `:scale` is
-  deliberately not registered here.
+  reason it was left rather than fixed: `"render"`'s 2-arg
+  `foreign-callable` declaration against GTK4's real 3-argument signal
+  (harmless, traced through the calling convention, not just asserted),
+  the dev-time hiccup warning that has no application-level silencer,
+  and why `:scale` is deliberately not registered here.
 
 ## See also
 
