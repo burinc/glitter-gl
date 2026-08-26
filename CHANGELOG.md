@@ -91,10 +91,15 @@ pass.
   render: no reaction, no deref-tracking, no cache.
 - **`reactive-area`** builds a ready-made `:gl-area` prop map from a scene
   function and glitter's shared state atom. Its own tick/motion/key/button
-  handlers read and write that state atom directly rather than dispatching
-  action tuples. This is deliberate, since GL-plumbing state can change 60 times
-  a second and has no business round-tripping through a full hiccup
-  recompute on every frame.
+  handlers read and write that state atom directly rather than
+  dispatching action tuples, which is deliberate: GL-plumbing state can
+  change 60 times a second and has no business paying the
+  action-tuple/dispatch indirection on every frame. That does not mean
+  every `reactive-area` demo escapes a full view recompute, though:
+  ticking glitter's *shared* state atom, which `orbit.clj` does below,
+  still fires one, because glitter's render watch triggers on any change
+  to that atom regardless of how it was written. See
+  `docs/guide/scene-and-app.md` for the full trade-off.
 - **The first live `reactive-area` demo** (`examples/glitter_gl/orbit.clj`,
   `jolt -M:orbit` / `bb orbit`): six distinct solids (cuboid, sphere,
   tetrahedron, octahedron, icosahedron, dodecahedron) orbiting a lit,
