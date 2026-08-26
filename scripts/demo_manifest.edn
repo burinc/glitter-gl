@@ -1,7 +1,8 @@
-;; screen-grab manifest for glitter-gl's plasma demo — four takes of one demo.
+;; screen-grab manifest for glitter-gl's example gallery — four takes of the
+;; plasma demo, plus one take each of three further distinct programs.
 ;; https://github.com/burinc/b12n-screen-grab
 ;;
-;; Driver is :spawn — each take is launched fresh via `jolt -M:plasma`, captured,
+;; Driver is :spawn — each take is launched fresh via `jolt -M:<alias>`, captured,
 ;; and torn down. Steering is KEYBOARD ONLY: screen-grab's own README is
 ;; explicit that :click/:move/:drag move the cursor but their press is never
 ;; processed by the target app, so a GTK button cannot be clicked this way.
@@ -18,9 +19,19 @@
  :ledger  "docs/demos/ledger.edn"
  :readme  "docs/demos/README.md"
  :title   "Demos"
- :preamble "Animated previews of glitter-gl's plasma demo. Regenerate with `bb record` (maintainer-only: it needs an internal capture tool that is not publicly released). The GIFs here are committed, so you do not need it to browse them."
+ :preamble "Animated previews of glitter-gl's example gallery: the plasma demo (four takes) plus ripple, orbit and knot. Regenerate with `bb record` (maintainer-only: it needs an internal capture tool that is not publicly released). The GIFs here are committed, so you do not need it to browse them."
 
- :groups [{:key "plasma" :title "the plasma demo"}]
+ ;; One group per program, not one group for all three new examples: the
+ ;; four "plasma" items are four takes of the SAME program (shape/shading
+ ;; variants), which is what makes sharing one group heading correct for
+ ;; them. ripple/orbit/knot are three unrelated programs that each happen
+ ;; to get exactly one take, so each keeps its own single-item group
+ ;; rather than being lumped under a "new examples" heading that would
+ ;; misrepresent them as variations of one thing the way plasma's four are.
+ :groups [{:key "plasma" :title "the plasma demo"}
+          {:key "ripple" :title "the ripple demo"}
+          {:key "orbit"  :title "the orbit demo"}
+          {:key "knot"   :title "the knot demo"}]
 
  ;; warmup is higher than glitter's 12 — a GtkGLArea has to realize and start
  ;; its own frame clock before there is anything on screen to capture; 20 was

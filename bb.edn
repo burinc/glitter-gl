@@ -66,7 +66,7 @@
           (row "hooks:uninstall" "remove the git pre-commit hook")
           (hdr "Demos")
           (row "record" "batch-record a demo GIF for every take (needs internal screen-grab CLI)")
-          (row "demos:examples" "print the four take ids as EDN (used by bb record)")
+          (row "demos:examples" "print the seven take ids as EDN (used by bb record)")
           (row "demos:crop" "crop docs/demos/plasma-*.gif to the GL pane -> docs/demos/pane/")
           (hdr "Dev")
           (row "nrepl [port]" "start a jolt nREPL server (default 7888)")
@@ -95,6 +95,15 @@
   gl-area-smoke {:doc "Live-GTK smoke: :gl-area construct/realize/render/resize"
                  :task (shell "jolt" "-M:gl-area-smoke")}
 
+  ;; Considered adding ripple/orbit/knot here too: all three honour
+  ;; GLITTER_GL_DEMO_QUIT_MS and exit cleanly under the same live-GTK
+  ;; arrangement gl-area-smoke uses. Not added: none of the three calls
+  ;; System/exit on failure (verified: grep "System/exit" across all
+  ;; three returns nothing) — a broken shader or a bad mesh just prints
+  ;; to stdout and the process still exits 0, so folding one in here
+  ;; would not actually gate anything. gl-area-smoke.clj and check.clj
+  ;; both assert and exit non-zero on failure; that is what makes them
+  ;; usable as a smoke, and none of the three new examples do.
   smokes {:doc "Run every live-GTK smoke and headless check in sequence; stops at the first failure"
           :task (do (shell "jolt" "-M:gl-area-smoke")
                     (shell "jolt" "-M:check"))}
@@ -195,17 +204,37 @@
    ;; touched (burinc/b12n-screen-grab#5). `env` is spelled out because
    ;; screen-grab spawns via p/process, which tokenizes without a shell —
    ;; a bare VAR=x prefix would be exec'd as a binary name.
-   (prn (vec (for [row [["plasma-cube"   "the default cube, rotating under the composable plasma/stripes shader" ""]
-                        ["plasma-sphere" "the same shader on a sphere"                                           "GLITTER_GL_DEMO_SHAPE=sphere"]
-                        ["plasma-tetra"  "the same shader on a tetrahedron"                                      "GLITTER_GL_DEMO_SHAPE=tetra"]
-                        ["plasma-smooth" "smooth shading, against the flat shading of the takes above"           "GLITTER_GL_DEMO_SMOOTH=1"]]]
-               {:id (nth row 0)
-                :group "plasma"
-                :desc (nth row 1)
-                :src "examples/glitter_gl/plasma.clj"
-                :run (if (= "" (nth row 2))
-                       "jolt -M:plasma"
-                       (str "env " (nth row 2) " jolt -M:plasma"))})))}
+   ;;
+   ;; ripple/orbit/knot self-animate via :on-tick and take no env-var
+   ;; variant, unlike plasma's four takes of one program — each gets its
+   ;; own single-item group rather than joining "plasma" or each other.
+   (prn (vec (concat
+              (for [row [["plasma-cube"   "the default cube, rotating under the composable plasma/stripes shader" ""]
+                         ["plasma-sphere" "the same shader on a sphere"                                           "GLITTER_GL_DEMO_SHAPE=sphere"]
+                         ["plasma-tetra"  "the same shader on a tetrahedron"                                      "GLITTER_GL_DEMO_SHAPE=tetra"]
+                         ["plasma-smooth" "smooth shading, against the flat shading of the takes above"           "GLITTER_GL_DEMO_SMOOTH=1"]]]
+                {:id (nth row 0)
+                 :group "plasma"
+                 :desc (nth row 1)
+                 :src "examples/glitter_gl/plasma.clj"
+                 :run (if (= "" (nth row 2))
+                        "jolt -M:plasma"
+                        (str "env " (nth row 2) " jolt -M:plasma"))})
+              [{:id "ripple"
+                :group "ripple"
+                :desc "a full-screen fragment shader, no mesh, no lighting, no camera"
+                :src "examples/glitter_gl/ripple.clj"
+                :run "jolt -M:ripple"}
+               {:id "orbit"
+                :group "orbit"
+                :desc "six distinct solids orbiting above a ground plane, lit and shadowed, mounted via reactive-area"
+                :src "examples/glitter_gl/orbit.clj"
+                :run "jolt -M:orbit"}
+               {:id "knot"
+                :group "knot"
+                :desc "a (2,3) trefoil torus knot generated from scratch, 2400 quads"
+                :src "examples/glitter_gl/knot.clj"
+                :run "jolt -M:knot"}])))}
 
   record
   {:doc "Batch-record a demo GIF for every take: bb record [--only a,b] [--force] [--dry-run]"
