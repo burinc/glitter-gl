@@ -1,13 +1,14 @@
 # The examples
 
-Everything runnable lives under `examples/glitter_gl/`: four namespaces,
-three of them with their own `jolt -M:<alias>`/`bb <name>` entry point, one
-(`plasma_shader.clj`) that exists only to be required by the other two. They
+Everything runnable lives under `examples/glitter_gl/`: seven namespaces,
+six of them with their own `jolt -M:<alias>`/`bb <name>` entry point, one
+(`plasma_shader.clj`) that exists only to be required by `plasma.clj`. They
 split cleanly along one axis: two exist to **fail when a regression lands**
 (`check.clj`, `gl_area_smoke.clj`), one exists to be **composed and read**
-(`plasma_shader.clj`), and one exists to be **watched** (`plasma.clj`). Only
+(`plasma_shader.clj`), and four exist to be **watched**
+(`plasma.clj`, `ripple.clj`, `orbit.clj`, `knot.clj`). Only
 the first two are part of the project's actual regression coverage; say so
-plainly rather than letting a reader assume the demo is tested because it
+plainly rather than letting a reader assume a demo is tested because it
 runs.
 
 ## `check.clj`: headless, and the one that pins the widest surface
@@ -225,6 +226,95 @@ otherwise have to reconstruct from first principles: *which category does
 my new piece of state belong to?* If it changes on every frame and nothing
 in the UI needs to react to a click causing it, it's a plain atom. If a
 person clicks or drags something, it's an action.
+
+## `ripple.clj`: the shader DSL with no geometry to speak of
+
+```sh
+jolt -M:ripple     # or: bb ripple
+```
+
+A single `primitives/quad` scaled to fill clip space directly, no MVP, no
+camera, no lighting, no material system, textured by a fragment shader
+composed through `glitter-gl.shader/merge-specs` from two small modules:
+a drifting concentric-ripple field, and a wave-to-color mapping with a
+soft corner vignette. `on-tick` advances a time uniform; `on-render`
+draws.
+
+The claim this one makes is about the library's two independent halves.
+`plasma.clj` already shows a lit solid whose surface comes from a
+composable shader, so a second lit-solid-plus-shader demo would say
+nothing new. `ripple.clj` has no geometry to speak of, and demonstrates
+that the shader-spec DSL is useful entirely on its own, with no mesh
+half of the library involved at all.
+
+| preview | what it shows |
+|---|---|
+| [<img src="../demos/ripple.gif" width="300">](../demos/ripple.gif) | **`ripple`**: concentric rings drifting across a full-window quad, generated entirely by the fragment shader; there is no mesh visible because there is nothing to the geometry but the quad. |
+
+Like `plasma.clj`, this is watched, not trusted: it makes no assertions
+and is not part of `bb smokes` (`bb.edn`'s own comment on the `smokes`
+task explains why: none of the three new examples calls `System/exit` on
+failure, so a broken shader here would just print to stdout and the
+process would still exit 0).
+
+## `orbit.clj`: the first live `reactive-area` demo
+
+```sh
+jolt -M:orbit     # or: bb orbit
+```
+
+Six distinct solids drawn from the library's own shapes
+(`primitives/cuboid`, `primitives/sphere`, `primitives/tetrahedron`, and
+`polyhedra`'s octahedron/icosahedron/dodecahedron) orbit above a lit,
+shadowed ground plane, each at its own radius, phase, and speed. Unlike
+every other example, it's mounted through `glitter-gl.app/reactive-area`
+rather than direct `:gl-area` wiring, and its orbit phase lives in
+glitter's own shared `state` atom rather than a private clock atom, so
+that `scene-fn` is a genuine function of state.
+
+That choice is the whole point of the example, not incidental:
+`reactive-area` had direct unit coverage but had never before been
+mounted against a real `:gl-area`. `orbit.clj` closes that gap; see
+[`limitations.md`](limitations.md#reactive-area-now-has-a-live-demo) for
+the before-and-after, and
+[`scene-and-app.md`](scene-and-app.md#ticking-glitters-state-atom-costs-a-full-view-recompute-not-just-a-frame)
+for the real cost this example pays, by design, for driving glitter's
+watched state atom on every tick, which `plasma.clj` and `ripple.clj`
+avoid.
+
+| preview | what it shows |
+|---|---|
+| [<img src="../demos/orbit.gif" width="300">](../demos/orbit.gif) | **`orbit`**: six differently-shaped, differently-colored solids circling a shadowed ground plane at independent speeds, most also spinning on their own axis. |
+
+Like `plasma.clj` and `ripple.clj`, watched not trusted: no assertions,
+not part of `bb smokes`, for the same reason.
+
+## `knot.clj`: geometry the library does not ship
+
+```sh
+jolt -M:knot     # or: bb knot
+```
+
+A (2,3) trefoil torus knot, swept as a tube and rendered as a single
+rotating lit solid: 2400 quads generated from scratch by a pure function
+(`torus-knot-faces`) from a curve sample count and two tube radii, handed
+straight to `mesh/mesh`. Everything downstream of the generator, upload,
+shader, draw, is the exact single-mesh plumbing `plasma.clj` already
+established, wired directly to `:gl-area` rather than through
+`reactive-area` (one mesh, no scene composition, nothing for
+`reactive-area` to coordinate).
+
+The point is what `primitives.clj` and `polyhedra.clj` are not: a
+starting set, not the boundary of what `mesh/mesh` can build. No other
+example generates its own geometry; every other one draws a shape the
+library already ships as a constructor.
+
+| preview | what it shows |
+|---|---|
+| [<img src="../demos/knot.gif" width="300">](../demos/knot.gif) | **`knot`**: a rotating, smooth-shaded trefoil torus knot, its tube visibly self-crossing the way a genuine (2,3) knot does rather than closing into a plain ring. |
+
+Like the other two, watched not trusted: no assertions, not part of
+`bb smokes`.
 
 ## Adding an example
 
