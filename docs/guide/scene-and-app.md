@@ -181,9 +181,10 @@ doesn't spell out on its own is that *which* atom a caller chooses to
 tick from `:on-tick` has a cost, and the cost differs depending on the
 answer.
 
-`glitter.gtk/mount!`, the function every example's `-main` calls to
-start the reconciler, installs a watcher on whichever state atom it's
-handed:
+`glitter.gtk/mount!`, the function 5 of the 7 examples' `-main` calls to
+start the reconciler (`check.clj` is headless and never mounts, and
+`plasma_shader.clj` has no `-main` at all), installs a watcher on
+whichever state atom it's handed:
 
 ```clojure
 ;; glitter/src/glitter/gtk.clj:409
@@ -197,14 +198,15 @@ anything outside the GL pane actually depends on what changed.
 `(swap! state update :t + frame-dt)` on exactly that atom: `orbit.clj`
 calls `(gtk/mount! window view state)` and passes the same `state` into
 `reactive-area`, deliberately, so that `scene-fn` is a genuine function
-of `state` rather than a closure over a private mutable, per this
-example's own brief. Every tick therefore drives a full `view` →
+of `state` rather than a closure over a private mutable, a deliberate
+choice for this example. Every tick therefore drives a full `view` →
 reconcile pass, not just the GL render loop.
 
-`plasma.clj` and `ripple.clj` don't pay this cost, and not by accident:
-both advance a private `clock` atom from their own `:on-tick`, outside
-glitter's `state` entirely. `glitter.gtk/mount!` never watches `clock`,
-so nothing outside the render loop reruns when it changes.
+`plasma.clj`, `ripple.clj` and `knot.clj` don't pay this cost, and not
+by accident: all three advance a private `clock` atom from their own
+`:on-tick`, outside glitter's `state` entirely. `glitter.gtk/mount!`
+never watches `clock`, so nothing outside the render loop reruns when
+it changes.
 
 Neither choice is wrong. `orbit.clj` is the honest exercise of
 `reactive-area`, whose own docstring says it's "driven by glitter's
@@ -212,10 +214,9 @@ shared top-level `state` atom" by design; a demo that routed around that
 to dodge the cost would prove nothing about the thing it exists to
 prove. But the cost is real and worth naming for anyone reaching for
 `reactive-area` in a busier reconciled tree than a single `:gl-area`
-pane: `orbit.clj`'s own build report saw no visible stutter in the
-recorded frames or the live run, but that's a single-widget view, not a
-claim the same approach scales once `view` has real work to do outside
-the GL pane. See
+pane: the recorded frames and the live run showed no visible stutter,
+but that's a single-widget view, not a claim the same approach scales
+once `view` has real work to do outside the GL pane. See
 [`limitations.md`](limitations.md#reactive-area-now-has-a-live-demo) for
 the rest of what `orbit.clj` did, and didn't, verify.
 

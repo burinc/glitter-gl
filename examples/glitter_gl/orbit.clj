@@ -24,9 +24,9 @@
   per event.
 
   Orbit state (:t, advanced by :on-tick) lives in glitter's own shared
-  `state` atom rather than a private plain atom, per this example's brief:
-  scene-fn must be a genuine function of `state`, not of a closed-over
-  mutable, the way plasma.clj's/ripple.clj's GL-plumbing atoms are. That
+  `state` atom rather than a private plain atom, by design: scene-fn
+  must be a genuine function of `state`, not of a closed-over mutable,
+  the way plasma.clj's/ripple.clj's GL-plumbing atoms are. That
   means every tick's `swap!` also fires glitter.gtk/mount!'s state-atom
   watcher and re-runs the whole `view` -> reconcile path, not just the GL
   render loop, unlike plasma/ripple, which advance a private `clock` atom
