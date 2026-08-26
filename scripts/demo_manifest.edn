@@ -44,4 +44,11 @@
  ;; wrong widget and still produces a plausible-looking GIF. The next task
  ;; fills this in after Tabbing through the real running app and recording
  ;; the observed focus order.
- :overrides {}}
+ ;; ripple and knot are full-window animation with no static chrome: every
+ ;; pixel changes every frame, which is close to worst case for GIF's
+ ;; inter-frame compression. At the shared defaults ripple came out at 4.6 MB
+ ;; and knot at 1.3 MB, against roughly 200 KB for a cropped plasma take.
+ ;; Fewer frames and a smaller frame are the levers that preserve the
+ ;; gradients; reducing the palette is not, since it visibly bands them.
+ :overrides {"ripple" {:fps 6 :duration 5 :width 440}
+             "knot"   {:fps 8 :duration 6 :width 480}}}

@@ -1,6 +1,6 @@
 # Demos
 
-Animated previews of glitter-gl's plasma demo. Regenerate with `bb record` (maintainer-only: it needs an internal capture tool that is not publicly released). The GIFs here are committed, so you do not need it to browse them.
+Animated previews of glitter-gl's example gallery: the plasma demo (four takes) plus ripple, orbit and knot. Regenerate with `bb record` (maintainer-only: it needs an internal capture tool that is not publicly released). The GIFs here are committed, so you do not need it to browse them.
 
 ## the plasma demo
 
@@ -27,4 +27,28 @@ the same shader on a tetrahedron
 smooth shading, against the flat shading of the takes above
 
 ![plasma-smooth](plasma-smooth.gif)
+
+## the ripple demo
+
+### ripple
+
+a full-screen fragment shader, no mesh, no lighting, no camera
+
+![ripple](ripple.gif)
+
+## the orbit demo
+
+### orbit
+
+six distinct solids orbiting above a ground plane, lit and shadowed, mounted via reactive-area
+
+![orbit](orbit.gif)
+
+## the knot demo
+
+### knot
+
+a (2,3) trefoil torus knot generated from scratch, 2400 quads
+
+![knot](knot.gif)
 
