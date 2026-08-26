@@ -5,40 +5,51 @@ you're tempted to "just fix" one of these opportunistically, read the
 rationale first: each has a reason the fix (or the workaround) was left
 for a later round, not a reason it's impossible.
 
-## `reactive-area` has no live demo
+## `reactive-area` now has a live demo
 
 `glitter-gl.app/reactive-area` is real, adapted code with direct unit
 coverage: `app_test.clj` asserts it returns a `:gl-area` prop map with
 all four standard handler keys present as functions, that its defaults
 match the documented ones (`[3 2]` version, depth buffer on,
-`hexpand`/`vexpand` true), and that explicit `opts` override them. What
-it does not have is a demo that mounts it and drives a real render loop
-through it end to end. Grepping the whole tree for `reactive-area`
-outside its own definition and test file returns nothing; the shipped
-`plasma` demo (`examples/glitter_gl/plasma.clj`) wires `:gl-area`
-directly instead, matching its own upstream source: the demo's docstring
-describes itself as ported from `gl-demo.core`, with "the GL render-loop
-plumbing (on-realize/on-render/on-resize/on-tick) ... otherwise
-unchanged". Direct wiring is how the original glimmer-gl demo already
-worked, not a shortcut taken during this port.
+`hexpand`/`vexpand` true), and that explicit `opts` override them. Until
+this arc, that was all the coverage it had: grepping the tree for
+`reactive-area` outside its own definition and test file returned
+nothing, and the shipped `plasma` demo (`examples/glitter_gl/plasma.clj`)
+wired `:gl-area` directly instead, matching its own upstream source (the
+demo's docstring describes itself as ported from `gl-demo.core`, with
+"the GL render-loop plumbing ... otherwise unchanged").
 
-**What a reader should treat with extra care:** `reactive-area` is
-verified at the unit level (its prop-map shape, its defaults) but not
-at the integration level. No example in this project actually mounts it
-against a live `GtkGLArea` and renders a frame through it. If you adopt
-it for a real app, your app is the first thing that ever exercises the
-wiring between its returned prop map and a real render loop; treat that
-first integration as genuinely new ground, not as something this
-codebase has already proven under fire.
+`examples/glitter_gl/orbit.clj` closes that gap: six solids
+(`primitives/cuboid`/`sphere`/`tetrahedron` plus `polyhedra`'s
+octahedron/icosahedron/dodecahedron) orbiting a lit, shadowed ground
+plane, mounted through `reactive-area` and driven by glitter's own
+shared `state` atom, the first thing in this project that mounts
+`reactive-area` against a real `:gl-area` and renders a frame through
+it. Recorded and committed; see
+[`examples.md`](examples.md#orbitclj-the-first-live-reactive-area-demo)
+for the gallery entry.
 
-**Why left as-is:** a second demo whose only purpose is exercising
-`reactive-area` end to end wasn't judged worth the maintenance cost of a
-largely-redundant example for v1: the `plasma` demo already exercises
-the same render loop, the same `:gl-area` prop shape, and the same
-state-atom-direct-write pattern `reactive-area`'s handlers follow, just
-wired by hand instead of through `reactive-area` itself. See
-[`scene-and-app.md`](scene-and-app.md)'s "What `reactive-area` actually
-is" section for the full status note.
+**What `orbit.clj` found, stated plainly: no defect.** `reactive-area`
+mounted and rendered correctly on the first version that actually ran:
+no crash, no black window, no stalled scene, multiple distinct solids
+visible and lit, shadows tracking each solid's position across frames.
+That's a real result, not a non-result: an integration path that had
+never been exercised end to end turned out to work as designed the
+first time it was tried live. See
+[`scene-and-app.md`](scene-and-app.md#ticking-glitters-state-atom-costs-a-full-view-recompute-not-just-a-frame)
+for the one real cost this example did surface: driving glitter's
+watched `state` atom from `:on-tick` recomputes the whole view every
+frame, not just the GL render loop, worth knowing before reaching for
+`reactive-area` in a busier reconciled tree than a single `:gl-area`
+pane.
+
+**What this does not close:** `orbit.clj` is one scene, exercising one
+shape of `reactive-area` usage (built from the library's own primitives
+and polyhedra, one light, `:materials` fully overriding the renderer's
+default palette). It doesn't exercise `:fog`, `:shadow-bias`,
+`:depth-spec`/`:lit-spec`, `:on-motion`, `:on-key`, or `:on-button`, all
+of which `reactive-area` accepts and none of which any example drives.
+Treat those as still resting on unit coverage alone.
 
 ## `"render"`'s `foreign-callable` declares two arguments; GTK4 passes three
 
