@@ -5,6 +5,7 @@
 ;;   bb plasma               interactive demo: rotating primitive + plasma/stripes shader
 ;;   bb ripple                interactive demo: full-screen fragment shader, no mesh at all
 ;;   bb orbit                interactive demo: several solids orbiting, via app/reactive-area
+;;   bb knot                   interactive demo: a (p,q) torus knot, generated geometry
 ;;   bb check                 headless sanity check: shader compiles, geometry buffers valid
 ;;   bb gl-area-smoke          live-GTK smoke: :gl-area construct/realize/render/resize
 ;;   bb smokes                  gl-area-smoke + check (CI-safe entry point, mirrors glitter's bb smokes)
@@ -42,6 +43,7 @@
           (row "plasma" "interactive demo: rotating primitive + plasma/stripes shader")
           (row "ripple" "interactive demo: full-screen fragment shader, no mesh at all")
           (row "orbit" "interactive demo: several solids orbiting, via app/reactive-area")
+          (row "knot" "interactive demo: a (p,q) torus knot, generated geometry")
           (row "check" "headless sanity check: shader compiles, geometry buffers valid")
           (hdr "Smoke (live GTK, exits non-zero on failure)")
           (row "gl-area-smoke" ":gl-area construct/realize/render/resize against real GTK")
@@ -83,6 +85,9 @@
 
   orbit {:doc "Interactive demo: several solids orbiting, via app/reactive-area"
          :task (shell "jolt" "-M:orbit")}
+
+  knot {:doc "Interactive demo: a (p,q) torus knot, generated geometry"
+        :task (shell "jolt" "-M:knot")}
 
   check {:doc "Headless sanity check: shader compiles, geometry buffers valid"
          :task (shell "jolt" "-M:check")}
