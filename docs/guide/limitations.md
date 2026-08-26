@@ -51,6 +51,24 @@ default palette). It doesn't exercise `:fog`, `:shadow-bias`,
 of which `reactive-area` accepts and none of which any example drives.
 Treat those as still resting on unit coverage alone.
 
+**One item here is not merely untested, it is wrong.** Verified against
+source: `app.clj:186` always writes `:materials (:materials opts)` into
+the render context, so the key is always present, with value `nil` when
+a caller omits it. `renderer.clj:190` reads it back as `(get ctx
+:materials material-colors)`; `get`'s default fires only on an ABSENT
+key, so it never fires here, and `materials` stays `nil`.
+`renderer.clj:238`'s per-mesh lookup, `(get materials material [0.5 0.5
+0.5])`, then falls through for every mesh, rendering everything
+mid-grey instead of the renderer's palette. Every sibling opt (`:bg`,
+`:ambient`, `:shadow-bias`, `:fog`, at `app.clj:166-170`) uses `or` and
+does fall back correctly, and `app.clj:108`'s own docstring promises
+`:materials` "defaults to the renderer's": this is an oversight, not
+intent. `orbit.clj` supplies `:materials` explicitly, which is exactly
+why this arc did not surface it. This is a defect in the ported
+renderer path, not a deliberate limitation like the rest of this page;
+left rather than fixed because `src/` is frozen verbatim-ported code
+and a behavior change needs its own arc with a test.
+
 ## `"render"`'s `foreign-callable` declares two arguments; GTK4 passes three
 
 Verified directly against the source, not restated from a plan. From
