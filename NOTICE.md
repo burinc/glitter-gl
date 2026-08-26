@@ -91,3 +91,38 @@ itself was ported, and a namespace that fails to require contributes zero
 tests rather than a build failure, which is easy to mistake for "nothing
 to test" rather than "broken." Closed once the last of those four
 dependencies landed; `glmesh-test` now requires and passes cleanly.
+
+## Three further examples: reimplementations, not ports (2026-08-26 arc)
+
+`examples/glitter_gl/ripple.clj`, `orbit.clj`, and `knot.clj` are a
+different kind of source entry than anything above, and are recorded
+here separately so the distinction doesn't blur into the porting ledger.
+The 22 files above are namespace-rename ports: the Standard Verbatim
+Port Procedure makes "only the namespace changed" a checkable claim
+about a specific commit. These three are not that. Two of them start
+from a named [thi.ng/geom](https://thi.ng/geom) example, but only the
+*idea* and the geometry setup transfer; the windowing, event loop, and
+every GL call are original to this project, written against
+`glitter-gl.gtk`'s `:gl-area` and `glitter-gl.gl` rather than JOGL or
+WebGL. Calling that a port, verbatim or adapted, would misrepresent what
+actually crossed over and understate what didn't.
+
+- **`ripple.clj`**: idea from `~/dev/geom/examples/jogl/fullscreen_shader.clj`
+  (a full-screen fragment shader over a single quad, no mesh, no
+  lighting, no camera). The JOGL windowing and GL setup do not transfer;
+  only the "one quad, all the interest in the fragment shader" shape
+  does. The shader itself, composed through `glitter-gl.shader/merge-specs`
+  from a ripple module and a color module, is original to this file.
+- **`knot.clj`**: idea from `~/dev/geom/examples/gl/torus_knot.cljs`
+  (thi.ng/geom's `cinquefoil` curve swept into a tube via
+  `ptf/sweep-mesh`, a parallel-transport-frame construction). The
+  ClojureScript/WebGL plumbing and the parallel-transport-frame
+  machinery do not transfer; only the parametric idea, a torus knot
+  swept as a tube, does. `torus-knot-faces`' own frame construction is
+  original to this file, built differently from `sweep-mesh`'s (see the
+  file's own docstring for the difference).
+- **`orbit.clj`**: no direct geom-example model. It's original to this
+  project: a scene built entirely from `primitives`/`polyhedra`
+  constructors this library already ships, mounted through
+  `glitter-gl.app/reactive-area` specifically to exercise that path live
+  for the first time (see `docs/guide/limitations.md`).
