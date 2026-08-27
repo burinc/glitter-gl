@@ -29,12 +29,38 @@ need to compile shaders and fill buffers/VAOs/uniforms, and
 `glitter-gl.mesh` / `glitter-gl.primitives` are the thi.ng/geom-style
 composition layer.
 
+[<img src="docs/demos/orbit.gif" width="480">](docs/guide/examples.md)
+
+*`orbit`: six solids over a lit, shadowed ground plane, driven through
+`glitter-gl.app/reactive-area`. Six more takes, and what each one
+demonstrates, in the [examples gallery](docs/guide/examples.md).*
+
 **Docs site:** [glitter-gl.b12n.app](https://glitter-gl.b12n.app)
 
-> The site is built but not yet published as of this arc: no DNS, no
+> The site is built but not yet published: no DNS, no
 > bucket, no GitHub Pages. The URL will not resolve until the go-public
 > sequence runs; until then, browse the same content directly in
 > [`docs/guide/`](docs/guide/index.md).
+
+## Requirements
+
+- **[Jolt](https://github.com/jolt-lang/jolt)**: Clojure on Chez Scheme.
+  This project is not JVM Clojure and there is no `clojure`/`lein` path.
+- **GTK4**: glitter renders through it, and `:gl-area` is a `GtkGLArea`.
+- **A working OpenGL context.** macOS ships OpenGL as a framework; on Linux
+  it is the `libGL` shared object from mesa or your vendor driver. The
+  headless `bb check` needs no display, but every interactive demo does.
+- **[babashka](https://babashka.org)** (`bb`) for the task wrappers. Optional:
+  every task has a `jolt -M:<alias>` equivalent.
+
+```sh
+brew install gtk4        # macOS
+```
+
+Nothing else needs to sit next to this checkout: `deps.edn` pins glitter as
+a git coordinate, so a fresh clone builds on its own. See
+[Dependency modes](#dependency-modes) if you want to develop against a local
+glitter instead.
 
 ## Quick start
 
@@ -73,6 +99,32 @@ invariant #1 for why a project-wide `clojure-lsp format` pass doesn't conflict
 with the "don't improve ported files" porting discipline. It mirrors
 glitter's identical resolution of the same tension for its own
 Replicant-ported files.
+
+## Dependency modes
+
+`deps.edn` declares glitter as a pinned git coordinate
+(`io.github.burinc/glitter` at a fixed `:git/sha`). jolt fetches and builds
+against that exact commit, so a fresh clone of this repo builds with no other
+setup. This is the default, and what every command above uses:
+
+```sh
+jolt -M:plasma           # builds against the pinned glitter sha
+```
+
+To co-develop this library against an unreleased glitter change, the `:dev`
+alias overrides the pin back to a sibling checkout at `../glitter`. Combine it
+with any runnable alias:
+
+```sh
+jolt -M:dev:plasma       # builds against ../glitter instead of the pin
+jolt -M:dev:test
+```
+
+`:dev` only helps if `../glitter` actually exists next to this checkout. It is
+not something a first-time user needs or has.
+
+Bumping the pin is deliberate: change the `:git/sha` in `deps.edn`, then run
+`bb test` and `bb smokes` before committing.
 
 ## Architecture
 
