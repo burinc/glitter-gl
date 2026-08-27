@@ -72,4 +72,13 @@
     ;; every vertex sits at radius * its cycled profile entry
     (is (every? true?
                 (map (fn [pt f] (< (Math/abs (- (v2/magnitude pt) f)) 1e-9))
-                     pts (take 24 (cycle profile)))))))
+                     pts (take 24 (cycle profile))))))
+  ;; verify radius handling with a different radius
+  (let [radius  2.0
+        profile [0.9 1.0 1.0 0.9]
+        p       (poly/cog radius 6 profile)
+        pts     (poly/points p)
+        expected-radii (take 24 (cycle (map #(* radius %) profile)))]
+    (is (every? true?
+                (map (fn [pt f] (< (Math/abs (- (v2/magnitude pt) f)) 1e-9))
+                     pts expected-radii)))))
