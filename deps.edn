@@ -4,7 +4,19 @@
  ;; standalone, but glitter-gl.gtk registers a :gl-area widget into glitter's
  ;; widget registry, so glitter is a dependency. Its GTK4/GLib native libs merge
  ;; in via the dependency walk (only used by glitter-gl.gtk).
- :deps {burinc/glitter {:local/root "../glitter"}}
+ ;;
+ ;; Dependency form: a pinned git coordinate, not :local/root. glitter is public,
+ ;; so jolt can clone it itself and a fresh clone of this repo builds with nothing
+ ;; sitting next to it on disk. :local/root only ever resolved on a machine that
+ ;; happened to have a sibling ../glitter checkout, which is nobody but the author.
+ ;; The :dev alias below re-adds that sibling path as a top-level :override-deps
+ ;; entry for the co-development loop; jolt's deps walk is breadth-first, so a
+ ;; top-level coordinate wins over the transitive one it overrides. Mirrors
+ ;; glitter-uikit's deps.edn, which verified the same mechanism against jolt's own
+ ;; source rather than inferring it from JVM tools.deps.
+ :deps {io.github.burinc/glitter
+        {:git/url "https://github.com/burinc/glitter"
+         :git/sha "482642fd3c9671b05f0ffaa2ef47420b1a92553b"}}
 
  ;; OpenGL via the host. On macOS OpenGL ships as a framework; on Linux it's the
  ;; libGL shared object (mesa or the vendor driver). Chez's dlopen default search
@@ -19,7 +31,14 @@
  ;; Native-GL geometry & matrix library for jolt, ported from glimmer-gl (itself
  ;; ported from thi.ng/geom's platform-independent math) onto glitter's
  ;; Replicant-style widget registry. See README.md.
- :aliases {:test          {:extra-paths ["test"]     :main-opts ["-m" "glitter-gl.test-runner"]}
+ :aliases {;; Co-development loop only: overrides the pinned glitter dep back to a
+           ;; sibling checkout. Combine with any runnable alias, e.g.
+           ;; `jolt -M:dev:test` or `jolt -M:dev:plasma`. Requires a ../glitter
+           ;; checkout next to this one; nobody outside this machine needs it.
+           :dev {:override-deps
+                 {io.github.burinc/glitter {:local/root "../glitter"}}}
+
+           :test          {:extra-paths ["test"]     :main-opts ["-m" "glitter-gl.test-runner"]}
            :plasma        {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.plasma"]}
            :ripple        {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.ripple"]}
            :orbit         {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.orbit"]}
