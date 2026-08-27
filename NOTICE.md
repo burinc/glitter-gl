@@ -156,7 +156,12 @@ than ClojureScript/WebGL.
   (a scene picked by unprojecting the pointer into a world-space ray).
   The ClojureScript/WebGL windowing and event plumbing do not transfer;
   only the idea, a ground and a wall plane, ray-cast to find and mark the
-  pointer's hit, does. The `unproject`/`pointer-ray` implementation and
-  the direct `:gl-area` wiring are all original to this file; see
-  `docs/guide/gl-area-widget-layer.md` for a widget-layer correction this
-  example's development also found, unrelated to the porting question.
+  pointer's hit, does. The `pointer-ray` implementation and the direct
+  `:gl-area` wiring are original to this file. `unproject` is not: it
+  re-derives the divide-by-w half of `unproject-point`'s 6-arity body from
+  thi.ng/geom's `src/thi/ng/geom/matrix.cljc`. glitter-gl's own port of
+  that file, `matrix.clj`, never carried `unproject-point` over, so this
+  file supplies its own rather than reaching for one that doesn't exist;
+  see `docs/guide/gl-area-widget-layer.md` for a widget-layer correction
+  this example's development also found, unrelated to the porting
+  question.
