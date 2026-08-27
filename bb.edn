@@ -44,6 +44,9 @@
           (row "ripple" "interactive demo: full-screen fragment shader, no mesh at all")
           (row "orbit" "interactive demo: several solids orbiting, via app/reactive-area")
           (row "knot" "interactive demo: a (p,q) torus knot, generated geometry")
+          (row "gears" "interactive demo: three counter-rotating cog outlines, 2D, orthographic")
+          (row "textured" "interactive demo: a rotating cube with a procedural checkerboard texture")
+          (row "picking" "interactive demo: pointer-driven ray picking against a ground and a wall plane")
           (row "check" "headless sanity check: shader compiles, geometry buffers valid")
           (hdr "Smoke (live GTK, exits non-zero on failure)")
           (row "gl-area-smoke" ":gl-area construct/realize/render/resize against real GTK")
@@ -66,7 +69,7 @@
           (row "hooks:uninstall" "remove the git pre-commit hook")
           (hdr "Demos")
           (row "record" "batch-record a demo GIF for every take (needs internal screen-grab CLI)")
-          (row "demos:examples" "print the seven take ids as EDN (used by bb record)")
+          (row "demos:examples" "print the ten take ids as EDN (used by bb record)")
           (row "demos:crop" "crop docs/demos/plasma-*.gif to the GL pane -> docs/demos/pane/")
           (hdr "Dev")
           (row "nrepl [port]" "start a jolt nREPL server (default 7888)")
@@ -88,6 +91,15 @@
 
   knot {:doc "Interactive demo: a (p,q) torus knot, generated geometry"
         :task (shell "jolt" "-M:knot")}
+
+  gears {:doc "Interactive demo: three counter-rotating cog outlines, 2D, orthographic"
+         :task (shell "jolt" "-M:gears")}
+
+  textured {:doc "Interactive demo: a rotating cube with a procedural checkerboard texture"
+            :task (shell "jolt" "-M:textured")}
+
+  picking {:doc "Interactive demo: pointer-driven ray picking against a ground and a wall plane"
+           :task (shell "jolt" "-M:picking")}
 
   check {:doc "Headless sanity check: shader compiles, geometry buffers valid"
          :task (shell "jolt" "-M:check")}
@@ -211,9 +223,11 @@
    ;; screen-grab spawns via p/process, which tokenizes without a shell —
    ;; a bare VAR=x prefix would be exec'd as a binary name.
    ;;
-   ;; ripple/orbit/knot self-animate via :on-tick and take no env-var
-   ;; variant, unlike plasma's four takes of one program — each gets its
-   ;; own single-item group rather than joining "plasma" or each other.
+   ;; ripple/orbit/knot/gears/textured self-animate via :on-tick and take
+   ;; no env-var variant, unlike plasma's four takes of one program — each
+   ;; gets its own single-item group rather than joining "plasma" or each
+   ;; other. picking is pointer-driven rather than self-animating, but
+   ;; still gets its own single-item group for the same reason.
    (prn (vec (concat
               (for [row [["plasma-cube"   "the default cube, rotating under the composable plasma/stripes shader" ""]
                          ["plasma-sphere" "the same shader on a sphere"                                           "GLITTER_GL_DEMO_SHAPE=sphere"]
@@ -240,7 +254,22 @@
                 :group "knot"
                 :desc "a (2,3) trefoil torus knot generated from scratch, 2400 quads"
                 :src "examples/glitter_gl/knot.clj"
-                :run "jolt -M:knot"}])))}
+                :run "jolt -M:knot"}
+               {:id "gears"
+                :group "gears"
+                :desc "three counter-rotating cog outlines, flat-shaded in 2D, no lighting or camera"
+                :src "examples/glitter_gl/gears.clj"
+                :run "jolt -M:gears"}
+               {:id "textured"
+                :group "textured"
+                :desc "a rotating cube wearing a procedural checkerboard texture, generated at runtime, no image file"
+                :src "examples/glitter_gl/textured.clj"
+                :run "jolt -M:textured"}
+               {:id "picking"
+                :group "picking"
+                :desc "a ground plane and a back wall with a marker at wherever the pointer's world-space ray hits, pointer-driven"
+                :src "examples/glitter_gl/picking.clj"
+                :run "jolt -M:picking"}])))}
 
   record
   {:doc "Batch-record a demo GIF for every take: bb record [--only a,b] [--force] [--dry-run]"
