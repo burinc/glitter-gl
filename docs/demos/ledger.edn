@@ -1,9 +1,11 @@
 {
-  "knot" {:sha "c93129f244751a1e432de38eb34d25e5e872dc85a19b449e9b9aeec029f2b7ab", :settings [6 8 480 "gif"], :bytes 715325, :at "2026-08-26T02:15:31.080894Z"}
-  "orbit" {:sha "897f078da201291f59b6972a43c50578e09b87315697532155a595db15c9d027", :settings [8 10 560 "gif"], :bytes 357291, :at "2026-08-26T02:12:54.677804Z"}
-  "plasma-cube" {:sha "ba4f9ce7c97041de14f5024da3d7d43d1d3aff068bfa59df938aba0d4b111b3a", :settings [8 10 560 "gif"], :bytes 308927, :at "2026-08-24T22:17:22.170819Z"}
-  "plasma-smooth" {:sha "ba4f9ce7c97041de14f5024da3d7d43d1d3aff068bfa59df938aba0d4b111b3a", :settings [8 10 560 "gif"], :bytes 295615, :at "2026-08-24T22:17:22.171389Z"}
-  "plasma-sphere" {:sha "ba4f9ce7c97041de14f5024da3d7d43d1d3aff068bfa59df938aba0d4b111b3a", :settings [8 10 560 "gif"], :bytes 271247, :at "2026-08-24T22:17:22.171352Z"}
-  "plasma-tetra" {:sha "ba4f9ce7c97041de14f5024da3d7d43d1d3aff068bfa59df938aba0d4b111b3a", :settings [8 10 560 "gif"], :bytes 195373, :at "2026-08-24T22:20:53.861630Z"}
+  "gears" {:sha "e4e4e40a8f65dc9c88ffb655bda9f343c36a1d2999ab45efab872574f25bf59d", :settings [8 10 560 "gif"], :bytes 325425, :at "2026-08-27T12:32:25.503871Z"}
+  "knot" {:sha "56f5be012476a61bbbd583815ae1c0697c96d4ef23628fffd401e9b958e39ad8", :settings [6 8 480 "gif"], :bytes 715325, :at "2026-08-26T02:15:31.080894Z"}
+  "orbit" {:sha "328aee53b73da322577becb9b0edc6868cce0545aadb1b665034e5df1eda65f5", :settings [8 10 560 "gif"], :bytes 357291, :at "2026-08-26T02:12:54.677804Z"}
+  "plasma-cube" {:sha "ed3065421f2133e09c1ad36427baad05797f8c1c638432fdc4d95e22906a3b5e", :settings [8 10 560 "gif"], :bytes 308927, :at "2026-08-24T22:17:22.170819Z"}
+  "plasma-smooth" {:sha "ed3065421f2133e09c1ad36427baad05797f8c1c638432fdc4d95e22906a3b5e", :settings [8 10 560 "gif"], :bytes 295615, :at "2026-08-24T22:17:22.171389Z"}
+  "plasma-sphere" {:sha "ed3065421f2133e09c1ad36427baad05797f8c1c638432fdc4d95e22906a3b5e", :settings [8 10 560 "gif"], :bytes 271247, :at "2026-08-24T22:17:22.171352Z"}
+  "plasma-tetra" {:sha "ed3065421f2133e09c1ad36427baad05797f8c1c638432fdc4d95e22906a3b5e", :settings [8 10 560 "gif"], :bytes 195373, :at "2026-08-24T22:20:53.861630Z"}
   "ripple" {:sha "4df316fdff62f1c647925f0bdf6fba0ea8aaad25d416a0124e4174e8393d38a8", :settings [5 6 440 "gif"], :bytes 1838091, :at "2026-08-26T02:15:31.080852Z"}
-}
+  "textured" {:sha "f5be3ff100d3b40c3e1172fa92c2f7aa91d2227a5344078c59c4b89965e15159", :settings [8 10 560 "gif"], :bytes 836245, :at "2026-08-27T12:32:25.503956Z"}
+ "picking" {:sha "1bdf197e1a02c5291e988bb8b22ef7e5190c2b390f8ad5533163811becf0fc45", :settings [8 10 560 "gif"], :bytes 191910, :at "2026-08-27T12:41:53.243704Z"}}
