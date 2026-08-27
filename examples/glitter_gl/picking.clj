@@ -2,16 +2,16 @@
   "glitter-gl demo: a ground plane and a back wall, with a marker drawn at
   wherever the pointer's world-space ray hits them.
 
-  The arc's headline example. Ported from thi.ng/geom's examples/gl/
-  picking.cljs (the idea only; its ClojureScript/WebGL windowing does not
-  transfer to glitter-gl's :gl-area). Every other example draws geometry
-  that never reacts to input; this is the first to use pointer events at
-  all, and the first consumer of glitter-gl.intersect's four `ray-*` fns
-  outside their own namespace and test suite.
+  Ported from thi.ng/geom's examples/gl/picking.cljs (the idea only; its
+  ClojureScript/WebGL windowing does not transfer to glitter-gl's
+  :gl-area). Every other example draws geometry that never reacts to
+  input; this is the first to use pointer events at all, and the first
+  consumer of glitter-gl.intersect (specifically its `ray-plane` fn)
+  outside its own namespace and test suite.
 
   RENDER PATH: direct :gl-area wiring (like plasma.clj/ripple.clj/gears.clj/
-  knot.clj), not glitter-gl.app/reactive-area -- two static planes and a
-  marker is not a scene-graph problem.
+  knot.clj/textured.clj), not glitter-gl.app/reactive-area -- two static
+  planes and a marker is not a scene-graph problem.
 
   SCENE: a horizontal ground quad (glitter-gl.primitives/plane, rotated flat
   like orbit.clj's ground) and a vertical wall quad (the same primitive,
@@ -25,9 +25,12 @@
   is drawn at the nearer hit -- colored one way for the ground, another for
   the wall, so the switch is visible without needing to read coordinates.
 
-  T0 SPIKE FINDINGS CARRIED FORWARD (see this arc's spike report):
-  1. :on-motion and :on-button do fire live (471 motion + 6 button events
-     observed) -- not another dead-wiring trap.
+  Pointer-handling behavior, verified before writing this file, not
+  assumed:
+  1. :on-motion fires live through :gl-area -- this file's own operation
+     is the confirmation. It does not wire :on-button at all; see
+     docs/guide/limitations.md for what pointer coverage remains
+     unexercised.
   2. Pointer coordinates are widget-relative doubles, origin TOP-LEFT, y
      increasing downward, straight from GTK4 with no transform applied
      (gtk.clj's :on-motion wiring: `(on-motion area (double x) (double y))`).
@@ -57,9 +60,12 @@
   file uses) showed the naive direction identical across four different
   NDC coordinates, while the correct (divide-by-w) direction varied
   correctly with each one. `unproject` below does the real 4-component
-  transform, including the divide, kept local to this file per the task's
-  instruction not to touch `matrix.clj` or promote a camera-ray helper
-  into src/.
+  transform, including the divide: it re-derives the divide-by-w half of
+  thi.ng.geom.matrix/unproject-point's 6-arity body (thi.ng/geom's
+  src/thi/ng/geom/matrix.cljc; see NOTICE.md). The port that produced
+  `matrix.clj` never carried that fn over, so there is nothing there to
+  call. Promoting it into `matrix.clj` would be a library change, out of
+  scope for this file; kept local here instead.
 
   IMPORTANT -- gtk.clj's :on-motion wiring calls the handler directly with
   no follow-up `queue-render` (unlike :on-tick, whose wiring calls
@@ -68,9 +74,9 @@
   `on-tick` below is therefore a deliberate no-op: it exists purely so
   gtk.clj's tick wiring keeps queuing a render every frame, and `on-render`
   re-reads whatever `pointer-pos` currently holds -- the same
-  read-fresh-state-every-frame shape the task asked for (\"do the raycast
-  in on-render, not in the motion callback, so a fast pointer does not
-  queue work per event\").
+  read-fresh-state-every-frame shape used throughout: do the raycast in
+  on-render, not in the motion callback, so a fast pointer does not queue
+  work per event.
 
   IMPORTANT -- found live, on a Retina display, by the first live-GTK smoke
   of this file (the marker rendered nowhere near the actual pointer): a
@@ -223,7 +229,8 @@
 
 (defn- pointer-ray
   "Screen pixel (x,y) -> [origin dir] world-space ray. y is flipped because GL
-  NDC is +y up while widget coordinates are +y down (T0 spike finding 2)."
+  NDC is +y up while widget coordinates are +y down (see the ns docstring's
+  pointer-handling notes)."
   [^double x ^double y ^double w ^double h view proj eye]
   (let [ndc-x (- (* 2.0 (/ x w)) 1.0)
         ndc-y (- 1.0 (* 2.0 (/ y h)))
