@@ -1,7 +1,8 @@
 (ns glitter-gl.polygon
   "2D polygon, ported from thi.ng/geom's Polygon2. Stored as a vector of Vec2
   vertices in winding order (CCW ⇒ positive area). Plain functions."
-  (:require [glitter-gl.rect :as r]
+  (:require [glitter-gl.circle :as c]
+            [glitter-gl.rect :as r]
             [glitter-gl.vec2 :as v2 :refer [vec2 Vec2]]))
 
 (defrecord Polygon2 [points])
@@ -9,6 +10,16 @@
 (defn polygon [pts] (Polygon2. (vec pts)))
 (defn points   [^Polygon2 p] (.-points p))
 (defn vertices [^Polygon2 p] (.-points p))
+
+(defn cog
+  "A cog/gear outline: `teeth * (count profile)` points sampled on a circle of
+  `radius`, each scaled by the next entry of `profile`, cycling. Ported from
+  thi.ng/geom's `thi.ng.geom.polygon/cog`."
+  [^double radius ^long teeth profile]
+  (->> (c/vertices (c/circle radius) (* teeth (count profile)))
+       (map (fn [f v] (v2/scale v ^double f)) (cycle profile))
+       (vec)
+       (polygon)))
 
 (defn area
   "Unsigned polygon area via the shoelace formula."

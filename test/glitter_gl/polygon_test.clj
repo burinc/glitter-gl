@@ -63,3 +63,13 @@
                                   (range 0 (* 2 Math/PI) (/ (* 2 Math/PI) 5))))]
     (is (== 3 (count (poly/tessellate penta))))
     (is (approx (poly/area penta) (reduce + (map #(apply tri-area2 %) (poly/tessellate penta)))))))
+
+(deftest cog-vertex-count-and-radii
+  (let [profile [0.9 1.0 1.0 0.9]
+        p       (poly/cog 1.0 6 profile)
+        pts     (poly/points p)]
+    (is (= 24 (count pts)) "teeth * (count profile) vertices")
+    ;; every vertex sits at radius * its cycled profile entry
+    (is (every? true?
+                (map (fn [pt f] (< (Math/abs (- (v2/magnitude pt) f)) 1e-9))
+                     pts (take 24 (cycle profile)))))))

@@ -33,6 +33,9 @@ task order: `shader.clj` itself requires `glitter-gl.gl`, so the plan's
 numbering was swapped to match the real dependency direction; the ported
 code itself is unaffected.
 
+`polygon/cog` (ported from thi.ng/geom's `thi.ng.geom.polygon/cog`) was added
+to the already-ported `polygon.clj` in a later 2026-08-27 arc.
+
 Adapted for glitter's Replicant-style model (see the port design spec in
 the private planning store for the full rationale, and
 `docs/guide/gl-area-widget-layer.md` for a correction to one part of it):
