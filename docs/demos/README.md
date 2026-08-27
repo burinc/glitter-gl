@@ -68,3 +68,13 @@ a rotating cube wearing a procedural checkerboard texture, generated at runtime,
 
 ![textured](textured.gif)
 
+## the picking demo
+
+### picking
+
+a ground plane and a back wall with a marker at wherever the pointer's world-space ray hits, pointer-driven
+
+![picking](picking.gif)
+
+This take is captured by hand, not by `bb record`: `picking` is pointer-driven and the recorder's steering is keyboard-only, so an actual recording run would show the scene at rest with no marker at all. `docs/demos/ledger.edn`'s `picking` entry is kept in sync by hand for the same reason, so an unforced `bb record` reports it up to date rather than attempting to re-capture it.
+
