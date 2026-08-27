@@ -1,10 +1,5 @@
 # glitter-gl Guide
 
-> **The code is not public yet.** This guide is, but the repository behind it
-> is still private, so links here that point into the source on GitHub will not
-> resolve for you. Everything the guide itself explains is on this site. This
-> note goes away when the repository opens.
-
 ## Why this exists
 
 `glitter-gl` is glimmer-gl's geometry/matrix/shader/GL library, ported
