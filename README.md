@@ -32,7 +32,7 @@ composition layer.
 [<img src="docs/demos/orbit.gif" width="480">](docs/guide/examples.md)
 
 *`orbit`: six solids over a lit, shadowed ground plane, driven through
-`glitter-gl.app/reactive-area`. Six more takes, and what each one
+`glitter-gl.app/reactive-area`. Nine more takes, and what each one
 demonstrates, in the [examples gallery](docs/guide/examples.md).*
 
 **Docs site:** [glitter-gl.b12n.app](https://glitter-gl.b12n.app)
@@ -69,6 +69,9 @@ jolt -M:plasma         # rotating cube/sphere/tetra + composable plasma/stripes 
 jolt -M:ripple         # full-screen fragment shader, no mesh at all
 jolt -M:orbit          # several solids orbiting a lit, shadowed ground plane
 jolt -M:knot           # a (2,3) torus knot, geometry generated from scratch
+jolt -M:gears          # three counter-rotating cog outlines, 2D, orthographic
+jolt -M:textured       # rotating cube wearing a procedural checkerboard texture
+jolt -M:picking        # pointer-driven ray picking against a ground and a wall
 jolt -M:check          # headless sanity check: shader compiles, geometry buffers valid
 jolt -M:test           # unit suite
 jolt -M:gl-area-smoke  # live-GTK smoke: :gl-area construct/realize/render/resize
@@ -198,10 +201,11 @@ one topic per page:
 - [`porting-and-attribution.md`](docs/guide/porting-and-attribution.md):
   the three sourcing buckets, the Standard Verbatim Port Procedure,
   and the lineage back through glimmer-gl to thi.ng/geom.
-- [`examples.md`](docs/guide/examples.md): what each of the seven
+- [`examples.md`](docs/guide/examples.md): what each of the ten
   `examples/glitter_gl/` namespaces is for, and which two are actually
   wired into regression coverage. Includes a four-take gallery of the
-  `plasma` demo, plus one take each of `ripple`, `orbit` and `knot`.
+  `plasma` demo, plus one take each of `ripple`, `orbit`, `knot`,
+  `gears`, `textured` and `picking`.
 - [`testing-and-tasks.md`](docs/guide/testing-and-tasks.md): the unit
   suite, the live-GTK smoke and headless check `bb smokes` runs, and the
   quality-tooling task surface (lint, format, `clj-kondo`'s FFI hook, the
@@ -234,7 +238,7 @@ Ported from glimmer-gl (2026-08-06 arc). See `NOTICE.md`'s porting ledger
 for the full verbatim/adapted/new breakdown, including a real live-found
 correction to `:gl-area`'s original wiring design (see
 [`docs/guide/gl-area-widget-layer.md`](docs/guide/gl-area-widget-layer.md)).
-The unit suite currently stands at 177 tests / 556 assertions (`bb test`),
+The unit suite currently stands at 178 tests / 559 assertions (`bb test`),
 plus `bb smokes`' live-GTK smoke (`gl-area-smoke`, which drives a real
 `GtkGLArea` under the real reconciler rather than a fake renderer) and its
 headless check (`check`, which needs no GL context or display at all).
@@ -242,7 +246,7 @@ headless check (`check`, which needs no GL context or display at all).
 (`reactive-area`) is ported, unit-tested, and, as of this arc, exercised
 live end to end by `examples/glitter_gl/orbit.clj`. The `plasma` demo
 still wires `:gl-area` directly, the same way glimmer-gl's own upstream
-demo does; `ripple` and `knot` do too, for reasons of their own (see
-`NOTICE.md`). See
+demo does; `ripple`, `knot`, `gears`, `textured` and `picking` do too,
+for reasons of their own (see `NOTICE.md`). See
 [`docs/guide/limitations.md`](docs/guide/limitations.md) for this and
 every other known v1 gap.

@@ -47,9 +47,21 @@ pane.
 shape of `reactive-area` usage (built from the library's own primitives
 and polyhedra, one light, `:materials` fully overriding the renderer's
 default palette). It doesn't exercise `:fog`, `:shadow-bias`,
-`:depth-spec`/`:lit-spec`, `:on-motion`, `:on-key`, or `:on-button`, all
-of which `reactive-area` accepts and none of which any example drives.
-Treat those as still resting on unit coverage alone.
+`:depth-spec`/`:lit-spec`, `:on-motion`, `:on-key`, or `:on-button`
+through `reactive-area`'s own opts, all of which `reactive-area` accepts
+and none of which any `reactive-area`-mounted example drives. Treat
+`:fog`, `:shadow-bias`, and `:depth-spec`/`:lit-spec` as still resting on
+unit coverage alone.
+
+`:on-motion` and `:on-button` are no longer wholly unexercised, though,
+just not through `reactive-area`.
+[`examples/glitter_gl/picking.clj`](examples.md#pickingclj-the-arcs-headline-example-and-the-first-to-react-to-the-pointer)
+drives both live, wired directly onto `:gl-area` the way `plasma.clj`/
+`ripple.clj`/`gears.clj`/`knot.clj` wire their own handlers, not through
+`reactive-area`: a spike this arc observed 471 motion events and 6 button
+events fire in one live run. `:on-key` remains completely unexercised, by
+any example, through either wiring path; a future example driving it
+would still be closing new ground.
 
 **One item here is not merely untested, it is wrong.** Verified against
 source: `app.clj:186` always writes `:materials (:materials opts)` into

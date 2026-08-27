@@ -45,15 +45,17 @@ each call, exactly like any other glitter view function.
 
 ### Orientation
 
-- [`examples.md`](examples.md): the seven namespaces under
+- [`examples.md`](examples.md): the ten namespaces under
   `examples/glitter_gl/`, split by what each is for: `check.clj` and
   `gl_area_smoke.clj` exist to fail when a regression lands (the only two
   wired into `bb smokes`), `plasma_shader.clj` exists to be composed and
   read (the shader-composition worked example), and `plasma.clj`,
-  `ripple.clj`, `orbit.clj` and `knot.clj` exist to be watched: rotating-
-  shape and shader demos with no assertions of their own.
-  Also covers the four touchpoints (namespace, `deps.edn` alias, `bb.edn`
-  task, `smokes` entry) a new example needs so it doesn't go silently
+  `ripple.clj`, `orbit.clj`, `knot.clj`, `gears.clj`, `textured.clj` and
+  `picking.clj` exist to be watched: rotating-shape, shader, texture and
+  pointer-input demos with no assertions of their own.
+  Also covers the six touchpoints (namespace, `deps.edn` alias, `bb.edn`
+  task, `bb.edn` `demos:examples` row, `scripts/demo_manifest.edn` group
+  entry, `smokes` entry) a new example needs so it doesn't go silently
   unexercised.
 - [`architecture.md`](architecture.md): how thin the seam to glitter
   actually is: of 25 files under `src/glitter_gl/`, only `gtk.clj` has a
@@ -99,7 +101,10 @@ each call, exactly like any other glitter view function.
   glitter's uniform `void(widget,data)` path: `"render"`'s non-void
   return, `"resize"`'s extra int arguments, `on-tick`'s frame-clock API
   that isn't a signal at all, and the controllers `on-motion`/`on-key`/
-  `on-button` layer onto the widget or its root window.
+  `on-button` layer onto the widget or its root window. Also documents a
+  live-found Retina-only trap: `"resize"` reports device pixels while
+  `on-motion` reports logical points, and unprojecting a pointer position
+  with the wrong one is silently wrong by the display's scale factor.
 - [`scene-and-app.md`](scene-and-app.md): `glitter-gl.scene`'s
   mini-hiccup dialect, and why it's not glitter's hiccup: `[fn
   args...]` is a first-class component invocation here, a real trap in
@@ -114,7 +119,7 @@ each call, exactly like any other glitter view function.
 ### Verify
 
 - [`testing-and-tasks.md`](testing-and-tasks.md): the unit suite (`jolt
-  -M:test`, 177 tests / 556 assertions) and the live-GTK smoke plus
+  -M:test`, 178 tests / 559 assertions) and the live-GTK smoke plus
   headless check `bb smokes` runs, plus `offscreen_test.clj`'s real
   render-to-texture round trip and its designed-to-skip behavior on a
   display-less machine.

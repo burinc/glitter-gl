@@ -129,3 +129,34 @@ actually crossed over and understate what didn't.
   constructors this library already ships, mounted through
   `glitter-gl.app/reactive-area` specifically to exercise that path live
   for the first time (see `docs/guide/limitations.md`).
+
+## Three more examples: reimplementations, not ports (2026-08-27 arc)
+
+`examples/glitter_gl/gears.clj`, `textured.clj`, and `picking.clj` are the
+same kind of source entry as the three above, for the same reason: each
+starts from a named [thi.ng/geom](https://thi.ng/geom) example, but only
+the *idea* transfers, not the windowing, event loop, or GL calls, which
+are original to this project against `glitter-gl.gtk`'s `:gl-area` rather
+than ClojureScript/WebGL.
+
+- **`gears.clj`**: idea from [thi.ng/geom](https://github.com/thi-ng/geom)'s `examples/gl/gears2d.cljs`
+  (three counter-rotating cog outlines in 2D). The ClojureScript/WebGL
+  windowing does not transfer; only the idea, three counter-rotating
+  cogs, does. `polygon/cog` itself is a port, already recorded above;
+  what's original to this file is feeding its tessellated output into a
+  flat GL buffer, the camera-less orthographic scene, and the direct
+  `:gl-area` wiring.
+- **`textured.clj`**: idea from [thi.ng/geom](https://github.com/thi-ng/geom)'s `examples/gl/textured_cube.cljs`
+  (a rotating cube sampling a texture). The WebGL buffer/camera/
+  texture-load plumbing does not transfer; only the idea, a textured,
+  rotating cube, does. The procedural checkerboard generation (no image
+  asset), the per-corner UV buffer construction, and the direct
+  `:gl-area`/FFI texture upload are all original to this file.
+- **`picking.clj`**: idea from [thi.ng/geom](https://github.com/thi-ng/geom)'s `examples/gl/picking.cljs`
+  (a scene picked by unprojecting the pointer into a world-space ray).
+  The ClojureScript/WebGL windowing and event plumbing do not transfer;
+  only the idea, a ground and a wall plane, ray-cast to find and mark the
+  pointer's hit, does. The `unproject`/`pointer-ray` implementation and
+  the direct `:gl-area` wiring are all original to this file; see
+  `docs/guide/gl-area-widget-layer.md` for a widget-layer correction this
+  example's development also found, unrelated to the porting question.

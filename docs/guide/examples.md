@@ -1,12 +1,13 @@
 # The examples
 
-Everything runnable lives under `examples/glitter_gl/`: seven namespaces,
-six of them with their own `jolt -M:<alias>`/`bb <name>` entry point, one
+Everything runnable lives under `examples/glitter_gl/`: ten namespaces,
+nine of them with their own `jolt -M:<alias>`/`bb <name>` entry point, one
 (`plasma_shader.clj`) that exists only to be required by `plasma.clj`. They
 split cleanly along one axis: two exist to **fail when a regression lands**
 (`check.clj`, `gl_area_smoke.clj`), one exists to be **composed and read**
-(`plasma_shader.clj`), and four exist to be **watched**
-(`plasma.clj`, `ripple.clj`, `orbit.clj`, `knot.clj`). Only
+(`plasma_shader.clj`), and seven exist to be **watched**
+(`plasma.clj`, `ripple.clj`, `orbit.clj`, `knot.clj`, `gears.clj`,
+`textured.clj`, `picking.clj`). Only
 the first two are part of the project's actual regression coverage; say so
 plainly rather than letting a reader assume a demo is tested because it
 runs.
@@ -321,6 +322,126 @@ library already ships as a constructor.
 
 Like the other two, watched not trusted: no assertions, not part of
 `bb smokes`.
+
+## `gears.clj`: `polygon/tessellate`'s first consumer outside `mesh.clj`
+
+```sh
+jolt -M:gears     # or: bb gears
+```
+
+Three cog outlines, flat-shaded, spinning in a camera-less 2D scene.
+`polygon/cog` (added to `glitter-gl.polygon` in this arc, ported from
+thi.ng/geom's `thi.ng.geom.polygon/cog`; see `NOTICE.md`) builds a toothed
+outline per cog, and `polygon/tessellate` ear-clips that outline directly
+into a triangle list, with `mesh.clj` never involved. Every other example
+draws geometry `glitter-gl.mesh` already tessellates for it
+(`primitives.clj`/`polyhedra.clj` shapes go through `mesh/->floats`); this
+is the first thing in the project to hand `polygon/tessellate` a shape of
+its own.
+
+Each cog's triangle buffer is built once, at namespace load; `on-render`
+never rebuilds geometry, it only rotates the three buffers, at different
+signed speeds so adjacent cogs counter-rotate, via a per-cog model matrix,
+the same way `knot.clj` spins its tube by matrix alone. `m/ortho` stands in
+for `m/perspective`: there's no camera, just a flat orthographic frame wide
+enough to hold all three cogs side by side.
+
+| preview | what it shows |
+|---|---|
+| [<img src="../demos/gears.gif" width="300">](../demos/gears.gif) | **`gears`**: three cog outlines of different radii and tooth counts, spinning at different signed rates so the two outer cogs turn one way and the middle one turns the other. |
+
+Like the three above, watched not trusted: no assertions, not part of
+`bb smokes`.
+
+## `textured.clj`: the first shader spec to sample a texture
+
+```sh
+jolt -M:textured     # or: bb textured
+```
+
+A rotating cube wearing a procedurally generated checkerboard: no image
+file, no binary asset in the repo. `checkerboard-ptr` writes an RGBA byte
+buffer straight into foreign memory at realize time. `p/cuboid` supplies
+the mesh; since `mesh/->floats` only ever emits position and normal, this
+file builds its own interleaved position+UV buffer by hand
+(`cube-uv-floats`), matching UV corners to `p/cuboid`'s own per-face
+winding so every face shows the full checkerboard once.
+
+This is the first consumer of `glitter-gl.gl`'s texture FFI
+(`gl-gen-textures`/`gl-bind-texture`/`gl-tex-image-2d`/
+`gl-tex-parameter-i`/`gl-active-texture`) outside `renderer.clj`'s internal
+shadow-map path, and the first shader spec in the project to declare a
+`:sampler2D` uniform. Worth stating plainly, since "first user of X"
+invites the assumption that X was broken: no library gap was found here.
+`shader.clj`'s `set-uniform!` already had a working `:sampler2D` branch,
+uploading the texture unit index via `glUniform1i`; it had simply never
+had a caller before this file.
+
+The one uniform that's easy to get wrong, `:u_texture`, must be set to the
+texture *unit* index (`0`), never the GL texture id `gl-gen-textures`
+returned; `on-render` sets it correctly on every frame, the same
+"set every declared uniform explicitly" discipline `ripple.clj`'s ns
+docstring describes.
+
+| preview | what it shows |
+|---|---|
+| [<img src="../demos/textured.gif" width="300">](../demos/textured.gif) | **`textured`**: a cube rotating on two axes, its faces showing a crisp black-and-orange checkerboard baked at runtime rather than loaded from a file. |
+
+Like the three above, watched not trusted: no assertions, not part of
+`bb smokes`.
+
+## `picking.clj`: the arc's headline example, and the first to react to the pointer
+
+```sh
+jolt -M:picking     # or: bb picking
+```
+
+A ground plane and a back wall, with a small sphere marker drawn at
+wherever the pointer's world-space ray hits one of them: amber for the
+ground, magenta for the wall, so the switch is visible without reading
+coordinates. Every other example draws geometry that never reacts to
+input; this is the first to use pointer events at all, and the first
+consumer of `glitter-gl.intersect`'s four `ray-*` functions outside their
+own namespace and test suite.
+
+`on-motion` only stores the latest pointer position; the actual raycast
+happens in `on-render`, every frame, re-reading whatever `pointer-pos`
+currently holds, so a fast pointer doesn't queue extra work per event.
+Unprojecting a screen pixel into a world-space ray needs the real
+perspective divide: `glitter-gl.matrix/transform-point` is documented as
+an affine-only transform (it assumes a constant w row, true for
+model/view matrices but not for a projection matrix), so this file keeps
+its own `unproject`, doing the full four-component transform including the
+divide by w, local to the file rather than promoted into `matrix.clj`.
+
+**A real widget-layer trap, found live during this arc**: `GtkGLArea`'s
+resize signal reports the framebuffer size in *device* pixels (2x on a
+Retina display), while `:on-motion` reports *logical* points. Unprojecting
+a pointer position using the viewport dimensions captured from resize is
+silently wrong by the display's scale factor on a Retina display, and
+invisible on a non-Retina one, where the two units happen to coincide.
+`picking.clj` avoids it by sourcing width and height from
+`glx/widget-width`/`glx/widget-height` (both logical) rather than from its
+own `@viewport` atom (kept for `gl/gl-viewport`, which does want device
+pixels). See
+[`gl-area-widget-layer.md`](gl-area-widget-layer.md#device-pixels-vs-logical-points-a-retina-only-trap)
+for the full mechanics.
+
+| preview | what it shows |
+|---|---|
+| [<img src="../demos/picking.gif" width="300">](../demos/picking.gif) | **`picking`**: a marker tracking the pointer across a ground plane and a back wall, switching color at the boundary where the ray leaves one plane and hits the other. |
+
+Like the three above, watched not trusted: no assertions, not part of
+`bb smokes`.
+
+**This GIF cannot be reproduced by `bb record`.** `picking` is
+pointer-driven, and `scripts/demo_manifest.edn`'s steering is
+keyboard-only: `bb record --only picking` records the scene at rest, with
+no marker at all, and would overwrite the committed take with an empty
+one. The committed GIF was captured outside the normal recording pipeline,
+by synthesizing pointer motion with Quartz `CGEventPost` while taking a
+screenshot per frame. Before re-recording this one, reach for that
+approach rather than `bb record`.
 
 ## Adding an example
 

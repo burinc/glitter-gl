@@ -318,6 +318,36 @@ args, void return; the `n_press` (click-count) argument is read but
 discarded, and `on-button` is always called reporting button `1` (no
 button-index disambiguation in this version).
 
+## Device pixels vs. logical points: a Retina-only trap
+
+`"resize"` reports the framebuffer size in **device** pixels, correct for
+`gl/gl-viewport`, which needs real framebuffer pixels: on a 2x Retina
+display, a 900x600 logical window resizes to `1800x1200`. `"motion"`'s
+`(x, y)` arguments, by contrast, arrive in **logical** points, the same
+units GTK reports widget/window sizes in everywhere else: on that same
+900-wide area, a live `:on-motion` trace never exceeds roughly 900, not
+1800.
+
+Anything that unprojects a pointer position using the viewport dimensions
+captured from `"resize"` is silently wrong by the display's scale factor,
+and the bug is **invisible on a non-Retina display**, where the scale
+factor is 1 and the two units happen to coincide. Found live during this
+project's `picking.clj` arc: a standalone probe (`(gtk-gl-area "resize")`
+against `gtk_widget_get_width`/`gtk_widget_get_height` against a live
+`:on-motion` trace, all on the same window) confirmed the split directly,
+after a first version of the example placed its marker nowhere near the
+actual pointer on a Retina machine.
+
+The fix is to source width and height from `glx/widget-width`/
+`glx/widget-height` (`gtk.clj:116-122`, thin wrappers over
+`gtk_widget_get_width`/`gtk_widget_get_height`, both logical) for anything
+unprojecting a screen pixel, and to reserve a `"resize"`-populated
+viewport atom for `gl/gl-viewport` and any aspect-ratio computation, which
+is scale-invariant either way and doesn't care which unit it's given.
+[`examples/glitter_gl/picking.clj`](examples.md#pickingclj-the-arcs-headline-example-and-the-first-to-react-to-the-pointer)
+is the first, and so far only, consumer of pointer input anywhere in this
+project, and follows this pattern.
+
 ## Summary: every non-standard shape in this file
 
 | Signal / mechanism | Args | Return | Notes |

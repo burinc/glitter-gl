@@ -48,6 +48,18 @@ pass.
   tube, 2400 quads generated from scratch and handed to `mesh/mesh`.
   The first example to render geometry the library doesn't ship as a
   built-in primitive.
+- **`polygon/cog`**, ported from thi.ng/geom's `thi.ng.geom.polygon/cog`:
+  builds a toothed 2D polygon outline from a radius and a tooth count.
+  Demoed by **`examples/glitter_gl/gears.clj`** (`jolt -M:gears` /
+  `bb gears`): three counter-rotating cog outlines, flat-shaded in a
+  camera-less 2D scene, the first thing in the project to feed
+  `polygon/tessellate` a shape outside `mesh.clj`.
+- **A texturing example** (`examples/glitter_gl/textured.clj`,
+  `jolt -M:textured` / `bb textured`): a rotating cube wearing a
+  procedurally generated checkerboard, no image file. The first shader
+  spec in the project to declare a `:sampler2D` uniform, and the first
+  consumer of `glitter-gl.gl`'s texture FFI outside the renderer's
+  internal shadow-map path; no library gap needed fixing to support it.
 
 ### GTK integration
 
@@ -75,6 +87,16 @@ pass.
   smooth-shading checkbutton, pause/resume) dispatched through
   `glitter.nexus` like the rest of a glitter UI, while the GL render loop
   itself reads and writes plain atoms directly.
+- **The first example to react to pointer input**
+  (`examples/glitter_gl/picking.clj`, `jolt -M:picking` / `bb picking`): a
+  ground plane and a back wall, with a marker drawn at wherever the
+  pointer's world-space ray hits them. `:on-motion` and `:on-button` now
+  have a live exerciser, wired directly onto `:gl-area`. Building it found
+  a real, previously undocumented widget-layer trap: `"resize"` reports
+  device pixels while `:on-motion` reports logical points, so unprojecting
+  a pointer with the wrong one is silently wrong by the display's scale
+  factor, invisible on a non-Retina display. See
+  `docs/guide/gl-area-widget-layer.md`.
 
 ### Scene graph
 
