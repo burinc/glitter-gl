@@ -52,14 +52,17 @@ pass.
   builds a toothed 2D polygon outline from a radius and a tooth count.
   Demoed by **`examples/glitter_gl/gears.clj`** (`jolt -M:gears` /
   `bb gears`): three counter-rotating cog outlines, flat-shaded in a
-  camera-less 2D scene, the first thing in the project to feed
-  `polygon/tessellate` a shape outside `mesh.clj`.
+  camera-less 2D scene, `polygon/tessellate`'s first real consumer
+  anywhere: `mesh.clj` never calls it and has its own unrelated
+  `tessellate-face` over Vec3 meshes, so before this example the only
+  caller was `polygon/tessellate`'s own test suite.
 - **A texturing example** (`examples/glitter_gl/textured.clj`,
   `jolt -M:textured` / `bb textured`): a rotating cube wearing a
   procedurally generated checkerboard, no image file. The first shader
   spec in the project to declare a `:sampler2D` uniform, and the first
   consumer of `glitter-gl.gl`'s texture FFI outside the renderer's
-  internal shadow-map path; no library gap needed fixing to support it.
+  internal shadow-map path and the test suite; no library gap needed
+  fixing to support it.
 
 ### GTK integration
 
@@ -90,8 +93,9 @@ pass.
 - **The first example to react to pointer input**
   (`examples/glitter_gl/picking.clj`, `jolt -M:picking` / `bb picking`): a
   ground plane and a back wall, with a marker drawn at wherever the
-  pointer's world-space ray hits them. `:on-motion` and `:on-button` now
-  have a live exerciser, wired directly onto `:gl-area`. Building it found
+  pointer's world-space ray hits them. `:on-motion` now has a live
+  exerciser, wired directly onto `:gl-area`; `:on-button` is not wired by
+  this example and remains as unexercised as `:on-key`. Building it found
   a real, previously undocumented widget-layer trap: `"resize"` reports
   device pixels while `:on-motion` reports logical points, so unprojecting
   a pointer with the wrong one is silently wrong by the display's scale
