@@ -224,7 +224,7 @@
    ;; a bare VAR=x prefix would be exec'd as a binary name.
    ;;
    ;; ripple/orbit/knot/gears/textured self-animate via :on-tick and take
-   ;; no env-var variant, unlike plasma's four takes of one program — each
+   ;; no env-var variant, unlike plasma's four takes of one program, each
    ;; gets its own single-item group rather than joining "plasma" or each
    ;; other. picking is pointer-driven rather than self-animating, but
    ;; still gets its own single-item group for the same reason.
