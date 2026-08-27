@@ -209,7 +209,7 @@ entirely. `glitter.gtk/mount!` never watches `clock`, so nothing outside
 the render loop reruns when it changes. `picking.clj` doesn't pay it
 either, for a related but distinct reason: it has no `clock` atom at
 all, and its own `:on-tick` is a deliberate no-op (see
-[`examples.md`](examples.md#pickingclj-the-arcs-headline-example-and-the-first-to-react-to-the-pointer));
+[`examples.md`](examples.md#pickingclj-the-first-example-to-react-to-the-pointer));
 `:on-motion` resets a private `pointer-pos` atom instead, which
 `mount!` never watches either.
 

@@ -344,7 +344,12 @@ The fix is to source width and height from `glx/widget-width`/
 unprojecting a screen pixel, and to reserve a `"resize"`-populated
 viewport atom for `gl/gl-viewport` and any aspect-ratio computation, which
 is scale-invariant either way and doesn't care which unit it's given.
-[`examples/glitter_gl/picking.clj`](examples.md#pickingclj-the-arcs-headline-example-and-the-first-to-react-to-the-pointer)
+`gtk.clj`'s own docstrings for these two functions just say "in pixels
+(GTK4)"; "logical" is this guide's own term for the distinction drawn
+above, between `"resize"`'s device pixels and `gtk_widget_get_width`/
+`gtk_widget_get_height`'s GTK4-defined widget-space pixels, not
+additional wording `gtk.clj` itself uses.
+[`examples/glitter_gl/picking.clj`](examples.md#pickingclj-the-first-example-to-react-to-the-pointer)
 is the first, and so far only, consumer of pointer input anywhere in this
 project, and follows this pattern.
 
