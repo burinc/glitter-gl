@@ -132,7 +132,7 @@ each call, exactly like any other glitter view function.
 
 ## See also
 
-- [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (repo root): how to build,
+- [`CONTRIBUTING.md`](https://github.com/burinc/glitter-gl/blob/main/CONTRIBUTING.md) (repo root): how to build,
   test, and submit changes, plus the ten numbered invariants this project
   does not regress (the `:gl-area` correction is invariant #2 there, in
   summary form).

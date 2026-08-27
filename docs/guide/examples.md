@@ -36,7 +36,7 @@ windowing system at all. It asserts three unrelated things in one process:
 That third assertion is a **load-order check, not an ownership check**,
 worth stating precisely because it's easy to misread. `:gl-area` is
 registered by this library; `:scale` is not (invariant #6 in
-[`CONTRIBUTING.md`](../../CONTRIBUTING.md); glitter already ships a
+[`CONTRIBUTING.md`](https://github.com/burinc/glitter-gl/blob/main/CONTRIBUTING.md); glitter already ships a
 richer, first-party `:scale`, and glitter-gl deliberately doesn't shadow
 it). `check.clj`'s own docstring says as much: `:scale` "comes from
 glitter's own native widget, not from glitter-gl.gtk." So if `:scale` is
@@ -181,7 +181,7 @@ The honest cost of that choice: until this arc, `reactive-area` had direct
 unit coverage (`app_test.clj` checks its returned prop map's shape and
 defaults) but no example that mounted it end to end against a real
 `:gl-area` and actually rendered through it. See
-[`orbit.clj`](#orbitclj-the-first-live-reactive-area-demo) below for the
+the `orbit.clj` section below below for the
 example that closes that gap, [`scene-and-app.md`](scene-and-app.md)'s
 "What `reactive-area` actually is" section for the full "honest status"
 note, and [`limitations.md`](limitations.md) for this and the project's
@@ -282,7 +282,7 @@ That choice is the whole point of the example, not incidental:
 mounted against a real `:gl-area`. `orbit.clj` closes that gap; see
 [`limitations.md`](limitations.md#reactive-area-now-has-a-live-demo) for
 the before-and-after, and
-[`scene-and-app.md`](scene-and-app.md#ticking-glitters-state-atom-costs-a-full-view-recompute-not-just-a-frame)
+[`scene-and-app.md`](scene-and-app.md)
 for the real cost this example pays, by design, for driving glitter's
 watched state atom on every tick, which `plasma.clj` and `ripple.clj`
 avoid.

@@ -42,7 +42,7 @@ this page's job is only the provenance.
 
 Two more files in `examples/glitter_gl/` sit in the same bucket for a
 different reason: they're ports of a *different* upstream,
-`~/dev/jolt-examples/glimmer-gl-app`'s `gl_demo/*.clj`, not glimmer-gl
+the `glimmer-gl-app` jolt example's `gl_demo/*.clj`, not glimmer-gl
 itself. `plasma_shader.clj` and `check.clj` are near-verbatim; `plasma.clj`
 (from `gl_demo/core.clj`) is a real adaptation, rewriting its reactive-cell
 control panel as glitter's state-atom-plus-action-dispatch pattern while
@@ -194,7 +194,7 @@ Where the two disagree, `NOTICE.md` wins.
   GL plumbing), including the mesh → GL data-shape trace.
 - [`gl-area-widget-layer.md`](gl-area-widget-layer.md): the full
   `:apply`-vs-`:connect` correction referenced above.
-- [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (repo root): the ten
+- [`CONTRIBUTING.md`](https://github.com/burinc/glitter-gl/blob/main/CONTRIBUTING.md) (repo root): the ten
   numbered invariants, including invariant #1's summary of this page.
 - `NOTICE.md` (repo root): the authoritative, file-by-file ledger.
 - [thi.ng/geom](https://thi.ng/geom) and

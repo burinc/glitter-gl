@@ -26,7 +26,7 @@ plane, mounted through `reactive-area` and driven by glitter's own
 shared `state` atom, the first thing in this project that mounts
 `reactive-area` against a real `:gl-area` and renders a frame through
 it. Recorded and committed; see
-[`examples.md`](examples.md#orbitclj-the-first-live-reactive-area-demo)
+[`examples.md`](examples.md)
 for the gallery entry.
 
 **What `orbit.clj` found, stated plainly: no defect.** `reactive-area`
@@ -36,7 +36,7 @@ visible and lit, shadows tracking each solid's position across frames.
 That's a real result, not a non-result: an integration path that had
 never been exercised end to end turned out to work as designed the
 first time it was tried live. See
-[`scene-and-app.md`](scene-and-app.md#ticking-glitters-state-atom-costs-a-full-view-recompute-not-just-a-frame)
+[`scene-and-app.md`](scene-and-app.md)
 for the one real cost this example did surface: driving glitter's
 watched `state` atom from `:on-tick` recomputes the whole view every
 frame, not just the GL render loop, worth knowing before reaching for
@@ -162,7 +162,7 @@ acknowledge the same tradeoff. Full mechanics:
 
 `glimmer-gl.gtk` ships its own `:scale` widget. `glitter-gl.gtk` does
 not port it. That is deliberate (invariant #6 in
-[`CONTRIBUTING.md`](../../CONTRIBUTING.md)): glitter already has a
+[`CONTRIBUTING.md`](https://github.com/burinc/glitter-gl/blob/main/CONTRIBUTING.md)): glitter already has a
 richer, first-party native `:scale` (min/max/step/value/digits/
 draw-value, with `:on-value-changed` already wired through glitter's own
 standard signals table), and porting glimmer-gl's version alongside it
@@ -188,5 +188,5 @@ project doesn't accidentally shadow it in some future change.
   its "honest status" note.
 - [`examples.md`](examples.md): why the shipped `plasma` demo wires
   `:gl-area` directly rather than through `reactive-area`.
-- [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (repo root): the ten
+- [`CONTRIBUTING.md`](https://github.com/burinc/glitter-gl/blob/main/CONTRIBUTING.md) (repo root): the ten
   numbered invariants this project does not regress.

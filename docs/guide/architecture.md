@@ -5,7 +5,7 @@
 `glitter-gl` reads as one project but is really two: a geometry/matrix/
 mesh/shader/GL library that knows nothing about any UI toolkit, and a
 thin glitter-integration layer bolted on top of it. The
-[README](../../README.md) and [`CONTRIBUTING.md`](../../CONTRIBUTING.md)
+[README](https://github.com/burinc/glitter-gl/blob/main/README.md) and [`CONTRIBUTING.md`](https://github.com/burinc/glitter-gl/blob/main/CONTRIBUTING.md)
 both describe this as "`glitter-gl.gtk`/`.scene`/`.app` are the
 glitter-specific layer", true as a grouping, but the actual
 `:require` graph is sharper than that phrasing suggests, worth stating
