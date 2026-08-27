@@ -181,8 +181,8 @@ The honest cost of that choice: until this arc, `reactive-area` had direct
 unit coverage (`app_test.clj` checks its returned prop map's shape and
 defaults) but no example that mounted it end to end against a real
 `:gl-area` and actually rendered through it. See
-the `orbit.clj` section below below for the
-example that closes that gap, [`scene-and-app.md`](scene-and-app.md)'s
+[`orbit.clj`](#orbitclj-the-first-live-reactive-area-demo) below below for the
+example that closes that gap, [`scene-and-app.md`](scene-and-app.md#ticking-glitters-state-atom-costs-a-full-view-recompute-not-just-a-frame)'s
 "What `reactive-area` actually is" section for the full "honest status"
 note, and [`limitations.md`](limitations.md) for this and the project's
 other known gaps.
@@ -282,7 +282,7 @@ That choice is the whole point of the example, not incidental:
 mounted against a real `:gl-area`. `orbit.clj` closes that gap; see
 [`limitations.md`](limitations.md#reactive-area-now-has-a-live-demo) for
 the before-and-after, and
-[`scene-and-app.md`](scene-and-app.md)
+[`scene-and-app.md`](scene-and-app.md#ticking-glitters-state-atom-costs-a-full-view-recompute-not-just-a-frame)
 for the real cost this example pays, by design, for driving glitter's
 watched state atom on every tick, which `plasma.clj` and `ripple.clj`
 avoid.
