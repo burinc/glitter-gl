@@ -37,11 +37,6 @@ demonstrates, in the [examples gallery](docs/guide/examples.md).*
 
 **Docs site:** [glitter-gl.b12n.app](https://glitter-gl.b12n.app)
 
-> The site is built but not yet published: no DNS, no
-> bucket, no GitHub Pages. The URL will not resolve until the go-public
-> sequence runs; until then, browse the same content directly in
-> [`docs/guide/`](docs/guide/index.md).
-
 ## Requirements
 
 - **[Jolt](https://github.com/jolt-lang/jolt)**: Clojure on Chez Scheme.
