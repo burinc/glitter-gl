@@ -28,12 +28,12 @@ jolt -M:test     # or: bb test
 Measured just now:
 
 ```
-Ran 177 tests. 556 assertions passed, 0 failures, 0 errors.
+Ran 178 tests. 559 assertions passed, 0 failures, 0 errors.
 ----
-tests: 177 assertions: 556 passed / 0 failed
+tests: 178 assertions: 559 passed / 0 failed
 ```
 
-That's 177 `deftest` forms and 556 individual assertions. Don't multiply
+That's 178 `deftest` forms and 559 individual assertions. Don't multiply
 one by the other; a single `deftest` built on `clojure.test/are` can
 contribute many assertions under one test count. If this number drifts in
 your own run, re-measure with `bb test 2>&1 | tail -3` rather than trusting

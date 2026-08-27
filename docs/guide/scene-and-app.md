@@ -181,9 +181,9 @@ doesn't spell out on its own is that *which* atom a caller chooses to
 tick from `:on-tick` has a cost, and the cost differs depending on the
 answer.
 
-`glitter.gtk/mount!`, the function 5 of the 7 examples' `-main` calls to
-start the reconciler (`check.clj` is headless and never mounts, and
-`plasma_shader.clj` has no `-main` at all), installs a watcher on
+`glitter.gtk/mount!`, the function every example's `-main` calls to
+start the reconciler except `check.clj` (headless, never mounts) and
+`plasma_shader.clj` (no `-main` at all), installs a watcher on
 whichever state atom it's handed:
 
 ```clojure
@@ -202,11 +202,16 @@ of `state` rather than a closure over a private mutable, a deliberate
 choice for this example. Every tick therefore drives a full `view` →
 reconcile pass, not just the GL render loop.
 
-`plasma.clj`, `ripple.clj` and `knot.clj` don't pay this cost, and not
-by accident: all three advance a private `clock` atom from their own
-`:on-tick`, outside glitter's `state` entirely. `glitter.gtk/mount!`
-never watches `clock`, so nothing outside the render loop reruns when
-it changes.
+`plasma.clj`, `ripple.clj`, `knot.clj`, `gears.clj` and `textured.clj`
+don't pay this cost, and not by accident: all five advance a private
+`clock` atom from their own `:on-tick`, outside glitter's `state`
+entirely. `glitter.gtk/mount!` never watches `clock`, so nothing outside
+the render loop reruns when it changes. `picking.clj` doesn't pay it
+either, for a related but distinct reason: it has no `clock` atom at
+all, and its own `:on-tick` is a deliberate no-op (see
+[`examples.md`](examples.md#pickingclj-the-arcs-headline-example-and-the-first-to-react-to-the-pointer));
+`:on-motion` resets a private `pointer-pos` atom instead, which
+`mount!` never watches either.
 
 Neither choice is wrong. `orbit.clj` is the honest exercise of
 `reactive-area`, whose own docstring says it's "driven by glitter's
@@ -293,9 +298,10 @@ What changed this arc: `examples/glitter_gl/orbit.clj` now mounts
 it: six solids orbiting a lit, shadowed ground plane, driven by
 glitter's own shared `state` atom. It's the only example built
 specifically to exercise `reactive-area`; every other example
-(`plasma.clj`, `ripple.clj`, `knot.clj`) wires `:gl-area` directly
-instead, matching `plasma.clj`'s own upstream source: its docstring
-describes itself as ported from `gl-demo.core`, with "the GL render-loop
+(`plasma.clj`, `ripple.clj`, `knot.clj`, `gears.clj`, `textured.clj`,
+`picking.clj`) wires `:gl-area` directly instead, matching `plasma.clj`'s
+own upstream source: its docstring describes itself as ported from
+`gl-demo.core`, with "the GL render-loop
 plumbing (on-realize/on-render/on-resize/on-tick) ... otherwise
 unchanged". `orbit.clj` mounted and rendered correctly on the first
 version that actually ran: no crash, no black window, no stalled scene.
