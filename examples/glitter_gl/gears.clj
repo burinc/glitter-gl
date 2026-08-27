@@ -4,10 +4,12 @@
   Model: geom's examples/gl/gears2d.cljs (the idea only; its ClojureScript/
   WebGL windowing does not transfer to glitter-gl's :gl-area). Every other
   example draws geometry glitter-gl.mesh already tessellates for it
-  (primitives.clj/polyhedra.clj shapes go through mesh/->floats). This one
-  gives glitter-gl.polygon/tessellate its first consumer outside mesh.clj:
-  polygon/cog builds a toothed 2D outline, and polygon/tessellate ear-clips
-  that outline directly, with no mesh.clj involved at all.
+  (primitives.clj/polyhedra.clj shapes go through mesh/->floats). mesh.clj
+  never requires glitter-gl.polygon at all, and has its own unrelated
+  tessellate-face over Vec3 meshes; before this file, glitter-gl.polygon/
+  tessellate's only caller anywhere was its own test suite. This one gives
+  it its first real consumer: polygon/cog builds a toothed 2D outline, and
+  polygon/tessellate ear-clips that outline directly.
 
   RENDER PATH: direct :gl-area wiring (like plasma.clj/ripple.clj/knot.clj),
   not glitter-gl.app/reactive-area. Three flat cogs and no lighting is not a
@@ -35,11 +37,13 @@
             [glitter.gtk :as gtk]
             [jolt.ffi :as ffi]))
 
+;; the tooth profile every cog's outline is built from (poly/cog below) --
+;; cog geometry, not a shader constant
+(def ^:private profile [0.9 1.0 1.0 0.9])
+
 ;; --- shared constants: the single source for both the shader-spec's
 ;; documentation-only [type default] pair and on-render's actual
 ;; set-uniforms! values below, so the two cannot drift apart -----------------
-(def ^:private profile [0.9 1.0 1.0 0.9])
-
 (def ^:private color-a [0.85 0.62 0.20])   ; amber
 (def ^:private color-b [0.28 0.55 0.85])   ; sky blue
 (def ^:private color-c [0.78 0.24 0.24])   ; brick red

@@ -7,8 +7,9 @@
   lighting math or a flat color -- plasma.clj/knot.clj/gears.clj never
   sample a texture. This is the first consumer of glitter-gl.gl's texture
   FFI (gl-gen-textures/gl-bind-texture/gl-tex-image-2d/gl-tex-parameter-i/
-  gl-active-texture) outside renderer.clj's internal shadow-map path, and
-  the first shader spec in the project to declare a :sampler2D uniform --
+  gl-active-texture) outside renderer.clj's internal shadow-map path and
+  the test suite (offscreen_test.clj exercises the same fns headlessly),
+  and the first shader spec in the project to declare a :sampler2D uniform --
   shader.clj's gles-sampler-types already knows the type (see adapt-spec),
   it has simply never had a caller before.
 
@@ -64,7 +65,7 @@
     ptr))
 
 ;; --- the shader: a_uv straight through to a texture() sample, no lighting --
-(def ^:private shader-spec
+(def shader-spec
   {:version  "330 core"
    :uniforms {:u_mvp     :mat4
               :u_texture :sampler2D}
