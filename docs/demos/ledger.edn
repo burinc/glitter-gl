@@ -1,4 +1,4 @@
-{"gears" {:sha "e4e4e40a8f65dc9c88ffb655bda9f343c36a1d2999ab45efab872574f25bf59d", :settings [8 10 560 "gif"], :bytes 325425, :at "2026-08-27T12:32:25.503871Z"}
+{"gears" {:sha "d16516a1e9e7def06f878c920e1c879e69ec8862acb442e1d27020947d0794fb", :settings [8 10 560 "gif"], :bytes 325425, :at "2026-08-27T12:32:25.503871Z"}
  "knot" {:sha "56f5be012476a61bbbd583815ae1c0697c96d4ef23628fffd401e9b958e39ad8", :settings [6 8 480 "gif"], :bytes 715325, :at "2026-08-26T02:15:31.080894Z"}
  "orbit" {:sha "328aee53b73da322577becb9b0edc6868cce0545aadb1b665034e5df1eda65f5", :settings [8 10 560 "gif"], :bytes 357291, :at "2026-08-26T02:12:54.677804Z"}
  "plasma-cube" {:sha "ed3065421f2133e09c1ad36427baad05797f8c1c638432fdc4d95e22906a3b5e", :settings [8 10 560 "gif"], :bytes 308927, :at "2026-08-24T22:17:22.170819Z"}
@@ -6,5 +6,5 @@
  "plasma-sphere" {:sha "ed3065421f2133e09c1ad36427baad05797f8c1c638432fdc4d95e22906a3b5e", :settings [8 10 560 "gif"], :bytes 271247, :at "2026-08-24T22:17:22.171352Z"}
  "plasma-tetra" {:sha "ed3065421f2133e09c1ad36427baad05797f8c1c638432fdc4d95e22906a3b5e", :settings [8 10 560 "gif"], :bytes 195373, :at "2026-08-24T22:20:53.861630Z"}
  "ripple" {:sha "4df316fdff62f1c647925f0bdf6fba0ea8aaad25d416a0124e4174e8393d38a8", :settings [5 6 440 "gif"], :bytes 1838091, :at "2026-08-26T02:15:31.080852Z"}
- "textured" {:sha "f5be3ff100d3b40c3e1172fa92c2f7aa91d2227a5344078c59c4b89965e15159", :settings [8 10 560 "gif"], :bytes 836245, :at "2026-08-27T12:32:25.503956Z"}
+ "textured" {:sha "718113f95b650fccec453ee0386b867ba0fb3a96076347f5a539cb04d8dc7b77", :settings [8 10 560 "gif"], :bytes 836245, :at "2026-08-27T12:32:25.503956Z"}
  "picking" {:sha "0c7d2aaa8cebd466d624e70e7e37796770b5504e71c24f999a9a88a29bfe5715", :settings [8 10 560 "gif"], :bytes 191910, :at "2026-08-27T12:41:53.243704Z"}}
