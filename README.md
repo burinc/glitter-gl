@@ -74,8 +74,12 @@ jolt -M:test           # unit suite
 jolt -M:gl-area-smoke  # live-GTK smoke: :gl-area construct/realize/render/resize
 ```
 
-**In CI, invoke the alias form** (`jolt -M:test`, not `jolt test`). Same
-exit-code caveat as glitter itself (see glitter's own README).
+**In CI, invoke the alias form** (`jolt -M:test`, not `jolt test`). On every
+released jolt the task shorthand swallows the child's exit status, so a failing
+suite reports green. Fixed on jolt `main` after `v0.7.27` but not yet in a
+tagged release, so the alias form stays the safe default. See
+[`docs/guide/testing-and-tasks.md`](docs/guide/testing-and-tasks.md) for the
+probe.
 
 ### Or via `bb`
 

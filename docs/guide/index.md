@@ -119,8 +119,9 @@ each call, exactly like any other glitter view function.
   render-to-texture round trip and its designed-to-skip behavior on a
   display-less machine.
   Documents the `jolt -M:<alias>` vs `jolt <task>` exit-code trap
-  (reverified fresh against the currently-installed `v0.7.23`, not just
-  carried forward from the original `v0.6.3` finding) and the
+  (reproduced across `v0.6.3` and `v0.7.23`, and confirmed fixed on
+  jolt `main` at `v0.7.27-22`, though no tagged release carries the fix
+  yet) and the
   quality-tooling surface (`bb lint`, `bb lsp:*`, the FFI-aware
   clj-kondo hook, `bb verify` vs. the stricter git pre-commit hook).
 - [`limitations.md`](limitations.md): every known v1 gap, each with the

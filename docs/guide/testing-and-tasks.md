@@ -109,10 +109,9 @@ for anyone bypassing `bb` and driving `jolt` directly, not a live bug in
 this repo's own tasks.
 
 This was originally verified against jolt v0.6.3 (in glitter, where the
-finding was first made). **The installed `jolt` on this machine is
-`v0.7.23-10-gc50a3717`**, so it was reverified fresh for this page rather
-than carried forward on the older claim: a minimal `deps.edn` with a task
-shelling to a process that exits 7:
+finding was first made), then reverified against `v0.7.23-10-gc50a3717`
+rather than carried forward on the older claim: a minimal `deps.edn` with a
+task shelling to a process that exits 7:
 
 ```
 $ jolt fail            # task form
@@ -121,8 +120,12 @@ $ jolt -M:fail          # alias form
 EXIT(alias form)=7
 ```
 
-Same result on the newer version: the task form swallows the child's exit
-code, the alias form propagates it correctly. **Always use `-M:<alias>`
+**This is fixed on jolt `main`.** Re-running the same probe under
+`v0.7.27-22-g502008db` gives `EXIT(task form)=7`: jolt now exits with the
+command's status for a string task body. The fix sits under `[Unreleased]`
+in jolt's own CHANGELOG and no tagged release contains it yet, so anyone on
+`v0.7.27` or earlier still hits the swallow. Keep using `-M:<alias>` until
+the fix ships in a release. **Always use `-M:<alias>`
 (or a `bb.edn` task, which already does) to gate a build or a commit.**
 The bare task form is fine for interactive use where a human is watching
 stdout directly, and nowhere else.
