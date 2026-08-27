@@ -9,7 +9,7 @@
   4. :on-resize fires with the window's actual allocated size.
 
   Mirrors examples/glitter/smoke.clj's and scale_smoke.clj's shape in
-  ~/dev/glitter — :auto-quit-ms closes the window after a fixed delay so
+  glitter — :auto-quit-ms closes the window after a fixed delay so
   this exits on its own for CI."
   (:require [glitter.app :as app]
             [glitter.core :as core]

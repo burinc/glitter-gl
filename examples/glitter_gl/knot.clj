@@ -13,7 +13,7 @@
   the exact plumbing plasma.clj already established for a single lit
   mesh, unchanged.
 
-  Idea from ~/dev/geom/examples/gl/torus_knot.cljs (thi.ng/geom's
+  Idea from thi.ng/geom's examples/gl/torus_knot.cljs (its
   `cinquefoil` + `ptf/sweep-mesh`), reimplemented rather than ported: the
   ClojureScript/WebGL/parallel-transport-frame plumbing does not transfer,
   only the parametric idea of a torus knot swept as a tube. This example's

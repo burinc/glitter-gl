@@ -7,11 +7,11 @@ body:
       value: |
         Please check [`docs/guide/limitations.md`](https://github.com/burinc/glitter-gl/blob/main/docs/guide/limitations.md)
         first. A couple of behaviours that look like bugs are documented,
-        deliberate v1 scope calls with the reasoning recorded — for example,
-        `reactive-area` has no live demo exercising it yet, and `:gl-area`'s
-        `:on-*` props emit a cosmetic dev-time hiccup warning on every render
-        that cannot be silenced from application code (see
-        `CONTRIBUTING.md` invariant #10).
+        deliberate v1 scope calls with the reasoning recorded. For example,
+        `:gl-area`'s `:on-*` props emit a cosmetic dev-time hiccup warning on
+        every render that cannot be silenced from application code (see
+        `CONTRIBUTING.md` invariant #10), and calling `reactive-area` without
+        `:materials` renders every mesh mid-grey.
 
   - type: textarea
     id: what-happened
@@ -43,7 +43,7 @@ body:
         paths have completely different debugging stories, so narrowing this
         down first is the most useful triage step.
       options:
-        - Headless (bb check) — no display needed
+        - Headless (bb check), no display needed
         - Only with live GTK (bb smokes / a real app)
         - Both
         - Not sure
@@ -61,7 +61,7 @@ body:
       value: |
         ```
         $ uname -sm
-        (paste here — OS and CPU architecture)
+        (paste here, OS and CPU architecture)
 
         $ jolt --version
         (paste here)
@@ -79,7 +79,7 @@ body:
     attributes:
       label: Does the unit suite pass?
       description: |
-        `bb test` runs headlessly — no display needed. If it fails too, the
+        `bb test` runs headlessly, no display needed. If it fails too, the
         problem is probably in the geometry/matrix/mesh/shader layer rather
         than the GTK widget layer, which is a useful thing to know up front.
       value: |

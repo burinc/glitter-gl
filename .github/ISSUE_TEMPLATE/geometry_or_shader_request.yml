@@ -7,10 +7,10 @@ body:
       value: |
         The 22 files making up the geometry/matrix/mesh/shader/GL layer
         (`vector.clj` through `renderer.clj`) are verbatim ports from
-        glimmer-gl, held byte-stable on purpose — see
+        glimmer-gl, held byte-stable on purpose, see
         `CONTRIBUTING.md` invariant #1. A request to *change* one of those
         files' behavior is a different, more careful conversation than a
-        request to *add* a new file — say which kind this is below.
+        request to *add* a new file, say which kind this is below.
 
   - type: textarea
     id: what
@@ -27,7 +27,7 @@ body:
       description: |
         Check [thi.ng/geom](https://github.com/thi-ng/geom) and
         [glimmer-gl](https://github.com/jolt-lang/glimmer-gl) first. If either
-        already has it, link the source — a verbatim port is a much cheaper,
+        already has it, link the source, a verbatim port is a much cheaper,
         faster conversation than new code written from scratch.
       placeholder: "Link, or \"not that I could find\""
     validations:
@@ -53,7 +53,7 @@ body:
       label: Does this add a new file, or change an existing verbatim-port file's behavior?
       description: |
         A behavioral change to one of the 22 existing verbatim-port files needs
-        its own reviewed commit and a `NOTICE.md` update — it can't be folded
+        its own reviewed commit and a `NOTICE.md` update, it can't be folded
         into another change (invariant #1). A new file has no such constraint.
       options:
         - Adds a new file

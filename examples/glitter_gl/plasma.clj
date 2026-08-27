@@ -3,7 +3,7 @@
   plasma+stripes procedural shader (glitter-gl.plasma-shader), driven by a
   reactive control panel — the GL analogue of glitter's todo demo.
 
-  Ported from gl-demo.core (~/dev/jolt-examples/glimmer-gl-app), converting
+  Ported from gl-demo.core (the glimmer-gl-app jolt example), converting
   its reactive-cell control panel (glimmer.ratom/atom + closures) into
   glitter's single state atom + data-driven action dispatch. The GL
   render-loop plumbing (on-realize/on-render/on-resize/on-tick) is

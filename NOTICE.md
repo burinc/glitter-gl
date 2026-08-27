@@ -1,7 +1,7 @@
 glitter-gl
 ==========
 
-An OpenGL geometry, matrix, and shader library for the [glitter](../glitter)
+An OpenGL geometry, matrix, and shader library for the [glitter](https://github.com/burinc/glitter)
 GTK4 renderer for Jolt, ported from
 [glimmer-gl](https://github.com/jolt-lang/glimmer-gl), which was itself
 ported from thi.ng/geom.
@@ -48,7 +48,7 @@ plain function of `state`), `app.clj` (`reactive-area` takes glitter's
 state atom directly instead of reactive cells).
 
 Demo (`examples/glitter_gl/`), ported from
-`~/dev/jolt-examples/glimmer-gl-app`'s `gl_demo/*.clj`: `plasma_shader.clj`
+the `glimmer-gl-app` jolt example's `gl_demo/*.clj`: `plasma_shader.clj`
 and `check.clj` near-verbatim; `plasma.clj` (from `gl_demo/core.clj`)
 rewrites its reactive-cell control panel as glitter's state atom + action
 dispatch, keeping the GL render-loop plumbing's direct state-atom
@@ -107,13 +107,13 @@ every GL call are original to this project, written against
 WebGL. Calling that a port, verbatim or adapted, would misrepresent what
 actually crossed over and understate what didn't.
 
-- **`ripple.clj`**: idea from `~/dev/geom/examples/jogl/fullscreen_shader.clj`
+- **`ripple.clj`**: idea from [thi.ng/geom](https://github.com/thi-ng/geom)'s `examples/jogl/fullscreen_shader.clj`
   (a full-screen fragment shader over a single quad, no mesh, no
   lighting, no camera). The JOGL windowing and GL setup do not transfer;
   only the "one quad, all the interest in the fragment shader" shape
   does. The shader itself, composed through `glitter-gl.shader/merge-specs`
   from a ripple module and a color module, is original to this file.
-- **`knot.clj`**: idea from `~/dev/geom/examples/gl/torus_knot.cljs`
+- **`knot.clj`**: idea from [thi.ng/geom](https://github.com/thi-ng/geom)'s `examples/gl/torus_knot.cljs`
   (thi.ng/geom's `cinquefoil` curve swept into a tube via
   `ptf/sweep-mesh`, a parallel-transport-frame construction). The
   ClojureScript/WebGL plumbing and the parallel-transport-frame
