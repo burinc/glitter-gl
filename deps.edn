@@ -44,6 +44,7 @@
            :orbit         {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.orbit"]}
            :knot          {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.knot"]}
            :gears         {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.gears"]}
+           :textured      {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.textured"]}
            :check         {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.check"]}
            :gl-area-smoke {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.gl-area-smoke"]}}
 
@@ -53,5 +54,6 @@
          orbit         "jolt -M:orbit"
          knot          "jolt -M:knot"
          gears         "jolt -M:gears"
+         textured      "jolt -M:textured"
          check         "jolt -M:check"
          gl-area-smoke "jolt -M:gl-area-smoke"}}
