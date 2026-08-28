@@ -1,8 +1,27 @@
 ;; clojure-lsp configuration for glitter-gl.
 ;;
-;; glitter-gl is a library — its whole point is a public API other projects
+;; glitter-gl is a library, and its whole point is a public API other projects
 ;; call, not one this repo calls internally end-to-end. Without this,
 ;; `clojure-lsp diagnostics` flags every genuinely-public entry point as
 ;; "unused", which is wrong for a library and makes the linter noisy rather
 ;; than a useful signal.
-{:linters {:clojure-lsp/unused-public-var {:level :off}}}
+;;
+;; :source-aliases is pinned to #{:test}, dropping :dev from clojure-lsp's
+;; default #{:dev :test}. clojure-lsp discovers the classpath by shelling out
+;; to `clojure -A:<source-aliases> -Spath`, so the default made it run
+;; `clojure -A:test:dev -Spath`. deps.edn's :dev alias exists only for the
+;; co-development loop: it overrides the pinned glitter git coordinate back to
+;; :local/root "../glitter", a sibling checkout that, as deps.edn's own comment
+;; says, nobody outside the author's machine has. So on any machine without
+;; that sibling the lookup died with
+;;
+;;   [ERROR] Classpath lookup failed when running `clojure -A:test:dev -Spath`.
+;;   Error building classpath. Local lib io.github.burinc/glitter not found: ../glitter
+;;
+;; and `clojure-lsp format --dry` exited non-zero. Found live: it passed on the
+;; author's machine and failed on the first CI run, then reproduced exactly in
+;; a fresh clone placed where no ../glitter sits next to it. Dropping :dev
+;; costs nothing here, since :test is the alias carrying :extra-paths ["test"]
+;; and is the only one clojure-lsp needs for source-path discovery.
+{:linters {:clojure-lsp/unused-public-var {:level :off}}
+ :source-aliases #{:test}}
