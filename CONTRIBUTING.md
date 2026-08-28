@@ -72,10 +72,11 @@ gets a real GL context. It reports GL 4.5, well past the 3.3 that
 `glitter-gl.offscreen-test` asserts, so the render-to-texture round trip
 and the live `[:gl-area]` mount both genuinely execute there.
 
-That job is informational for now, meaning it reports but cannot fail
-the build. Treat it as a signal rather than a gate, and keep running
-`bb smokes` yourself if you touched `gtk.clj`, `scene.clj` or `app.clj`.
-Software rendering is not the same as your driver.
+That job can fail the build, as of 9 consecutive green runs while it was
+informational. Keep running `bb smokes` yourself anyway if you touched
+`gtk.clj`, `scene.clj` or `app.clj`: llvmpipe agreeing with your driver
+is not the same as your driver agreeing, and a gate passing is not the
+same as the thing working.
 
 `gl-area-smoke` gives the window 2000ms to realize and paint before its
 auto-quit timer closes it. That started at 500, which was fine on a warm

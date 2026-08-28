@@ -224,10 +224,10 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, the ten numbered
 invariants this project does not regress, and how to add a widget.
 Before opening a PR, run the four local gates: `bb test`, `bb lint`,
 `bb lsp:format-check`, and `bb smokes`. CI runs the first three plus
-`bb lsp:clean-ns-check` on every PR, and a second informational job
-exercises real OpenGL under Xvfb on mesa's llvmpipe. `bb smokes` is
-still worth running yourself, since software rendering is not your
-driver.
+`bb lsp:clean-ns-check` on every PR, and a second job exercises real
+OpenGL under Xvfb on mesa's llvmpipe. Both can fail the build. `bb
+smokes` is still worth running yourself, since software rendering is not
+your driver.
 
 ## Status
 

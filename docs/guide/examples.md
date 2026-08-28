@@ -93,9 +93,10 @@ It's CI-safe in two senses. `bb.edn`'s `smokes` task runs it via
 `jolt -M:gl-area-smoke`, the exit-code-propagating alias form rather than
 the task form (see [`testing-and-tasks.md`](testing-and-tasks.md)), and
 it closes its own window on a timer instead of waiting for a human. CI's
-`gl` job does run it, under Xvfb on mesa's llvmpipe. That job is
-informational, so a contributor running it by hand against a real driver
-is still the coverage that counts.
+`gl` job runs it, under Xvfb on mesa's llvmpipe, and a failure there
+blocks the merge. Running it by hand against a real driver still adds
+something CI cannot: llvmpipe is a software rasterizer, not the GL
+implementation any user will have.
 
 ## `plasma_shader.clj`: composed, not run
 
