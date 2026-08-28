@@ -68,18 +68,21 @@
 
 (def ^:private keyval-kw
   "GDK keyval -> movement keyword."
-  {0xff52 :up,
+  {;; arrows
+   0xff52 :up,
    0xff54 :down,
    0xff51 :left,
-   0xff53 :right   ; arrows
+   0xff53 :right
+   ;; w a (lower/upper)
    0x77 :w,
    0x57 :w,
    0x61 :a,
-   0x41 :a                     ; w a (lower/upper)
+   0x41 :a
+   ;; s d
    0x73 :s,
    0x53 :s,
    0x64 :d,
-   0x44 :d                     ; s d
+   0x44 :d
    0xff1b :escape,
    0x20 :space,
    0xff0d :enter})
