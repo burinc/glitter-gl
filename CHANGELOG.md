@@ -170,8 +170,8 @@ pass.
   `gates` job is headless: unit suite, clj-kondo, clojure-lsp format and
   clean-ns, plus a check that no tracked Markdown file has gained an
   em-dash. It lints with `lint:strict`, so warnings fail the build too.
-- **An OpenGL job that really runs OpenGL.** A second, informational job
-  runs the suite and `bb smokes` under Xvfb on mesa's llvmpipe, which
+- **An OpenGL job that really runs OpenGL.** A second required job runs
+  the suite and `bb smokes` under Xvfb on mesa's llvmpipe, which
   reports GL 4.5, so the render-to-texture round trip and a live
   `[:gl-area]` mount both execute on a runner with no GPU. It guards
   against being decoration: `offscreen-test` passes when it skips, by

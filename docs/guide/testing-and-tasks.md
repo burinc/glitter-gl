@@ -89,10 +89,9 @@ that happen; it falls out of `shell`'s default behavior.
 
 It runs in **both** places, and the two are not equivalent. CI's `gl` job
 gives it a display via Xvfb and a GL context via mesa's llvmpipe, so the
-window really opens there (see "CI status" below). That job is
-informational though, so it cannot block a regression, and software
-rendering is not the driver anyone actually ships on. Run it yourself
-before opening a PR; see [`examples.md`](examples.md) for what each of
+window really opens there, and a failure blocks the merge (see "CI
+status" below). Software rendering is still not the driver anyone
+actually ships on, so run it yourself before opening a PR; see [`examples.md`](examples.md) for what each of
 the two checks it runs individually pins.
 
 ## The `jolt -M:<alias>` vs `jolt <task>` exit-code trap
@@ -265,8 +264,8 @@ keeping clean.
 llvmpipe as a software rasterizer, so a runner with no GPU still gets a
 real GL context. It reports GL 4.5, comfortably past the 3.3 that
 `glitter-gl.offscreen-test` asserts and the `#version 330 core` shaders
-need. It is informational, meaning it reports but cannot fail the build,
-until it has more run history behind it.
+need. It is required: a red `gl` job blocks the merge, promoted after 9
+consecutive green runs while it was informational.
 
 There is one trap worth knowing before you read that job's output.
 `offscreen-test` **passes when it skips**: printing `SKIP offscreen GL:
@@ -278,5 +277,5 @@ it, then checks a real version line appeared. If you change what that
 test prints, change the grep in the workflow with it.
 
 Keep running `bb smokes` locally anyway if you touched `gtk.clj`,
-`scene.clj` or `app.clj`. Software rendering is not your driver, and the
-informational job cannot block a regression.
+`scene.clj` or `app.clj`. Software rendering is not your driver, and a
+green gate says llvmpipe was happy, not that a user's GL stack will be.

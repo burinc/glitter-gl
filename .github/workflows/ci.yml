@@ -12,9 +12,9 @@ name: CI
 #   GL: ..." when there is none, which is the expected outcome there.
 #
 #   `gl` closes exactly that hole, under Xvfb and mesa's llvmpipe, and asserts
-#   the skip did NOT happen. It is informational for now because whether
-#   llvmpipe reaches GL 3.3 on a runner is still being established. See that
-#   job's own header.
+#   the skip did NOT happen. It is required too, as of 9 consecutive green
+#   runs answering the question it was added to settle. See that job's own
+#   header.
 #
 # The lint gate here is `bb lint:strict`, which fails on warnings as well as
 # errors. That is stricter than glitter's own CI, which uses an errors-only
@@ -225,10 +225,19 @@ jobs:
   # rasterizer, and between them GDK can hand out a real GL context on a runner
   # with no GPU.
   #
-  # Whether llvmpipe gives GDK a context at GL 3.3 or better (what
-  # offscreen-test asserts, and what the #version 330 core shaders need) is the
-  # open question this job exists to answer. It is allowed to fail while that
-  # is being settled: see continue-on-error below.
+  # The question this job was added to answer, whether llvmpipe gives GDK a
+  # context at GL 3.3 or better (what offscreen-test asserts, and what the
+  # #version 330 core shaders need), is answered: it reports GL 4.5. The job
+  # ran green 9 times out of 9 while informational, so it is now required and
+  # a red run blocks the merge.
+  #
+  # The likeliest source of a false red is timing rather than GL. gl-area-smoke
+  # gives the window 2000ms to realize and paint before its auto-quit timer
+  # closes it, which is generous under llvmpipe on a warm runner and untested
+  # against a badly contended one. If this job starts flapping, raise that
+  # budget in examples/glitter_gl/gl_area_smoke.clj before reaching for
+  # continue-on-error: a missed frame leaves :rendered? false, which looks
+  # exactly like a real widget-layer regression.
   #
   # Guarding against a green no-op is the whole design here. offscreen-test
   # PASSES when it skips, by design, because a machine with no display is a
@@ -238,9 +247,8 @@ jobs:
   # GL ran has to check that GL ran.
   # ---------------------------------------------------------------------------
   gl:
-    name: OpenGL under Xvfb (informational)
+    name: OpenGL under Xvfb
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     env:
       DISPLAY: ":99"
