@@ -87,11 +87,13 @@ sanity) in sequence, and **stops at the first failure**. `bb.edn`'s
 first non-zero-exit `shell` call, so there's no extra control flow making
 that happen; it falls out of `shell`'s default behavior.
 
-It's a **local gate, not a CI one**, for one direct reason: `gl-area-smoke`
-opens a real GTK window, and this project has no CI wired up to give it a
-display (see "CI status" below). Run it yourself before opening a PR; see
-[`examples.md`](examples.md) for what each of the two checks it runs
-individually pins.
+It runs in **both** places, and the two are not equivalent. CI's `gl` job
+gives it a display via Xvfb and a GL context via mesa's llvmpipe, so the
+window really opens there (see "CI status" below). That job is
+informational though, so it cannot block a regression, and software
+rendering is not the driver anyone actually ships on. Run it yourself
+before opening a PR; see [`examples.md`](examples.md) for what each of
+the two checks it runs individually pins.
 
 ## The `jolt -M:<alias>` vs `jolt <task>` exit-code trap
 
@@ -223,7 +225,19 @@ tool: run `bb lsp:format` (or `bb lsp:clean-ns`) and re-commit.
 `spit`. It is not tracked in the repo, so each clone opts in with its
 own `bb hooks:install` run. The FAST hook (`bb.edn`'s own doc string calls
 it "~2s") runs clj-kondo errors-only, `clojure-lsp format --dry`, and
-`clojure-lsp clean-ns --dry`. `bb hooks:install:full` adds a fourth step,
+`clojure-lsp clean-ns --dry`.
+
+Worth knowing which files those three actually look at, because the two
+tools disagree and it is not obvious. clj-kondo takes explicit directory
+arguments (`src test examples`), so it has always covered the demos.
+clojure-lsp instead derives its source paths from the `:extra-paths` of
+aliases it recognizes, which are `:dev` and `:test` by default. Every demo
+alias in `deps.edn` declares `:extra-paths ["examples"]`, but none of them
+is named `:dev` or `:test`, so `examples/` was invisible to `format --dry`
+and `clean-ns --dry` and quietly drifted. `.lsp/config.edn` now pins
+`:source-paths` to `#{"src" "test" "examples"}`, so all three steps cover
+the same tree. If you edit a demo and the hook rejects the commit on step
+2 or 3 where it never used to, that is why. `bb hooks:install:full` adds a fourth step,
 the complete `jolt -M:test` suite, measured on this machine just now at
 roughly 5.6 seconds wall time (`time bb test` → `5.586 total`), so budget
 single-digit seconds more per commit with the full hook installed versus
@@ -235,8 +249,34 @@ correctly.
 
 ## CI status
 
-**Not yet wired, deliberately.** This is a scope decision, not an
-oversight, pending the repo going public and free CI runners applying to
-it. Until then, `bb verify` plus `bb smokes` (run by a human, locally,
-before opening a PR) is the whole gate. `CONTRIBUTING.md`'s "Before you
-open a PR" section lists the exact four commands.
+Wired, in `.github/workflows/ci.yml`, as two jobs with different jobs to
+do. Both run on pull requests to `main`, pushes to `main`, and manual
+dispatch.
+
+**`gates` is headless and is the required one.** It runs `bb test`, `bb
+lint:strict`, `bb lsp:format-check`, `bb lsp:clean-ns-check`, and a check
+that no tracked Markdown file has gained an em-dash. Note that it lints
+with `lint:strict`, which fails on warnings as well as errors, so a
+finding your local `bb lint` merely reports will still stop the build.
+The tree carries zero findings, so the stricter gate is the one worth
+keeping clean.
+
+**`gl` runs the same suite plus `bb smokes` under Xvfb**, with mesa's
+llvmpipe as a software rasterizer, so a runner with no GPU still gets a
+real GL context. It reports GL 4.5, comfortably past the 3.3 that
+`glitter-gl.offscreen-test` asserts and the `#version 330 core` shaders
+need. It is informational, meaning it reports but cannot fail the build,
+until it has more run history behind it.
+
+There is one trap worth knowing before you read that job's output.
+`offscreen-test` **passes when it skips**: printing `SKIP offscreen GL:
+...` and moving on is deliberate, because a machine with no display is a
+legitimate environment rather than a failure. That makes a green suite
+worthless as evidence GL ran, and it would make a naive Xvfb job pure
+decoration. So the job greps its own output for that banner and fails on
+it, then checks a real version line appeared. If you change what that
+test prints, change the grep in the workflow with it.
+
+Keep running `bb smokes` locally anyway if you touched `gtk.clj`,
+`scene.clj` or `app.clj`. Software rendering is not your driver, and the
+informational job cannot block a regression.

@@ -147,9 +147,14 @@ pass.
   lsp:format`/`format-check` and `lsp:clean-ns`/`clean-ns-check`
   (clojure-lsp), `bb verify` as a pre-commit-shaped bundle, and `bb
   check:positional-args`/`:strict` flagging functions with 3+ positional
-  arguments. The codebase is uniformly formatted, including the 22 files
-  ported verbatim from glimmer-gl, since a project-wide reformat changes
-  whitespace and `:require` ordering only, never logic.
+  arguments. The codebase is uniformly formatted, including `examples/`
+  and the 22 files ported verbatim from glimmer-gl, since a project-wide
+  reformat changes whitespace and `:require` ordering only, never logic.
+  `examples/` was outside that net for a while: clojure-lsp derives its
+  source paths from the `:extra-paths` of aliases it recognizes, and no
+  demo alias is named `:dev` or `:test`, so the directory was invisible to
+  it and drifted unnoticed. `.lsp/config.edn` now pins `:source-paths`
+  explicitly.
 - **`.clj-kondo/hooks/jolt_ffi.clj`** rewrites `jolt.ffi/defcfn` into an
   equivalent `defn` so clj-kondo and clojure-lsp can see through the FFI
   macro. Without it, every FFI-bound name in `gl.clj`/`gtk.clj` reports as
@@ -160,6 +165,18 @@ pass.
   suite), so formatting and namespace hygiene stay enforced on every
   commit, not just when someone remembers to run `bb verify` by hand.
 - **`bb nrepl`** starts a Jolt nREPL server for interactive development.
+- **GitHub Actions CI** (`.github/workflows/ci.yml`), as two jobs on pull
+  requests to `main`, pushes to `main`, and manual dispatch. The required
+  `gates` job is headless: unit suite, clj-kondo, clojure-lsp format and
+  clean-ns, plus a check that no tracked Markdown file has gained an
+  em-dash. It lints with `lint:strict`, so warnings fail the build too.
+- **An OpenGL job that really runs OpenGL.** A second, informational job
+  runs the suite and `bb smokes` under Xvfb on mesa's llvmpipe, which
+  reports GL 4.5, so the render-to-texture round trip and a live
+  `[:gl-area]` mount both execute on a runner with no GPU. It guards
+  against being decoration: `offscreen-test` passes when it skips, by
+  design, so the job greps its own output for the skip banner and fails on
+  it rather than trusting a green suite.
 
 ### Documentation
 
@@ -169,8 +186,8 @@ pass.
   testing and tasks, and every known v1 limitation with the reasoning
   behind leaving it.
 - **`CONTRIBUTING.md`** with ten numbered invariants this project does not
-  regress, plus build/test setup, the four local PR gates, the architecture
-  diagram, and how to add a widget.
+  regress, plus build/test setup, the PR gates and which of them CI runs
+  for you, the architecture diagram, and how to add a widget.
 - **`NOTICE.md`**: a file-by-file attribution ledger tracking which files
   are verbatim ports (22, from glimmer-gl, itself from thi.ng/geom), which
   are adapted for glitter's model, and which are new to this project.
