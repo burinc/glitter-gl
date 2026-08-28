@@ -52,9 +52,21 @@
 ;; adjacent cogs counter-rotate; radii/positions are spaced so the three
 ;; outlines never overlap.
 (def ^:private cogs
-  [{:radius 0.9  :teeth 8  :pos [-1.7  0.0] :spin  0.9 :color color-a}
-   {:radius 0.6  :teeth 6  :pos [0.0  0.0] :spin -1.3 :color color-b}
-   {:radius 0.75 :teeth 10 :pos [1.65 0.0] :spin  0.9 :color color-c}])
+  [{:radius 0.9
+    :teeth 8
+    :pos [-1.7  0.0]
+    :spin  0.9
+    :color color-a}
+   {:radius 0.6
+    :teeth 6
+    :pos [0.0  0.0]
+    :spin -1.3
+    :color color-b}
+   {:radius 0.75
+    :teeth 10
+    :pos [1.65 0.0]
+    :spin  0.9
+    :color color-c}])
 
 ;; --- the shader: a plain flat fill, no lighting, no varyings -- u_mvp alone
 ;; places each cog's own vertices, u_color alone fills it ---------------------
@@ -129,7 +141,8 @@
       (println "glitter-gl.gears: failed to build GL program (see info log above)")
       (let [meshes
             (mapv
-             (fn [{:keys [floats] :as spec}]
+             (fn [{:keys [floats]
+                   :as spec}]
                (let [idp (ffi/alloc (ffi/sizeof :uint))]
                  (gl/gl-gen-vertex-arrays 1 idp)
                  (let [vao (ffi/read idp :uint)]
@@ -141,7 +154,8 @@
                        (setup-attribs! shader)
                        (assoc spec :vao vao :vbo vbo :count n))))))
              cog-meshes)]
-        (swap! gl-state assoc area {:shader shader :meshes meshes})
+        (swap! gl-state assoc area {:shader shader
+                                    :meshes meshes})
         (println "glitter-gl.gears: GL ready, program" (:program shader)
                  "cogs" (count meshes))))))
 
@@ -167,7 +181,8 @@
         (let [[px py] pos
               model  (m/mul (m/translation px py 0.0) (m/rotate-z (* t spin)))
               mvp    (m/mul proj model)]
-          (sh/set-uniforms! shader {:u_mvp mvp :u_color color})
+          (sh/set-uniforms! shader {:u_mvp mvp
+                                    :u_color color})
           (gl/gl-bind-vertex-array vao)
           (gl/gl-draw-arrays gl/GL-TRIANGLES 0 count))))))
 

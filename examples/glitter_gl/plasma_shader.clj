@@ -24,7 +24,8 @@
               :u_light [:vec3 [0.4 0.85 0.6]]}
    :attribs  {:a_pos    [:vec3 0]
               :a_normal [:vec3 1]}
-   :varying  {:v_obj :vec3 :v_normal :vec3}
+   :varying  {:v_obj :vec3
+              :v_normal :vec3}
    :vs-main  [[:set :v_obj :a_pos]
               [:set :v_normal [:* [:mat3 :u_model] :a_normal]]
               [:set :gl_Position [:* :u_mvp [:vec4 :a_pos 1.0]]]]})
@@ -32,7 +33,8 @@
 ;; --- module 1: domain-warped plasma ------------------------------------------
 ;; Helper functions go in :prelude since the data IR only compiles main() bodies.
 (def plasma-module
-  {:uniforms {:u_scale [:float 3.0] :u_warp [:float 0.5]}
+  {:uniforms {:u_scale [:float 3.0]
+              :u_warp [:float 0.5]}
    :prelude
    "// Inigo Quilez cosine palette.
 vec3 palette(float t) {

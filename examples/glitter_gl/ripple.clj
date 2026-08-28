@@ -59,7 +59,8 @@
 
 ;; --- module 1: concentric ripples from a drifting origin --------------------
 (def ^:private ripple-module
-  {:uniforms {:u_freq [:float ripple-freq] :u_speed [:float ripple-speed]}
+  {:uniforms {:u_freq [:float ripple-freq]
+              :u_speed [:float ripple-speed]}
    :prelude
    "// A slow Lissajous drift for the ripple origin, so the rings never
 // settle into a static pattern.
@@ -77,7 +78,8 @@ float ripple_wave(vec2 uv, float t) {
 
 ;; --- module 2: wave value -> color, plus a mild corner vignette -------------
 (def ^:private color-module
-  {:uniforms {:u_deep [:vec3 color-deep] :u_bright [:vec3 color-bright]}
+  {:uniforms {:u_deep [:vec3 color-deep]
+              :u_bright [:vec3 color-bright]}
    :prelude
    "vec3 ripple_color(float wave) {
   // wave's full [-1, 1] range maps to the full deep-to-bright range, so
@@ -157,7 +159,10 @@ float vignette(vec2 uv) {
             (gl/gl-bind-vertex-array vao)
             (let [n (upload! vbo)]
               (setup-attribs! shader)
-              (swap! gl-state assoc area {:shader shader :vao vao :vbo vbo :count n})
+              (swap! gl-state assoc area {:shader shader
+                                          :vao vao
+                                          :vbo vbo
+                                          :count n})
               (println "glitter-gl.ripple: GL ready, program" (:program shader)
                        "vao" vao "verts" n))))))))
 

@@ -87,7 +87,13 @@
   are closed loops. p and q should be coprime for a single closed curve
   (not checked here). Pure: no GL, just Vec3 faces."
   [{:keys [p q R r tube-r samples sides]
-    :or {p 2 q 3 R 1.6 r 0.55 tube-r 0.22 samples 200 sides 12}}]
+    :or {p 2
+         q 3
+         R 1.6
+         r 0.55
+         tube-r 0.22
+         samples 200
+         sides 12}}]
   (let [two-pi (* 2.0 Math/PI)
         rings  (mapv (fn [w]
                        (let [t (* two-pi (/ (double w) samples))
@@ -123,13 +129,15 @@
               :u_light [:vec3 light]}
    :attribs  {:a_pos    [:vec3 0]
               :a_normal [:vec3 1]}
-   :varying  {:v_obj :vec3 :v_normal :vec3}
+   :varying  {:v_obj :vec3
+              :v_normal :vec3}
    :vs-main  [[:set :v_obj :a_pos]
               [:set :v_normal [:* [:mat3 :u_model] :a_normal]]
               [:set :gl_Position [:* :u_mvp [:vec4 :a_pos 1.0]]]]})
 
 (def ^:private color-module
-  {:uniforms {:u_deep [:vec3 color-deep] :u_bright [:vec3 color-bright]}
+  {:uniforms {:u_deep [:vec3 color-deep]
+              :u_bright [:vec3 color-bright]}
    :prelude
    "vec3 knot_color(vec3 p) {
   float a = atan(p.y, p.x);
@@ -206,7 +214,10 @@
             (gl/gl-bind-vertex-array vao)
             (let [n (upload! vbo)]
               (setup-attribs! shader)
-              (swap! gl-state assoc area {:shader shader :vao vao :vbo vbo :count n})
+              (swap! gl-state assoc area {:shader shader
+                                          :vao vao
+                                          :vbo vbo
+                                          :count n})
               (println "glitter-gl.knot: GL ready, program" (:program shader)
                        "vao" vao "verts" n))))))))
 
