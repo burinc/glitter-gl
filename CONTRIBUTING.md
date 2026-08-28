@@ -75,9 +75,15 @@ and the live `[:gl-area]` mount both genuinely execute there.
 That job is informational for now, meaning it reports but cannot fail
 the build. Treat it as a signal rather than a gate, and keep running
 `bb smokes` yourself if you touched `gtk.clj`, `scene.clj` or `app.clj`.
-Software rendering is not the same as your driver, and a 500ms
-auto-quit that is comfortable on a warm runner is not proof it will be
-comfortable on a busy one.
+Software rendering is not the same as your driver.
+
+`gl-area-smoke` gives the window 2000ms to realize and paint before its
+auto-quit timer closes it. That started at 500, which was fine on a warm
+machine with a real driver and left no margin under llvmpipe on a shared
+runner. A frame that misses the deadline reads as a widget-layer
+regression rather than a slow frame, which is a bad failure to debug, so
+the ceiling is deliberately generous. It costs nothing when things are
+fast, since the window closes on the timer either way.
 
 One thing worth knowing if you ever read that job's output:
 `glitter-gl.offscreen-test` **passes when it skips**. Printing `SKIP

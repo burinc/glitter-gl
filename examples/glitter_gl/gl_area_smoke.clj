@@ -33,9 +33,17 @@
 (core/set-dispatch! (fn [_event _actions] nil))
 
 (defn -main [& _]
+  ;; 2000ms, not the 500 this started with. The window has to realize AND
+  ;; paint a frame before the timer closes it, and CI runs this under Xvfb on
+  ;; mesa's llvmpipe, where every pixel is rasterized on the CPU on a shared
+  ;; runner. 500ms was comfortable on a warm machine with a real driver and
+  ;; had no margin anywhere else, which makes a missed :rendered? look like a
+  ;; widget-layer regression rather than a slow frame. The cost of the higher
+  ;; ceiling is nothing on a fast machine: the window closes on the timer, so
+  ;; this only ever spends the full budget when something is genuinely slow.
   (app/run (fn [window] (gtk/mount! window view (atom {})))
            :title "glitter-gl :gl-area smoke" :width 320 :height 240
-           :app-id "glitter-gl.gl-area-smoke" :auto-quit-ms 500)
+           :app-id "glitter-gl.gl-area-smoke" :auto-quit-ms 2000)
   (println :results (pr-str @results))
   (when-not (and (:realized? @results) (:rendered? @results)
                  (vector? (:resized? @results)) (nil? (:error @results)))
