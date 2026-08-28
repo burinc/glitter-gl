@@ -7,12 +7,12 @@
    glitter-gl.gtk). Needs no GL context and no display. Run with
    `jolt -M:check`."
   (:require [clojure.string :as str]
-            [glitter-gl.plasma-shader :as scene]
-            [glitter-gl.shader :as sh]
-            [glitter-gl.primitives :as p]
+            [glitter-gl.gtk] ; loading registers the widgets
             [glitter-gl.mesh :as mesh]
-            [glitter.widget :as w]
-            [glitter-gl.gtk]))            ; loading registers the widgets
+            [glitter-gl.plasma-shader :as scene]
+            [glitter-gl.primitives :as p]
+            [glitter-gl.shader :as sh]
+            [glitter.widget :as w]))
 
 (defn- check-shape [label m]
   (let [{:keys [data count stride]} (mesh/->floats m {:shading :smooth})]

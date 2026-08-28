@@ -95,8 +95,8 @@ bb hooks:install / :install:full / :uninstall  # git pre-commit hook: fast | +te
 
 `bb hooks:install` sets up a fast pre-commit hook (lint errors + format +
 ns cleanliness) that gates every commit on staying `bb lsp:format-check`-
-clean: the whole codebase is formatted uniformly, including the 22 files
-ported verbatim from glimmer-gl. See [`CONTRIBUTING.md`](CONTRIBUTING.md)'s
+clean: the whole codebase is formatted uniformly, including `examples/`
+and the 22 files ported verbatim from glimmer-gl. See [`CONTRIBUTING.md`](CONTRIBUTING.md)'s
 invariant #1 for why a project-wide `clojure-lsp format` pass doesn't conflict
 with the "don't improve ported files" porting discipline. It mirrors
 glitter's identical resolution of the same tension for its own
@@ -223,9 +223,11 @@ Plus:
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, the ten numbered
 invariants this project does not regress, and how to add a widget.
 Before opening a PR, run the four local gates: `bb test`, `bb lint`,
-`bb lsp:format-check`, and `bb smokes`. **CI is not wired up yet**:
-these four commands are the whole gate for now, so please run them
-yourself.
+`bb lsp:format-check`, and `bb smokes`. CI runs the first three plus
+`bb lsp:clean-ns-check` on every PR, and a second informational job
+exercises real OpenGL under Xvfb on mesa's llvmpipe. `bb smokes` is
+still worth running yourself, since software rendering is not your
+driver.
 
 ## Status
 

@@ -212,7 +212,9 @@
       (when (>= pos 0)
         (gl/gl-enable-vertex-attrib-array pos)
         (gl/gl-vertex-attrib-pointer pos 3 gl/GL-FLOAT gl/GL-FALSE stride-bytes 0)))
-    {:vao vao :vbo vbo :count vcount}))
+    {:vao vao
+     :vbo vbo
+     :count vcount}))
 
 ;; --- unproject: the fix described in the ns docstring's IMPORTANT note.
 ;; Full 4-component inverse transform, including the divide by the
@@ -246,7 +248,8 @@
   [origin dir]
   (let [t-ground (isec/ray-plane origin dir ground-plane)
         t-wall   (isec/ray-plane origin dir wall-plane)
-        pick     (fn [t plane] {:point (v3/add origin (v3/scale dir t)) :plane plane})]
+        pick     (fn [t plane] {:point (v3/add origin (v3/scale dir t))
+                                :plane plane})]
     (cond
       (and t-ground t-wall) (if (<= t-ground t-wall) (pick t-ground :ground) (pick t-wall :wall))
       t-ground               (pick t-ground :ground)
@@ -254,7 +257,8 @@
       :else                  nil)))
 
 (defn- draw-mesh! [shader {:keys [vao count]} mvp color]
-  (sh/set-uniforms! shader {:u_mvp mvp :u_color color})
+  (sh/set-uniforms! shader {:u_mvp mvp
+                            :u_color color})
   (gl/gl-bind-vertex-array vao)
   (gl/gl-draw-arrays gl/GL-TRIANGLES 0 count))
 
@@ -272,7 +276,10 @@
         (let [ground (upload-mesh! shader ground-mesh)
               wall   (upload-mesh! shader wall-mesh)
               marker (upload-mesh! shader marker-mesh)]
-          (swap! gl-state assoc area {:shader shader :ground ground :wall wall :marker marker})
+          (swap! gl-state assoc area {:shader shader
+                                      :ground ground
+                                      :wall wall
+                                      :marker marker})
           (println "glitter-gl.picking: GL ready, program" (:program shader)
                    "ground" (:count ground) "wall" (:count wall) "marker" (:count marker)))))))
 

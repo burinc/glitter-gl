@@ -59,12 +59,42 @@
 ;; orbit/spin speeds are irrational-ish multiples of each other so the
 ;; whole arrangement never repeats into a static-looking pose.
 (def ^:private solids
-  [{:geom (p/cuboid 1.1)           :material :cuboid  :radius 3.0 :phase 0.0                    :orbit-speed 0.55 :spin-speed 1.3}
-   {:geom (p/sphere 0.75 22 16)    :material :sphere   :radius 4.4 :phase (/ Math/PI 3.0)        :orbit-speed 0.35 :spin-speed 0.0}
-   {:geom (p/tetrahedron 1.0)      :material :tetra    :radius 2.1 :phase (/ Math/PI 1.4)        :orbit-speed 0.85 :spin-speed 1.9}
-   {:geom (poly/octahedron 0.85)   :material :octa     :radius 5.4 :phase Math/PI                :orbit-speed 0.28 :spin-speed 1.05}
-   {:geom (poly/icosahedron 0.85)  :material :icosa    :radius 3.7 :phase (* 1.65 Math/PI)       :orbit-speed 0.48 :spin-speed -1.15}
-   {:geom (poly/dodecahedron 0.9)  :material :dodeca   :radius 6.2 :phase (/ Math/PI 5.0)        :orbit-speed 0.22 :spin-speed 0.6}])
+  [{:geom (p/cuboid 1.1)
+    :material :cuboid
+    :radius 3.0
+    :phase 0.0
+    :orbit-speed 0.55
+    :spin-speed 1.3}
+   {:geom (p/sphere 0.75 22 16)
+    :material :sphere
+    :radius 4.4
+    :phase (/ Math/PI 3.0)
+    :orbit-speed 0.35
+    :spin-speed 0.0}
+   {:geom (p/tetrahedron 1.0)
+    :material :tetra
+    :radius 2.1
+    :phase (/ Math/PI 1.4)
+    :orbit-speed 0.85
+    :spin-speed 1.9}
+   {:geom (poly/octahedron 0.85)
+    :material :octa
+    :radius 5.4
+    :phase Math/PI
+    :orbit-speed 0.28
+    :spin-speed 1.05}
+   {:geom (poly/icosahedron 0.85)
+    :material :icosa
+    :radius 3.7
+    :phase (* 1.65 Math/PI)
+    :orbit-speed 0.48
+    :spin-speed -1.15}
+   {:geom (poly/dodecahedron 0.9)
+    :material :dodeca
+    :radius 6.2
+    :phase (/ Math/PI 5.0)
+    :orbit-speed 0.22
+    :spin-speed 0.6}])
 
 ;; Six visually distinct colors (one per solid) plus the ground, fully
 ;; replacing renderer/material-colors for this demo -- reactive-area's
@@ -89,7 +119,8 @@
   (scene/group (m/rotate-y (+ phase (* t orbit-speed)))
                (scene/group (m/translation radius 1.3 0.0)
                             (scene/group (m/rotate-y (* t spin-speed))
-                                         (scene/mesh {:geom geom :material material})))))
+                                         (scene/mesh {:geom geom
+                                                      :material material})))))
 
 ;; The ground never orbits: a single flat quad, rotated from primitives/
 ;; plane's native XY-facing-+Z orientation down into the XZ plane (normal
@@ -97,7 +128,9 @@
 ;; it should receive the orbiting solids' shadows, not cast one of its own.
 (def ^:private ground-node
   (scene/group (m/rotate-x (- (/ Math/PI 2.0)))
-               (scene/mesh {:geom ground-mesh :material :ground :cast-shadow false})))
+               (scene/mesh {:geom ground-mesh
+                            :material :ground
+                            :cast-shadow false})))
 
 (defn- scene-fn
   "Pure (fn [state] -> scene tree): one camera, one light, the static ground,
@@ -114,7 +147,8 @@
                           :aspect 1.6
                           :near 0.1
                           :far 100.0})
-           (scene/light {:dir [-0.45 -1.0 -0.3] :color [1.0 0.96 0.88]})
+           (scene/light {:dir [-0.45 -1.0 -0.3]
+                         :color [1.0 0.96 0.88]})
            ground-node
            (map (partial solid-node t) solids))))
 

@@ -23,5 +23,24 @@
 ;; a fresh clone placed where no ../glitter sits next to it. Dropping :dev
 ;; costs nothing here, since :test is the alias carrying :extra-paths ["test"]
 ;; and is the only one clojure-lsp needs for source-path discovery.
+;; :source-paths is pinned to include "examples" so the demos are covered by
+;; `bb lsp:format-check` and `bb lsp:clean-ns-check`, and therefore by the git
+;; pre-commit hook and CI. They were not, previously: clojure-lsp derives
+;; source paths from the :extra-paths of aliases it recognizes, and while every
+;; demo alias in deps.edn declares :extra-paths ["examples"], none of them is
+;; named :dev or :test, so none was ever visible here. The 2026-08-07
+;; project-wide format pass therefore reached src and test and left examples
+;; untouched, and it had drifted by roughly 350 diff lines before anyone
+;; noticed, because nothing was looking.
+;;
+;; Pinning the set explicitly also decouples this from deps.edn's per-alias
+;; :extra-paths, so adding "examples" to some alias later cannot silently widen
+;; or narrow what gets checked.
+;;
+;; Note that :source-paths and :source-aliases above solve different problems
+;; and both are needed. :source-aliases decides the aliases in the
+;; `clojure -A:... -Spath` classpath probe. :source-paths decides which
+;; directories get analyzed. Setting one does not cover the other.
 {:linters {:clojure-lsp/unused-public-var {:level :off}}
- :source-aliases #{:test}}
+ :source-aliases #{:test}
+ :source-paths #{"src" "test" "examples"}}

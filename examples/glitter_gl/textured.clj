@@ -116,7 +116,8 @@
   "Fill the bound VBO with the cube's interleaved position+UV floats.
   Returns the vertex count to draw."
   [vbo]
-  (let [{:keys [data] vcount :count} (cube-uv-floats)
+  (let [{:keys [data]
+         vcount :count} (cube-uv-floats)
         ptr (gl/write-floats data)]
     (gl/gl-bind-buffer gl/GL-ARRAY-BUFFER vbo)
     (gl/gl-buffer-data gl/GL-ARRAY-BUFFER
@@ -174,7 +175,11 @@
               (setup-attribs! shader)
               (let [tex (setup-texture!)]
                 (swap! gl-state assoc area
-                       {:shader shader :vao vao :vbo vbo :count n :tex tex})
+                       {:shader shader
+                        :vao vao
+                        :vbo vbo
+                        :count n
+                        :tex tex})
                 (println "glitter-gl.textured: GL ready, program" (:program shader)
                          "vao" vao "verts" n "tex" tex)))))))))
 
@@ -199,7 +204,8 @@
       (gl/gl-use-program (:program shader))
       (gl/gl-active-texture gl/GL-TEXTURE0)
       (gl/gl-bind-texture gl/GL-TEXTURE-2D tex)
-      (sh/set-uniforms! shader {:u_mvp mvp :u_texture 0})
+      (sh/set-uniforms! shader {:u_mvp mvp
+                                :u_texture 0})
       (gl/gl-bind-vertex-array vao)
       (gl/gl-draw-arrays gl/GL-TRIANGLES 0 count))))
 

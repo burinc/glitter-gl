@@ -11,17 +11,23 @@
   Mirrors examples/glitter/smoke.clj's and scale_smoke.clj's shape in
   glitter — :auto-quit-ms closes the window after a fixed delay so
   this exits on its own for CI."
-  (:require [glitter.app :as app]
+  (:require [glitter-gl.gtk :as glx]
+            [glitter.app :as app]
             [glitter.core :as core]
-            [glitter.gtk :as gtk]
-            [glitter-gl.gtk :as glx]))
+            [glitter.gtk :as gtk]))
 
-(defonce results (atom {:realized? false :rendered? false :resized? nil :error nil}))
+(defonce results (atom {:realized? false
+                        :rendered? false
+                        :resized? nil
+                        :error nil}))
 
 (defn view [_state]
   [:box {:spacing 0}
    [:gl-area
-    {:version [3 2] :depth-buffer true :hexpand true :vexpand true
+    {:version [3 2]
+     :depth-buffer true
+     :hexpand true
+     :vexpand true
      :on-realize (fn [area]
                    (glx/make-current area)
                    (if-let [err (glx/gl-area-error-message area)]
