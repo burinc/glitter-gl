@@ -57,8 +57,8 @@ check: ok
 ```
 
 **What it pins:** the shader-composition contract and the mesh-buffer
-contract, both without touching GTK at all. This is the one example a CI
-runner could execute today with no display, once CI is wired (see
+contract, both without touching GTK at all. Needing no display makes it
+the cheapest thing here to run anywhere, and CI runs it in both jobs (see
 [`testing-and-tasks.md`](testing-and-tasks.md)).
 
 ## `gl_area_smoke.clj`: live GTK, and the one that pins the correction
@@ -89,11 +89,13 @@ the smoke exists as a separate live-GTK example rather than a unit test;
 see the smoke's own docstring, and
 [`gl-area-widget-layer.md`](gl-area-widget-layer.md) for the full mechanics.
 
-It's CI-safe in the sense that `bb.edn`'s `smokes` task runs it via
-`jolt -M:gl-area-smoke` (the exit-code-propagating alias form, not the task
-form; see [`testing-and-tasks.md`](testing-and-tasks.md)), but CI isn't
-actually wired for this project yet, so today it's a local gate a
-contributor runs by hand before opening a PR.
+It's CI-safe in two senses. `bb.edn`'s `smokes` task runs it via
+`jolt -M:gl-area-smoke`, the exit-code-propagating alias form rather than
+the task form (see [`testing-and-tasks.md`](testing-and-tasks.md)), and
+it closes its own window on a timer instead of waiting for a human. CI's
+`gl` job does run it, under Xvfb on mesa's llvmpipe. That job is
+informational, so a contributor running it by hand against a real driver
+is still the coverage that counts.
 
 ## `plasma_shader.clj`: composed, not run
 
