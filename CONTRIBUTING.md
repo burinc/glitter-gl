@@ -66,13 +66,26 @@ CI lints with `bb lint:strict`, which fails on warnings as well as
 errors, so a finding your local `bb lint` merely reports will still stop
 the build.
 
-`bb smokes` is the one gate CI cannot run. It opens a real GTK4 window
-and a runner has no display, so running it yourself before opening a PR
-is the only thing that covers the widget layer. The unit suite's own GL
-test degrades the same way: `glitter-gl.offscreen-test` prints `SKIP
-offscreen GL: ...` and passes when there is nothing to draw into, which
-is what happens on every CI run. Nothing in CI ever issues an OpenGL
-command.
+A second CI job runs the same suite plus `bb smokes` under Xvfb, with
+mesa's llvmpipe as a software rasterizer, so a runner with no GPU still
+gets a real GL context. It reports GL 4.5, well past the 3.3 that
+`glitter-gl.offscreen-test` asserts, so the render-to-texture round trip
+and the live `[:gl-area]` mount both genuinely execute there.
+
+That job is informational for now, meaning it reports but cannot fail
+the build. Treat it as a signal rather than a gate, and keep running
+`bb smokes` yourself if you touched `gtk.clj`, `scene.clj` or `app.clj`.
+Software rendering is not the same as your driver, and a 500ms
+auto-quit that is comfortable on a warm runner is not proof it will be
+comfortable on a busy one.
+
+One thing worth knowing if you ever read that job's output:
+`glitter-gl.offscreen-test` **passes when it skips**. Printing `SKIP
+offscreen GL: ...` and moving on is deliberate, because a machine with
+no display is a legitimate environment rather than a failure. It also
+means a green suite is not evidence that GL ran, so the Xvfb job greps
+its own output for that banner and fails on it. If you change what that
+test prints, change the grep in `.github/workflows/ci.yml` with it.
 
 `bb verify` bundles a lint report plus `jolt -M:test` (which must pass)
 into one pre-commit-shaped command, but **it does not check formatting**.
