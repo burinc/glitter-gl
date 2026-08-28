@@ -3,14 +3,18 @@ name: CI
 # ---------------------------------------------------------------------------
 # Runs on pull requests and pushes to main, plus manual dispatch.
 #
-# Scope note: this gate is HEADLESS ONLY. `bb smokes` opens a real GTK4 window
-# and needs a display, so it stays a local / maintainer gate rather than a CI
-# one (see CONTRIBUTING.md). The unit suite itself is headless: the one test
-# that wants a GL context, glitter-gl.offscreen-test, probes for a display and
-# prints "SKIP offscreen GL: ..." when there is none, which is the expected
-# outcome on a runner. So CI proves the suite passes and the tree is lint-,
-# format- and ns-clean on a machine that is not the maintainer's. It does NOT
-# prove any OpenGL command actually executed.
+# Two jobs, with different jobs to do.
+#
+#   `gates` is HEADLESS and is the required one. It proves the unit suite
+#   passes and the tree is lint-, format- and ns-clean on a machine that is not
+#   the maintainer's. It does NOT prove any OpenGL command executed:
+#   glitter-gl.offscreen-test probes for a display and prints "SKIP offscreen
+#   GL: ..." when there is none, which is the expected outcome there.
+#
+#   `gl` closes exactly that hole, under Xvfb and mesa's llvmpipe, and asserts
+#   the skip did NOT happen. It is informational for now because whether
+#   llvmpipe reaches GL 3.3 on a runner is still being established. See that
+#   job's own header.
 #
 # The lint gate here is `bb lint:strict`, which fails on warnings as well as
 # errors. That is stricter than glitter's own CI, which uses an errors-only
@@ -214,3 +218,159 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           tail -c 2000 /tmp/diag.txt \
             | python3 -c 'import sys; print("::error title=native library diagnostics::" + sys.stdin.read().replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'
+
+  # ---------------------------------------------------------------------------
+  # The gate the headless job above cannot be: one that actually issues OpenGL
+  # commands. Xvfb supplies a display, mesa's llvmpipe supplies a software
+  # rasterizer, and between them GDK can hand out a real GL context on a runner
+  # with no GPU.
+  #
+  # Whether llvmpipe gives GDK a context at GL 3.3 or better (what
+  # offscreen-test asserts, and what the #version 330 core shaders need) is the
+  # open question this job exists to answer. It is allowed to fail while that
+  # is being settled: see continue-on-error below.
+  #
+  # Guarding against a green no-op is the whole design here. offscreen-test
+  # PASSES when it skips, by design, because a machine with no display is a
+  # legitimate environment rather than a failure. That makes `bb test` going
+  # green worthless as evidence for this job, so the Unit suite step below
+  # reads the output and fails when it finds the skip banner. A job that proves
+  # GL ran has to check that GL ran.
+  # ---------------------------------------------------------------------------
+  gl:
+    name: OpenGL under Xvfb (informational)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    env:
+      DISPLAY: ":99"
+      # Force the software rasterizer rather than letting mesa hunt for a GPU
+      # that is not there.
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      GALLIUM_DRIVER: llvmpipe
+      GDK_BACKEND: x11
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # libgl1-mesa-dri is the load-bearing one and the easiest to leave out:
+      # libgl-dev alone provides the GLX/loader side, but the actual llvmpipe
+      # rasterizer ships in the DRI package. Without it a context request fails
+      # rather than falling back to software. libegl1 and libgbm1 are here
+      # because GTK 4.6 and later prefer EGL over GLX on X11, so the EGL path
+      # is the one most likely to be taken. mesa-utils supplies glxinfo, used
+      # by the probe step below.
+      - name: Install GTK4, GLib, mesa and Xvfb
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libgtk-4-dev libgl-dev \
+            libgl1-mesa-dri libegl1 libegl-mesa0 libgbm1 \
+            xvfb x11-utils mesa-utils
+
+      - name: Start Xvfb
+        run: |
+          set -euo pipefail
+          Xvfb :99 -screen 0 1280x1024x24 -nolisten tcp &
+          for i in $(seq 1 30); do
+            if xdpyinfo -display :99 >/dev/null 2>&1; then
+              echo "Xvfb up after ${i} attempt(s)"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error title=Xvfb never came up::xdpyinfo could not reach :99 after 30s"
+          exit 1
+
+      # Front-loaded deliberately. If llvmpipe cannot reach GL 3.3 this reports
+      # exactly that, in one run, instead of leaving it to be inferred from a
+      # test failure further down. Never blocks: it is evidence, not a gate.
+      - name: Probe available GL
+        continue-on-error: true
+        run: |
+          set +e
+          {
+            echo "== glxinfo -B =="
+            glxinfo -B 2>&1
+            echo
+            echo "== version lines =="
+            glxinfo 2>&1 | grep -iE 'OpenGL (core profile )?(version|renderer|vendor)'
+          } > /tmp/gl.txt
+          cat /tmp/gl.txt
+          { printf '### GL probe\n\n```\n'; cat /tmp/gl.txt; printf '```\n'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install jolt
+        run: |
+          curl -sSL https://raw.githubusercontent.com/jolt-lang/jolt/main/install | bash
+          jolt --version
+
+      - uses: DeLaGuardo/setup-clojure@13.6.1
+        with:
+          bb: 1.12.196
+
+      - name: Cache dependencies
+        uses: actions/cache@v6.1.0
+        with:
+          path: |
+            ~/.jolt/gitlibs
+            ~/.jolt/mvnlibs
+          key: gl-deps-${{ runner.os }}-${{ hashFiles('deps.edn') }}
+          restore-keys: gl-deps-${{ runner.os }}-
+
+      # The anti-no-op check described in this job's header. `bb test` going
+      # green is necessary but nowhere near sufficient, because the skip path
+      # is also green. Both conditions have to hold: no skip banner, and a
+      # real version banner from a context that was actually created.
+      - name: Unit suite (asserting GL really ran)
+        run: |
+          set +e
+          out="$(bb test 2>&1)"; rc=$?
+          printf '%s\n' "$out"
+
+          if [ "$rc" -ne 0 ]; then
+            echo "::error title=bb test failed under Xvfb::exit $rc"
+            exit "$rc"
+          fi
+
+          # offscreen-test prints "SKIP offscreen GL: <reason>" when it could
+          # not get a context. Green-but-skipped is the failure this job exists
+          # to catch, so it is an error here even though the suite passed.
+          if printf '%s\n' "$out" | grep -q 'SKIP offscreen GL'; then
+            reason="$(printf '%s\n' "$out" | grep -m1 'SKIP offscreen GL')"
+            echo "::error title=GL did not run::$reason"
+            { printf '### GL did not run\n\n```\n%s\n```\n' "$reason"; } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          # The success path prints "offscreen GL <maj> . <mnr> <renderer>".
+          banner="$(printf '%s\n' "$out" | grep -m1 'offscreen GL [0-9]')"
+          if [ -z "$banner" ]; then
+            echo "::error title=No GL banner::offscreen-test printed neither a skip nor a version line. Its output shape may have changed."
+            exit 1
+          fi
+
+          echo "::notice title=GL ran::$banner"
+          { printf '### GL ran\n\n```\n%s\n```\n' "$banner"; } >> "$GITHUB_STEP_SUMMARY"
+
+      # gl-area-smoke mounts a real [:gl-area] through glitter's reconciler and
+      # self-closes via :auto-quit-ms, exiting 1 unless realize, render and
+      # resize all fired. That is the widget-layer coverage no headless run can
+      # give. `bb smokes` runs it, then the headless check.
+      - name: Live-GTK smokes
+        run: bb smokes
+
+      - name: Diagnostics (on failure)
+        if: failure()
+        run: |
+          set +e
+          {
+            echo "DISPLAY=$DISPLAY"
+            xdpyinfo -display :99 2>&1 | head -12
+            echo
+            echo "glxinfo -B:"; glxinfo -B 2>&1 | head -20
+            echo
+            echo "jolt: $(jolt --version 2>&1 | head -1)"
+          } > /tmp/diag.txt
+          cat /tmp/diag.txt
+          { printf '### Xvfb diagnostics\n\n```\n'; cat /tmp/diag.txt; printf '```\n'; } >> "$GITHUB_STEP_SUMMARY"
