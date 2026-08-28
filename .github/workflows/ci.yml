@@ -1,0 +1,216 @@
+name: CI
+
+# ---------------------------------------------------------------------------
+# Runs on pull requests and pushes to main, plus manual dispatch.
+#
+# Scope note: this gate is HEADLESS ONLY. `bb smokes` opens a real GTK4 window
+# and needs a display, so it stays a local / maintainer gate rather than a CI
+# one (see CONTRIBUTING.md). The unit suite itself is headless: the one test
+# that wants a GL context, glitter-gl.offscreen-test, probes for a display and
+# prints "SKIP offscreen GL: ..." when there is none, which is the expected
+# outcome on a runner. So CI proves the suite passes and the tree is lint-,
+# format- and ns-clean on a machine that is not the maintainer's. It does NOT
+# prove any OpenGL command actually executed.
+#
+# The lint gate here is `bb lint:strict`, which fails on warnings as well as
+# errors. That is stricter than glitter's own CI, which uses an errors-only
+# gate because its tree carries two known warnings. glitter-gl's tree reports
+# zero findings, so the stricter gate is the one worth keeping clean. If a
+# warning ever lands that is genuinely worth accepting, relax this to the
+# errors-only form the `bb hooks:install` pre-commit hook uses rather than
+# silencing it, so CI and a clean local commit keep agreeing.
+# ---------------------------------------------------------------------------
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      jolt-version:
+        description: "jolt version to install (blank = latest release)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+# A second push to the same branch makes the first run's answer stale, so stop
+# it rather than paying for both. Never cancels a run on main.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  gates:
+    name: test / lint / format
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # Two native dependency groups, from two different places:
+      #
+      #   GTK4 + GLib arrive transitively through the pinned glitter dep, whose
+      #   :jolt/native looks for libgtk-4.so.1 / libglib-2.0.so.0 and friends,
+      #   falling back to the unversioned .so names.
+      #
+      #   OpenGL is glitter-gl's own :jolt/native entry, which asks for
+      #   libGL.so.1 first and libGL.so second.
+      #
+      # The -dev packages ship both the versioned runtime object and the
+      # unversioned development symlink, so they cover either resolution path;
+      # the runtime packages alone would only satisfy the versioned one.
+      - name: Install GTK4, GLib and OpenGL
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libgtk-4-dev libgl-dev
+
+          echo "::group::what resolved"
+          ldconfig -p | grep -E 'libgtk-4|libglib-2\.0|libgobject-2\.0|libgio-2\.0|libGL\.so' || true
+          echo "::endgroup::"
+
+      # Official install script from jolt's README. Passed through env rather
+      # than interpolated into the script body, so the input cannot be used for
+      # shell injection.
+      - name: Install jolt
+        env:
+          JOLT_VERSION: ${{ inputs.jolt-version }}
+        run: |
+          if [ -n "$JOLT_VERSION" ]; then
+            curl -sSL https://raw.githubusercontent.com/jolt-lang/jolt/main/install \
+              | bash -s -- --version "$JOLT_VERSION"
+          else
+            curl -sSL https://raw.githubusercontent.com/jolt-lang/jolt/main/install | bash
+          fi
+          jolt --version
+
+      # Pinned to match what the maintainer runs locally and what the
+      # `bb hooks:install` pre-commit hook enforces. Floating these to `latest`
+      # would let CI disagree with a clean local commit whenever clj-kondo or
+      # clojure-lsp changes a default. `cli` is needed by clojure-lsp for
+      # classpath discovery.
+      - uses: DeLaGuardo/setup-clojure@13.6.1
+        with:
+          bb: 1.12.196
+          clj-kondo: "2026.05.25"
+          cli: latest
+
+      - uses: clojure-lsp/setup-clojure-lsp@v1.0.3
+        with:
+          clojure-lsp-version: "2026.05.05-12.58.26"
+
+      # deps.edn pins glitter as a git coordinate, so every cold run clones it
+      # and resolves its Maven deps. ~/.jolt/{gitlibs,mvnlibs} is jolt's own
+      # cache; ~/.gitlibs and ~/.m2 are the Clojure CLI's, used by clojure-lsp
+      # when it discovers the classpath. A miss only costs the fetch.
+      #
+      # ~/.jolt/aot-cache is deliberately NOT cached: it is keyed to the jolt
+      # build that produced it, and this workflow can install a different one
+      # via the jolt-version input.
+      - name: Cache dependencies
+        uses: actions/cache@v6.1.0
+        with:
+          path: |
+            ~/.jolt/gitlibs
+            ~/.jolt/mvnlibs
+            ~/.gitlibs
+            ~/.m2/repository
+          key: deps-${{ runner.os }}-${{ hashFiles('deps.edn') }}
+          restore-keys: deps-${{ runner.os }}-
+
+      # Headless: the suite runs against pure geometry/matrix/mesh code plus
+      # glitter's in-memory test renderer. Failure output is re-emitted as an
+      # annotation plus a job summary, both readable without downloading the
+      # log archive.
+      - name: Unit suite
+        run: |
+          set +e
+          out="$(bb test 2>&1)"; rc=$?
+          printf '%s\n' "$out"
+          if [ "$rc" -ne 0 ]; then
+            {
+              printf '### `bb test` failed (exit %s)\n\n```\n%s\n```\n' \
+                "$rc" "$(printf '%s\n' "$out" | tail -60)"
+            } >> "$GITHUB_STEP_SUMMARY"
+            printf '%s\n' "$out" | tail -c 2000 \
+              | python3 -c 'import sys; print("::error title=bb test failed::" + sys.stdin.read().replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'
+          fi
+          exit "$rc"
+
+      # `.clj-kondo/hooks/jolt_ffi.clj` rewrites jolt.ffi/defcfn into an
+      # equivalent defn so clj-kondo can see through the FFI macro. Without it
+      # every gl-*/gtk-*/gdk-* binding reports as unresolved.
+      - name: clj-kondo
+        run: bb lint:strict
+
+      # Formatting is owned by clojure-lsp, not cljfmt: the two disagree on
+      # some compact literal tables. See CONTRIBUTING.md.
+      - name: Formatting
+        run: bb lsp:format-check
+
+      - name: Namespace forms
+        run: bb lsp:clean-ns-check
+
+      # CONTRIBUTING.md's prose convention, in gate form. The pattern is the
+      # \u2014 escape rather than the character itself, matching the command
+      # CONTRIBUTING.md documents, so a grep over this repo for the literal
+      # never trips over the gate's own source. AGENTS.md and CLAUDE.md are
+      # untracked symlinks into a private planning store, so `git ls-files`
+      # correctly leaves them out and grep never sees a dangling link.
+      - name: Prose (no em-dashes in Markdown)
+        run: |
+          if git ls-files -z '*.md' | xargs -0 -r grep -n $'\u2014'; then
+            echo "::error title=em-dash found::CONTRIBUTING.md asks for a comma, colon, semicolon, parenthesis or sentence break instead. Lines above."
+            exit 1
+          fi
+          echo "clean"
+
+      # Report only, deliberately. Three functions are flagged today, and one
+      # of them (polygon.clj's `cog`) sits in a verbatim-ported file that
+      # Invariant #1 says must not be reshaped without its own reviewed commit.
+      # So this reports the count into the run's summary as a drift signal
+      # without failing the branch. Promote it to `bb check:positional-args:strict`
+      # if those three are ever resolved.
+      - name: Positional-args report
+        continue-on-error: true
+        run: |
+          set +e
+          out="$(bb check:positional-args 2>&1)"
+          printf '%s\n' "$out"
+          {
+            printf '### Positional-args report\n\n```\n%s\n```\n' \
+              "$(printf '%s\n' "$out" | tail -30)"
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 0
+
+      # Runs only when something above failed. The native libraries are present
+      # as FILES well before anything dlopens them, so a library that resolves
+      # but will not load (a missing runtime dependency on a headless runner)
+      # gets past the install step and fails later. This reports the linkage
+      # facts that tell those two apart.
+      - name: Diagnostics (on failure)
+        if: failure()
+        run: |
+          set +e
+          gtk="$(ldconfig -p | grep -m1 'libgtk-4' | awk '{print $NF}')"
+          gl="$(ldconfig -p | grep -m1 'libGL\.so' | awk '{print $NF}')"
+          {
+            for lib in "$gtk" "$gl"; do
+              echo "resolved: ${lib:-<not in ldconfig cache>}"
+              if [ -n "$lib" ]; then ldd "$lib" 2>&1; else echo "  (skipped)"; fi
+              echo
+            done
+            echo "unresolved above (if any) are the missing runtime deps."
+            echo
+            echo "jolt:  $(jolt --version 2>&1 | head -1)"
+            echo "bb:    $(bb --version 2>&1 | head -1)"
+          } > /tmp/diag.txt
+          cat /tmp/diag.txt
+          {
+            printf '### Diagnostics\n\n```\n'; cat /tmp/diag.txt; printf '```\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+          tail -c 2000 /tmp/diag.txt \
+            | python3 -c 'import sys; print("::error title=native library diagnostics::" + sys.stdin.read().replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'

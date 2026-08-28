@@ -59,8 +59,20 @@ lifecycle in the abstract. GTK4 is a live, stateful system with a
 blocking main loop, and this project's one real bug (see Invariant #2)
 was "obviously correct" on paper and wrong only when actually run.
 
-**CI is not yet wired for this project.** These four local gates are the
-whole gate for now, so please run them yourself before opening a PR.
+**CI runs `bb test`, the lint and the format check on every PR**, plus
+`bb lsp:clean-ns-check` and a check that no Markdown file has gained an
+em-dash. See `.github/workflows/ci.yml`. One difference worth knowing:
+CI lints with `bb lint:strict`, which fails on warnings as well as
+errors, so a finding your local `bb lint` merely reports will still stop
+the build.
+
+`bb smokes` is the one gate CI cannot run. It opens a real GTK4 window
+and a runner has no display, so running it yourself before opening a PR
+is the only thing that covers the widget layer. The unit suite's own GL
+test degrades the same way: `glitter-gl.offscreen-test` prints `SKIP
+offscreen GL: ...` and passes when there is nothing to draw into, which
+is what happens on every CI run. Nothing in CI ever issues an OpenGL
+command.
 
 `bb verify` bundles a lint report plus `jolt -M:test` (which must pass)
 into one pre-commit-shaped command, but **it does not check formatting**.
