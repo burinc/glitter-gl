@@ -37,7 +37,7 @@ windowing system at all. It asserts three unrelated things in one process:
 That third assertion is a **load-order check, not an ownership check**,
 worth stating precisely because it's easy to misread. `:gl-area` is
 registered by this library; `:scale` is not (invariant #6 in
-[`CONTRIBUTING.md`](https://github.com/burinc/glitter-gl/blob/main/CONTRIBUTING.md); glitter already ships a
+[`CONTRIBUTING.md`](https://github.com/jlt-commons/glitter-gl/blob/main/CONTRIBUTING.md); glitter already ships a
 richer, first-party `:scale`, and glitter-gl deliberately doesn't shadow
 it). `check.clj`'s own docstring says as much: `:scale` "comes from
 glitter's own native widget, not from glitter-gl.gtk." So if `:scale` is

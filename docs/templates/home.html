@@ -45,21 +45,21 @@
       data.
     </p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="/guide/index.html">Read the guide</a>
-      <a class="btn" href="https://github.com/burinc/glitter-gl" target="_blank" rel="noopener">View on GitHub</a>
+      <a class="btn btn-primary" href="{{site-base}}/guide/index.html">Read the guide</a>
+      <a class="btn" href="https://github.com/jlt-commons/glitter-gl" target="_blank" rel="noopener">View on GitHub</a>
     </div>
   </div>
 </header>
 
 <section id="demo">
   <div class="inner">
-    <img class="hero-demo" src="/demos/plasma-sphere.gif" alt="A sphere rotating under a composable plasma and gold-stripe shader; its high facet count makes the color read as a continuous gradient instead of flat panels" loading="lazy" width="960">
+    <img class="hero-demo" src="{{site-base}}/demos/plasma-sphere.gif" alt="A sphere rotating under a composable plasma and gold-stripe shader; its high facet count makes the color read as a continuous gradient instead of flat panels" loading="lazy" width="960">
     <p class="demo-caption">
       The <code>plasma</code> demo: a domain-warped plasma shader blended
       with animated gold stripes, composed from two independent shader
       modules and lit with a simple diffuse term, wired straight to
       <code>:gl-area</code>. The guide has
-      <a href="/guide/examples.html">three more takes</a> on the same
+      <a href="{{site-base}}/guide/examples.html">three more takes</a> on the same
       shader, including flat shading on a cube and a tetrahedron.
     </p>
   </div>
@@ -163,7 +163,7 @@ jolt -M:gl-area-smoke  # live-GTK smoke: :gl-area construct/realize/render/resiz
       which does the same for glitter's Reagent-style sibling
       <a href="https://github.com/jolt-lang/glimmer" target="_blank" rel="noopener">glimmer</a>,
       and which itself ports <a href="https://thi.ng/geom" target="_blank" rel="noopener">thi.ng/geom</a>.
-      See the <a href="/guide/index.html">guide</a> for the full nine-page tour.
+      See the <a href="{{site-base}}/guide/index.html">guide</a> for the full nine-page tour.
     </p>
   </div>
 </section>

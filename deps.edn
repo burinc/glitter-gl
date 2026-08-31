@@ -14,8 +14,8 @@
  ;; top-level coordinate wins over the transitive one it overrides. Mirrors
  ;; glitter-uikit's deps.edn, which verified the same mechanism against jolt's own
  ;; source rather than inferring it from JVM tools.deps.
- :deps {io.github.burinc/glitter
-        {:git/url "https://github.com/burinc/glitter"
+ :deps {io.github.jlt-commons/glitter
+        {:git/url "https://github.com/jlt-commons/glitter"
          :git/sha "482642fd3c9671b05f0ffaa2ef47420b1a92553b"}}
 
  ;; OpenGL via the host. On macOS OpenGL ships as a framework; on Linux it's the
@@ -36,7 +36,7 @@
            ;; `jolt -M:dev:test` or `jolt -M:dev:plasma`. Requires a ../glitter
            ;; checkout next to this one; nobody outside this machine needs it.
            :dev {:override-deps
-                 {io.github.burinc/glitter {:local/root "../glitter"}}}
+                 {io.github.jlt-commons/glitter {:local/root "../glitter"}}}
 
            :test          {:extra-paths ["test"]     :main-opts ["-m" "glitter-gl.test-runner"]}
            :plasma        {:extra-paths ["examples"] :main-opts ["-m" "glitter-gl.plasma"]}

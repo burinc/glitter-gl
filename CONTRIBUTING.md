@@ -1,14 +1,23 @@
 # Contributing
 
 Thanks for taking an interest. glitter-gl is an OpenGL geometry, matrix,
-and shader library for [glitter](https://github.com/burinc/glitter) (a
+and shader library for [glitter](https://github.com/jlt-commons/glitter) (a
 Replicant-style GTK4 renderer for
 [Jolt](https://github.com/jolt-lang/jolt): native Clojure on a Chez
 Scheme host, no JVM), ported from
 [glimmer-gl](https://github.com/jolt-lang/glimmer-gl), the same library
 for glimmer, glitter's Reagent-style sibling.
 
-The deep documentation lives in [`docs/guide/`](docs/guide/index.md).
+The deep documentation lives in [`docs/guide/`](docs/guide/index.md) and is
+published at <https://jlt-commons.github.io/glitter-gl/>. Edit the Markdown
+here, never the site.
+
+Publishing is automatic. `.github/workflows/site.yml` builds the site on every
+pull request and deploys it when your change lands on `main`, so a docs change
+goes live on merge without anyone running anything. You can preview it locally
+with `bb site:serve` if you clone
+[jlt-commons/docs-engine](https://github.com/jlt-commons/docs-engine) alongside
+this repo, but the pull request build is the authority.
 
 ## Setting up
 

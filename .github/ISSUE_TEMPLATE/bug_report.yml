@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please check [`docs/guide/limitations.md`](https://github.com/burinc/glitter-gl/blob/main/docs/guide/limitations.md)
+        Please check [`docs/guide/limitations.md`](https://github.com/jlt-commons/glitter-gl/blob/main/docs/guide/limitations.md)
         first. A couple of behaviours that look like bugs are documented,
         deliberate v1 scope calls with the reasoning recorded. For example,
         `:gl-area`'s `:on-*` props emit a cosmetic dev-time hiccup warning on

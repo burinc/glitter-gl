@@ -3,7 +3,7 @@
 ## Why this exists
 
 `glitter-gl` is glimmer-gl's geometry/matrix/shader/GL library, ported
-onto [glitter](https://github.com/burinc/glitter) instead of
+onto [glitter](https://github.com/jlt-commons/glitter) instead of
 [glimmer](https://github.com/jolt-lang/glimmer). Most of it (vectors,
 matrices, meshes, the shader DSL, raw GL bindings, the renderer) has no
 dependency on either UI library at all and ports across unchanged. The
@@ -138,7 +138,7 @@ each call, exactly like any other glitter view function.
 
 ## See also
 
-- [`CONTRIBUTING.md`](https://github.com/burinc/glitter-gl/blob/main/CONTRIBUTING.md) (repo root): how to build,
+- [`CONTRIBUTING.md`](https://github.com/jlt-commons/glitter-gl/blob/main/CONTRIBUTING.md) (repo root): how to build,
   test, and submit changes, plus the ten numbered invariants this project
   does not regress (the `:gl-area` correction is invariant #2 there, in
   summary form).
@@ -146,7 +146,7 @@ each call, exactly like any other glitter view function.
   porting summary (verbatim / adapted / new buckets).
 - [glimmer-gl](https://github.com/jolt-lang/glimmer-gl): the library
   this project ports from.
-- [glitter](https://github.com/burinc/glitter): the renderer this
+- [glitter](https://github.com/jlt-commons/glitter): the renderer this
   project extends; see its own `docs/guide/` for the reconcile →
   `IRender`/`IMemory` architecture and the GTK widget layer this
   project's `:gl-area` plugs into.

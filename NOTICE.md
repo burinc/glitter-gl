@@ -1,7 +1,7 @@
 glitter-gl
 ==========
 
-An OpenGL geometry, matrix, and shader library for the [glitter](https://github.com/burinc/glitter)
+An OpenGL geometry, matrix, and shader library for the [glitter](https://github.com/jlt-commons/glitter)
 GTK4 renderer for Jolt, ported from
 [glimmer-gl](https://github.com/jolt-lang/glimmer-gl), which was itself
 ported from thi.ng/geom.
