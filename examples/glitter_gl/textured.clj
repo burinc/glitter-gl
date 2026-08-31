@@ -58,10 +58,10 @@
         (let [[r g b] (if (even? (+ (quot x cell-size) (quot y cell-size)))
                         color-a color-b)
               i (* 4 (+ x (* y tex-size)))]
-          (ffi/write ptr :uint8 i       r)
-          (ffi/write ptr :uint8 (+ i 1) g)
-          (ffi/write ptr :uint8 (+ i 2) b)
-          (ffi/write ptr :uint8 (+ i 3) 255))))
+          (ffi/write ptr :uint8 r i)
+          (ffi/write ptr :uint8 g (+ i 1))
+          (ffi/write ptr :uint8 b (+ i 2))
+          (ffi/write ptr :uint8 255 (+ i 3)))))
     ptr))
 
 ;; --- the shader: a_uv straight through to a texture() sample, no lighting --
