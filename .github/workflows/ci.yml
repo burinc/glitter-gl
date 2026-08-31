@@ -33,12 +33,26 @@ on:
   workflow_dispatch:
     inputs:
       jolt-version:
-        description: "jolt version to install (blank = latest release)"
+        description: "jolt version to install (blank = the pinned JOLT_VERSION below)"
         required: false
         default: ""
 
 permissions:
   contents: read
+
+# jolt is pinned for the same reason clj-kondo, clojure-lsp and babashka are
+# pinned further down: a floating `latest` lets a release published overnight
+# turn CI red on a tree nobody touched. It used to float, which is how a
+# breaking change to jolt.ffi/write reached a pull request here as an opaque
+# test crash rather than as a version mismatch anyone could read.
+#
+# So moving this pin IS the cutover commit for a breaking jolt change. Bump it
+# and adapt the call sites together, in one reviewed commit, rather than
+# letting the release date decide when main breaks. Try the candidate first
+# with a workflow_dispatch run and the jolt-version input, which overrides
+# this for that run only.
+env:
+  JOLT_VERSION: ${{ inputs.jolt-version || '0.7.29' }}
 
 # A second push to the same branch makes the first run's answer stale, so stop
 # it rather than paying for both. Never cancels a run on main.
@@ -76,19 +90,16 @@ jobs:
           ldconfig -p | grep -E 'libgtk-4|libglib-2\.0|libgobject-2\.0|libgio-2\.0|libGL\.so' || true
           echo "::endgroup::"
 
-      # Official install script from jolt's README. Passed through env rather
-      # than interpolated into the script body, so the input cannot be used for
-      # shell injection.
+      # Official install script from jolt's README, which owns the archive
+      # naming and verifies the checksum. $JOLT_VERSION comes from the
+      # workflow-level env above and is read by the script rather than
+      # interpolated into it, so the dispatch input cannot inject shell.
       - name: Install jolt
-        env:
-          JOLT_VERSION: ${{ inputs.jolt-version }}
         run: |
-          if [ -n "$JOLT_VERSION" ]; then
-            curl -sSL https://raw.githubusercontent.com/jolt-lang/jolt/main/install \
-              | bash -s -- --version "$JOLT_VERSION"
-          else
-            curl -sSL https://raw.githubusercontent.com/jolt-lang/jolt/main/install | bash
-          fi
+          set -euo pipefail
+          : "${JOLT_VERSION:?empty; the workflow-level pin did not resolve}"
+          curl -sSL https://raw.githubusercontent.com/jolt-lang/jolt/main/install \
+            | bash -s -- --version "$JOLT_VERSION"
           jolt --version
 
       # Pinned to match what the maintainer runs locally and what the
@@ -308,9 +319,16 @@ jobs:
           cat /tmp/gl.txt
           { printf '### GL probe\n\n```\n'; cat /tmp/gl.txt; printf '```\n'; } >> "$GITHUB_STEP_SUMMARY"
 
+      # Same pin and the same dispatch override as the gates job. This step
+      # used to hardcode the latest release, so a run that dispatched a
+      # candidate jolt tested it on one job out of two and reported green from
+      # the other on a different runtime entirely.
       - name: Install jolt
         run: |
-          curl -sSL https://raw.githubusercontent.com/jolt-lang/jolt/main/install | bash
+          set -euo pipefail
+          : "${JOLT_VERSION:?empty; the workflow-level pin did not resolve}"
+          curl -sSL https://raw.githubusercontent.com/jolt-lang/jolt/main/install \
+            | bash -s -- --version "$JOLT_VERSION"
           jolt --version
 
       - uses: DeLaGuardo/setup-clojure@13.6.1
