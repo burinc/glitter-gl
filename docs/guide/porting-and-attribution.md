@@ -140,7 +140,7 @@ Getting this wrong runs in both directions:
   codebase's formatting conventions.
 
 This project isn't the first to hit this tension: glitter's own
-[`docs/guide/testing-and-tasks.md`](https://github.com/burinc/glitter/blob/main/docs/guide/testing-and-tasks.md)
+[`docs/guide/testing-and-tasks.md`](https://github.com/jlt-commons/glitter/blob/main/docs/guide/testing-and-tasks.md)
 records an identical reversal for its own Replicant-ported files, for
 the same reason.
 
@@ -194,7 +194,7 @@ Where the two disagree, `NOTICE.md` wins.
   GL plumbing), including the mesh → GL data-shape trace.
 - [`gl-area-widget-layer.md`](gl-area-widget-layer.md): the full
   `:apply`-vs-`:connect` correction referenced above.
-- [`CONTRIBUTING.md`](https://github.com/burinc/glitter-gl/blob/main/CONTRIBUTING.md) (repo root): the ten
+- [`CONTRIBUTING.md`](https://github.com/jlt-commons/glitter-gl/blob/main/CONTRIBUTING.md) (repo root): the ten
   numbered invariants, including invariant #1's summary of this page.
 - `NOTICE.md` (repo root): the authoritative, file-by-file ledger.
 - [thi.ng/geom](https://thi.ng/geom) and

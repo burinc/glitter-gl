@@ -16,7 +16,7 @@
 ;; that sibling the lookup died with
 ;;
 ;;   [ERROR] Classpath lookup failed when running `clojure -A:test:dev -Spath`.
-;;   Error building classpath. Local lib io.github.burinc/glitter not found: ../glitter
+;;   Error building classpath. Local lib io.github.jlt-commons/glitter not found: ../glitter
 ;;
 ;; and `clojure-lsp format --dry` exited non-zero. Found live: it passed on the
 ;; author's machine and failed on the first CI run, then reproduced exactly in

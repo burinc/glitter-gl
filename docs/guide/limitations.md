@@ -175,7 +175,7 @@ acknowledge the same tradeoff. Full mechanics:
 
 `glimmer-gl.gtk` ships its own `:scale` widget. `glitter-gl.gtk` does
 not port it. That is deliberate (invariant #6 in
-[`CONTRIBUTING.md`](https://github.com/burinc/glitter-gl/blob/main/CONTRIBUTING.md)): glitter already has a
+[`CONTRIBUTING.md`](https://github.com/jlt-commons/glitter-gl/blob/main/CONTRIBUTING.md)): glitter already has a
 richer, first-party native `:scale` (min/max/step/value/digits/
 draw-value, with `:on-value-changed` already wired through glitter's own
 standard signals table), and porting glimmer-gl's version alongside it
@@ -201,5 +201,5 @@ project doesn't accidentally shadow it in some future change.
   its "honest status" note.
 - [`examples.md`](examples.md): why the shipped `plasma` demo wires
   `:gl-area` directly rather than through `reactive-area`.
-- [`CONTRIBUTING.md`](https://github.com/burinc/glitter-gl/blob/main/CONTRIBUTING.md) (repo root): the ten
+- [`CONTRIBUTING.md`](https://github.com/jlt-commons/glitter-gl/blob/main/CONTRIBUTING.md) (repo root): the ten
   numbered invariants this project does not regress.

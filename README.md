@@ -1,7 +1,7 @@
 # glitter-gl
 
 An OpenGL geometry, matrix, and shader library for
-[glitter](https://github.com/burinc/glitter), a Replicant-style GTK4
+[glitter](https://github.com/jlt-commons/glitter), a Replicant-style GTK4
 renderer for [Jolt](https://github.com/jolt-lang/jolt). Ported from
 [glimmer-gl](https://github.com/jolt-lang/glimmer-gl), which does the same
 for [glimmer](https://github.com/jolt-lang/glimmer) (glitter's
@@ -35,7 +35,7 @@ composition layer.
 `glitter-gl.app/reactive-area`. Nine more takes, and what each one
 demonstrates, in the [examples gallery](docs/guide/examples.md).*
 
-**Docs site:** [glitter-gl.b12n.app](https://glitter-gl.b12n.app)
+**Docs site:** <https://jlt-commons.github.io/glitter-gl/>
 
 ## Requirements
 
@@ -105,7 +105,7 @@ Replicant-ported files.
 ## Dependency modes
 
 `deps.edn` declares glitter as a pinned git coordinate
-(`io.github.burinc/glitter` at a fixed `:git/sha`). jolt fetches and builds
+(`io.github.jlt-commons/glitter` at a fixed `:git/sha`). jolt fetches and builds
 against that exact commit, so a fresh clone of this repo builds with no other
 setup. This is the default, and what every command above uses:
 
