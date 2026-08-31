@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}glitter-gl: OpenGL geometry and shaders as Clojure data{% endblock %}
+{% block body-class %}home{% endblock %}
+
+{# Page-scoped styles. Deliberately NOT added to the shared screen.css:
+   the single large demo image and its caption are specific to this
+   project's one-hero-image layout, and screen.css is shared by every
+   b12n site. Uses only the engine's own theme tokens, so it follows
+   light/dark exactly like the rest of the page. #}
+{% block head %}
+<style>
+  .hero-demo {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg-raised);
+  }
+  .demo-caption {
+    color: var(--text-dim);
+    font-size: 0.875rem;
+    margin-top: 1rem;
+  }
+  .demo-caption code {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 0.15em 0.4em;
+    font-size: 0.875em;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="hero">
+  <div class="hero-inner">
+    <h1>OpenGL geometry and shaders, as plain Clojure data.</h1>
+    <p class="tagline">
+      <strong>glitter-gl</strong> builds solids out of vectors and matrices,
+      and shader programs out of maps describing their uniforms and
+      statements: ordinary Clojure data, tessellated to a GL vertex buffer
+      or emitted as GLSL only when it actually has to run. It's written for
+      <a href="https://github.com/jolt-lang/jolt" target="_blank" rel="noopener">Jolt</a>,
+      native Clojure on Chez Scheme: no JVM, no boxing, just OpenGL and your
+      data.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="/guide/index.html">Read the guide</a>
+      <a class="btn" href="https://github.com/burinc/glitter-gl" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+  </div>
+</header>
+
+<section id="demo">
+  <div class="inner">
+    <img class="hero-demo" src="/demos/plasma-sphere.gif" alt="A sphere rotating under a composable plasma and gold-stripe shader; its high facet count makes the color read as a continuous gradient instead of flat panels" loading="lazy" width="960">
+    <p class="demo-caption">
+      The <code>plasma</code> demo: a domain-warped plasma shader blended
+      with animated gold stripes, composed from two independent shader
+      modules and lit with a simple diffuse term, wired straight to
+      <code>:gl-area</code>. The guide has
+      <a href="/guide/examples.html">three more takes</a> on the same
+      shader, including flat shading on a cube and a tetrahedron.
+    </p>
+  </div>
+</section>
+
+<section id="seam" class="surface">
+  <div class="inner">
+    <h2>The seam to glitter is exactly one file</h2>
+    <pre class="mermaid">
+flowchart LR
+  subgraph pure["24 files: no dependency on glitter at all"]
+    geom["vector · vec2 · matrix · quaternion<br/>aabb · rect · circle · line · plane<br/>triangle · sphere · polygon<br/>bezier · intersect"]
+    mesh["mesh · glmesh<br/>primitives · polyhedra"]
+    glplumb["shader · gl<br/>offscreen · renderer"]
+    scene["scene.clj<br/>scene tree to render plan"]
+    app["app.clj<br/>reactive-area builds the<br/>:gl-area prop map"]
+  end
+  gtk["gtk.clj<br/>the one file"]
+  glitter["glitter<br/>widget registry"]
+  geom --> mesh
+  mesh --> glplumb
+  geom --> scene
+  glplumb --> app
+  scene --> app
+  gtk --> app
+  glitter -.->|"required by gtk.clj alone,<br/>1 of 25 namespaces"| gtk
+    </pre>
+    <p>
+      Of the 25 namespaces under <code>src/glitter_gl/</code>, only
+      <code>gtk.clj</code> has a literal <code>:require</code> on
+      <code>glitter.*</code>. The geometry, matrix, mesh, and shader halves
+      run from any Jolt program that has an OpenGL context: pull in
+      <code>glitter-gl.gtk</code> only if you also want a
+      <code>:gl-area</code> pane in a glitter UI.
+    </p>
+  </div>
+</section>
+
+<section id="shaders">
+  <div class="inner">
+    <h2>Shaders as data</h2>
+    <p>
+      A shader is a map declaring its interface: uniforms, attributes,
+      varyings, and a GLSL version. Bodies are vectors of statements built
+      from expression nodes, and independent modules merge with ordinary
+      map operations before anything touches the GPU:
+    </p>
+    <pre><code class="clojure">{:version  "330 core"
+ :uniforms {:u_mvp :mat4, :u_time [:float 0.0]}    ; type, or [type default]
+ :attribs  {:a_pos [:vec3 0], :a_normal [:vec3 1]} ; [type location]
+ :varying  {:v_normal :vec3}                       ; out in vs, in in fs
+ :fs-out   {:frag_color :vec4}
+ :vs-main  [[:set :gl_Position [:* :u_mvp [:vec4 :a_pos 1.0]]]]
+ :fs-main  [[:let :n :vec3 [:normalize :v_normal]] ...]}</code></pre>
+    <p>
+      The <code>uniform</code>/<code>in</code>/<code>out</code>
+      declarations are generated from the maps, and <code>merge-specs</code>
+      combines modules (a plasma term, a stripe term, a lighting term) into
+      one program. The GLSL string is only produced when
+      <code>program</code> compiles it.
+    </p>
+  </div>
+</section>
+
+<section id="features" class="surface">
+  <div class="inner">
+    <h2>What's here</h2>
+    <div class="feature-grid">
+      <div class="feat">
+        <h4>Geometry as data</h4>
+        <p>Solids are built from <code>glitter-gl.primitives</code> (cuboid, tetrahedron, sphere, plane) as plain Clojure meshes, transformed and combined with ordinary functions, then tessellated to an interleaved position+normal float buffer for the GPU.</p>
+      </div>
+      <div class="feat">
+        <h4>A GL pane in your UI tree</h4>
+        <p>Requiring <code>glitter-gl.gtk</code> registers a <code>:gl-area</code> tag into glitter's widget registry, so a <code>GtkGLArea</code> reconciles in the same hiccup tree as every other widget.</p>
+      </div>
+      <div class="feat">
+        <h4>Ported where it counts</h4>
+        <p>22 of 25 namespaces are verbatim ports (geometry, matrices, meshes, the shader DSL, raw GL bindings) via glimmer-gl from thi.ng/geom; 3 are adapted for glitter's single state atom.</p>
+      </div>
+      <div class="feat">
+        <h4>Tested against real GL</h4>
+        <p>177 tests, 556 assertions, plus a live-GTK smoke that drives a real <code>GtkGLArea</code> under the actual reconciler rather than a fake renderer.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="quickstart">
+  <div class="inner">
+    <h2>Quickstart</h2>
+    <pre><code class="sh">jolt -M:plasma         # rotating cube/sphere/tetra + composable plasma/stripes shader
+jolt -M:test           # unit suite: 177 tests, 556 assertions
+jolt -M:check          # headless sanity check: shader compiles, geometry buffers valid
+jolt -M:gl-area-smoke  # live-GTK smoke: :gl-area construct/realize/render/resize</code></pre>
+    <p>
+      Requires <a href="https://github.com/jolt-lang/jolt" target="_blank" rel="noopener">Jolt</a>
+      (tested against v0.7.27), GTK4, and a native OpenGL context. Released
+      under Apache 2.0. Ported from
+      <a href="https://github.com/jolt-lang/glimmer-gl" target="_blank" rel="noopener">glimmer-gl</a>,
+      which does the same for glitter's Reagent-style sibling
+      <a href="https://github.com/jolt-lang/glimmer" target="_blank" rel="noopener">glimmer</a>,
+      and which itself ports <a href="https://thi.ng/geom" target="_blank" rel="noopener">thi.ng/geom</a>.
+      See the <a href="/guide/index.html">guide</a> for the full nine-page tour.
+    </p>
+  </div>
+</section>
+{% endblock %}
