@@ -13,7 +13,7 @@ two `bb smokes` steps individually pins.
 ## Unit suite: `jolt -M:test` / `bb test`
 
 `test/glitter_gl/test_runner.clj` is the entry point (`deps.edn`'s `:test`
-alias points `-m` at it). It requires 24 test namespaces, one per
+alias points `-m` at it). It requires 25 test namespaces, one per
 `src/glitter_gl` file except `gtk.clj` (which needs a live widget registry
 and is exercised by the smoke instead, not a headless test), runs
 `clojure.test` against all of them, and calls `(System/exit code)`

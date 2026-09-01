@@ -165,3 +165,39 @@ than ClojureScript/WebGL.
   see `docs/guide/gl-area-widget-layer.md` for a widget-layer correction
   this example's development also found, unrelated to the porting
   question.
+
+## `glitter-gl.ffi-compat`: new, no upstream (2026-09-01)
+
+`src/glitter_gl/ffi_compat.clj` and `test/glitter_gl/ffi_compat_test.clj`
+are original to this project. glimmer-gl has no equivalent, and neither
+does thi.ng/geom: the file exists only because of a runtime change in
+jolt itself.
+
+jolt 0.8.0 ([jolt-lang/jolt#802](https://github.com/jolt-lang/jolt/pull/802))
+swaps `jolt.ffi/write`'s last two arguments, from `(p type offset value)`
+to `(p type value offset)`. An offset and a value are both plain integers,
+so a call written for one order does not fail on the other. It writes to
+the wrong address and reports nothing. `ffi-compat` probes the order once
+at load and binds `write!` to whichever spelling the running jolt wants,
+which is what lets the 10 migrated call sites in `gl.clj`, `offscreen.clj`
+and `examples/glitter_gl/textured.clj` read value-before-offset while
+still running on a released jolt that predates the change.
+
+The call-site migration itself came from
+[jlt-commons/glitter-gl#8](https://github.com/jlt-commons/glitter-gl/pull/8),
+contributed by [yogthos](https://github.com/yogthos) as part of a
+fleet-wide migration across the jolt repositories; that commit is
+preserved in this repo's history under its own authorship. The compat
+namespace was added on top here, so this repo's shape deliberately differs
+from its siblings, which take the argument swap together with a
+`:jolt/min-version "0.8.0"` floor.
+
+Those 10 call sites sit inside three files the porting ledger above lists
+as verbatim ports. Changing them is a real behavioral edit rather than a
+formatting pass, so it is recorded here rather than folded silently into
+the verbatim-port claim, per Invariant #1's requirement that any such
+change land in its own reviewed commit.
+
+Delete the namespace when `deps.edn` declares `:jolt/min-version "0.8.0"`
+or higher. At that point `write!` is exactly `ffi/write`, and removing it
+is a rename plus a `git rm`.
