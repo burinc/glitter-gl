@@ -2,7 +2,8 @@
   "Minimal native OpenGL bindings via jolt FFI. The host GL library is dlopened
   by the jolt/native entry in deps.edn; each defcfn resolves its C entry point
   at ns load. GL calls need a current context to do work."
-  (:require [jolt.ffi :as ffi]))
+  (:require [glitter-gl.ffi-compat :as compat]
+            [jolt.ffi :as ffi]))
 
 ;; --- enum: string names ------------------------------------------------------
 (def GL-VENDOR    0x1F00)
@@ -199,7 +200,7 @@
         ptr (ffi/alloc (* n (ffi/sizeof :float)))]
     (loop [i 0, s (seq xs)]
       (when s
-        (ffi/write ptr :float (double (first s)) (* i 4))
+        (compat/write! ptr :float (double (first s)) (* i 4))
         (recur (inc i) (next s))))
     ptr))
 
@@ -211,7 +212,7 @@
         ptr (ffi/alloc (* (max 1 n) (ffi/sizeof :int)))]
     (loop [i 0, s (seq xs)]
       (when s
-        (ffi/write ptr :int (long (first s)) (* i 4))
+        (compat/write! ptr :int (long (first s)) (* i 4))
         (recur (inc i) (next s))))
     ptr))
 
@@ -230,7 +231,7 @@
   needs this, or every reload leaks VRAM."
   [f ^long id]
   (let [p (ffi/alloc (ffi/sizeof :int))]
-    (ffi/write p :int id 0)
+    (compat/write! p :int id 0)
     (f 1 p)
     (ffi/free p)
     nil))
@@ -264,7 +265,7 @@
         src    (ffi/string->ptr source)
         arr    (ffi/alloc (ffi/sizeof :pointer))]
     ;; glShaderSource(shader, count=1, &src, lengths=NULL)
-    (ffi/write arr :pointer src 0)
+    (compat/write! arr :pointer src 0)
     (gl-shader-source sh 1 arr ffi/null)
     (ffi/free src)
     (ffi/free arr)
@@ -370,7 +371,7 @@
   (let [n    (count strs)
         arr  (ffi/alloc (* n (ffi/sizeof :pointer)))
         sps  (mapv ffi/string->ptr strs)]
-    (dotimes [i n] (ffi/write arr :pointer (nth sps i) (* i (ffi/sizeof :pointer))))
+    (dotimes [i n] (compat/write! arr :pointer (nth sps i) (* i (ffi/sizeof :pointer))))
     [arr sps]))
 
 (defn make-tf-program

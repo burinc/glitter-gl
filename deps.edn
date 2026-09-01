@@ -1,8 +1,13 @@
-{;; jolt.ffi/write takes the value BEFORE the offset as of jolt 0.8.0, and the
- ;; two spellings are both integers — an older runtime writes to the wrong
- ;; place rather than failing. Declare the floor so it refuses instead.
- :jolt/min-version "0.8.0"
-
+{;; No :jolt/min-version. jolt 0.8.0 (jolt-lang/jolt#802) swaps ffi/write's last
+ ;; two arguments, and glitter-gl.ffi-compat resolves that order at load, so this
+ ;; library runs correctly on either side of the change and has nothing to refuse.
+ ;;
+ ;; A "0.8.0" floor was tempting and would have been wrong twice over. jolt parses
+ ;; a dev build of main down to [0 7 29], so the floor rejects the very runtime
+ ;; that carries the fix, and a dependency's floor is enforced on CONSUMERS, so it
+ ;; would hard-stop every downstream project too. Add one only when there is a
+ ;; released jolt this library genuinely cannot run below, and delete
+ ;; glitter-gl.ffi-compat in the same commit.
  :paths ["src"]
 
  ;; glitter-gl is an extension of glitter: the geometry/matrix/GL namespaces are
