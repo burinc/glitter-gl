@@ -50,7 +50,7 @@ flowchart TD
   subgraph pure["Pure library: no glitter dependency, usable from any Jolt + OpenGL program"]
     geom["Geometry and math (14 files)<br/>vector, vec2, matrix, quaternion<br/>aabb, rect, circle, line, plane<br/>triangle, sphere, polygon<br/>bezier, intersect"]
     mesh["Mesh model (4 files)<br/>mesh, glmesh<br/>primitives, polyhedra"]
-    glplumb["GL plumbing (4 files)<br/>shader, gl<br/>offscreen, renderer"]
+    glplumb["GL plumbing (5 files)<br/>shader, gl, ffi-compat<br/>offscreen, renderer"]
     scene["scene.clj<br/>scene tree to render plan<br/>(requires glitter-gl.matrix only)"]
   end
 

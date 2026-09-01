@@ -63,6 +63,17 @@ pass.
   consumer of `glitter-gl.gl`'s texture FFI outside the renderer's
   internal shadow-map path and the test suite; no library gap needed
   fixing to support it.
+- **One `ffi/write` that means the same thing on every jolt**
+  (`glitter-gl.ffi-compat`). jolt 0.8.0 swaps `jolt.ffi/write`'s last two
+  arguments, from `(p type offset value)` to `(p type value offset)`. An
+  offset and a value are both plain integers, so code written for one order
+  does not fail on the other, it writes to the wrong address and says
+  nothing. Rather than gate the library behind a jolt that is not released
+  yet, `write!` probes the order once at load and binds whichever spelling
+  the runtime wants. Call sites read value before offset, matching where
+  jolt is going, and the suite passes identically on both sides of the
+  change. Deletable in one commit once a released jolt makes 0.8.0 a floor
+  worth declaring.
 
 ### GTK integration
 
@@ -136,6 +147,13 @@ pass.
 
 ### Tooling
 
+- **CI installs a pinned jolt**, carried by a workflow-level `JOLT_VERSION`
+  that a `workflow_dispatch` run can override. Both jobs read it; the Xvfb
+  one used to hardcode the latest release while the gates job honoured the
+  input, so a run meant to try a candidate jolt tested it on one job and
+  reported green from the other on a different runtime. Floating to
+  whatever shipped most recently is how a breaking `ffi/write` change
+  arrived as an opaque test crash rather than a readable version mismatch.
 - **A full `bb`/`jolt` task surface**: `bb info` for a grouped cheat-sheet,
   `bb test`/`bb check`/`bb plasma`/`bb gl-area-smoke`, and `bb smokes`
   (runs both live-GTK checks in sequence, stopping at the first failure).
