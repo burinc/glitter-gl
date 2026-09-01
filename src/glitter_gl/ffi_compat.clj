@@ -12,10 +12,29 @@
   that always reads value before offset. Call sites are then written for the
   world jolt is moving to, and run correctly on the one it has shipped.
 
-  Delete this namespace once `deps.edn` declares `:jolt/min-version \"0.8.0\"`
-  or higher. At that point `(write! p t v off)` is exactly
-  `(ffi/write p t v off)`, so the removal is a mechanical rename plus a
-  `git rm`."
+  When to delete: once every jolt this project supports is 0.8.0 or newer. At
+  that point `(write! p t v off)` is exactly `(ffi/write p t v off)`, so the
+  removal is a mechanical rename plus a `git rm`.
+
+  Do NOT treat declaring `:jolt/min-version \"0.8.0\"` as reaching that point on
+  its own. jolt honours that key only from #804, which merged AFTER #802
+  reversed the arguments and shipped in the same release, so every runtime
+  carrying the OLD order predates the key and ignores it as unknown data. The
+  floor is prospective by construction: it guards the NEXT break, not this one.
+  A runtime old enough to need this shim will read the floor, not understand
+  it, run anyway, and corrupt memory in the shim's absence. Measured on a
+  sibling project: a released v0.7.29 with the floor declared did not refuse,
+  it dropped namespaces with \"ERROR requiring ... : nil\" and reported a green
+  half-suite.
+
+  Where this pattern stops working: a probe normalises BEHAVIOUR at a boundary
+  this library owns, which is why it fits here, since `write!` wraps a call we
+  make and nothing downstream reads its result as data. It cannot normalise
+  DATA that crosses a boundary someone else interprets. A function returning a
+  layout descriptor whose shape changed between runtimes must not probe: its
+  output would vary by whichever jolt happened to be loaded, and a generator
+  whose result moves under you is worse than one that refuses on the wrong
+  runtime."
   (:require [jolt.ffi :as ffi]))
 
 (defn- value-before-offset?
