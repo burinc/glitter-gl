@@ -121,15 +121,39 @@ $ jolt -M:fail          # alias form
 EXIT(alias form)=7
 ```
 
-**This is fixed on jolt `main`.** Re-running the same probe under
-`v0.7.27-22-g502008db` gives `EXIT(task form)=7`: jolt now exits with the
-command's status for a string task body. The fix sits under `[Unreleased]`
-in jolt's own CHANGELOG and no tagged release contains it yet, so anyone on
-`v0.7.27` or earlier still hits the swallow. Keep using `-M:<alias>` until
-the fix ships in a release. **Always use `-M:<alias>`
-(or a `bb.edn` task, which already does) to gate a build or a commit.**
-The bare task form is fine for interactive use where a human is watching
-stdout directly, and nowhere else.
+**This is fixed, and the fix has now shipped.** Re-running the same probe
+under `v0.7.27-22-g502008db` gave `EXIT(task form)=7`: jolt exits with the
+command's status for a string task body. That landed in the tagged
+`v0.7.28` release (2026-08-27), listed in jolt's own CHANGELOG as "A failing
+`:tasks` shell command exited 0", and the probe was run once more under
+`v0.7.29-25-gd4e92a43` on 2026-09-01, still `EXIT(task form)=7`. So a reader
+on `v0.7.27` or earlier still hits the swallow, and one on `v0.7.28` or later
+does not.
+
+None of that changes the guidance here. **Always use `-M:<alias>` (or a
+`bb.edn` task, which already does) to gate a build or a commit.** It is
+correct on every jolt, before the fix and after it, so CI never has to
+depend on how recent the runtime happens to be. The bare task form is fine
+for interactive use where a human is watching stdout directly, and nowhere
+else.
+
+**When this caveat may be deleted, which is not yet.** The test is the floor
+this project declares, not the newest jolt anyone has run. `deps.edn` here
+declares no `:jolt/min-version` at all, and deliberately so: this repo absorbs
+the jolt 0.8.0 `ffi/write` change in `glitter-gl.ffi-compat` rather than by
+gating on a version, precisely so it keeps running on older jolts. A project
+with no floor implicitly supports every version, so every jolt below `v0.7.28`
+is inside the supported range and the swallow stays a live hazard rather than
+history.
+
+That makes the caveat durable here rather than transitional, so the mistake to
+avoid is re-measuring on a modern jolt, seeing `EXIT(task form)=7`, and
+simplifying it away: the fix having shipped says nothing about which versions
+this project supports. It becomes deletable only if a `:jolt/min-version`
+above `0.7.28` is ever declared, which would also be the moment
+`glitter-gl.ffi-compat` could go. glitter shows the other side of the same
+reasoning, declaring `"0.7.24"`, which leaves it a live 0.7.24-to-0.7.27 window
+where the swallow still bites.
 
 ## Quality tooling: lint, format, positional-args
 
