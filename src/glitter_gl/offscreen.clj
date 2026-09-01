@@ -26,7 +26,8 @@
 
   Call it from the main thread. GDK contexts are bound to the thread that
   realizes them, and GTK's own thread affinity applies here too."
-  (:require [jolt.ffi :as ffi]))
+  (:require [glitter-gl.ffi-compat :as compat]
+            [jolt.ffi :as ffi]))
 
 ;; --- GDK/GTK entry points ----------------------------------------------------
 ;; gtk_init_check returns FALSE instead of aborting when there is no display, so
@@ -62,7 +63,7 @@
 ;; working and a hard crash on the error path.
 (defn- error-slot []
   (let [p (ffi/alloc (ffi/sizeof :pointer))]
-    (ffi/write p :pointer ffi/null 0)
+    (compat/write! p :pointer ffi/null 0)
     p))
 
 (defn- take-error!

@@ -28,7 +28,8 @@
   uploads it. on-render below sets every uniform this shader declares,
   every frame, including :u_texture, which must be set to the texture
   UNIT index (0), not the GL texture id gl-gen-textures returned."
-  (:require [glitter-gl.gl :as gl]
+  (:require [glitter-gl.ffi-compat :as compat]
+            [glitter-gl.gl :as gl]
             [glitter-gl.gtk :as glx]
             [glitter-gl.matrix :as m]
             [glitter-gl.mesh :as mesh]
@@ -58,10 +59,10 @@
         (let [[r g b] (if (even? (+ (quot x cell-size) (quot y cell-size)))
                         color-a color-b)
               i (* 4 (+ x (* y tex-size)))]
-          (ffi/write ptr :uint8 r i)
-          (ffi/write ptr :uint8 g (+ i 1))
-          (ffi/write ptr :uint8 b (+ i 2))
-          (ffi/write ptr :uint8 255 (+ i 3)))))
+          (compat/write! ptr :uint8 r i)
+          (compat/write! ptr :uint8 g (+ i 1))
+          (compat/write! ptr :uint8 b (+ i 2))
+          (compat/write! ptr :uint8 255 (+ i 3)))))
     ptr))
 
 ;; --- the shader: a_uv straight through to a texture() sample, no lighting --
