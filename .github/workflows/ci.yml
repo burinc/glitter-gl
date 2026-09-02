@@ -52,7 +52,7 @@ permissions:
 # with a workflow_dispatch run and the jolt-version input, which overrides
 # this for that run only.
 env:
-  JOLT_VERSION: ${{ inputs.jolt-version || '0.8.0' }}
+  JOLT_VERSION: ${{ inputs.jolt-version || '0.8.1' }}
 
 # A second push to the same branch makes the first run's answer stale, so stop
 # it rather than paying for both. Never cancels a run on main.
