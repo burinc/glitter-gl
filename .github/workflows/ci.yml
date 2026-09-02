@@ -400,3 +400,93 @@ jobs:
           } > /tmp/diag.txt
           cat /tmp/diag.txt
           { printf '### Xvfb diagnostics\n\n```\n'; cat /tmp/diag.txt; printf '```\n'; } >> "$GITHUB_STEP_SUMMARY"
+
+  # ---------------------------------------------------------------------------
+  # The other side of jolt-lang/jolt#802.
+  #
+  # glitter-gl.ffi-compat exists to make this library correct on BOTH argument
+  # orders of jolt.ffi/write, and it declares no :jolt/min-version, so both are
+  # genuinely supported rather than merely tolerated. The two jobs above run on
+  # whatever JOLT_VERSION pins, which is a single version, so they can only ever
+  # exercise one side. Before the pin moved to 0.8.0 they tested the old order
+  # and never the new one; after it, the reverse. Either way the gate is blind
+  # to half of what the shim is for.
+  #
+  # So this job pins the OTHER side explicitly: v0.7.29, the last release
+  # carrying the pre-#802 order. That is not "the previous release" and should
+  # not be bumped along with JOLT_VERSION; it is the boundary itself, and it
+  # stays put while the shim does.
+  #
+  # Only the unit suite runs here. Lint, formatting, namespace forms and the
+  # prose gate do not vary with the jolt version, so running them a second time
+  # would cost a clojure-lsp project analysis to re-learn the same answer.
+  #
+  # Delete this job together with glitter-gl.ffi-compat, on the same signal:
+  # once every jolt this project supports is 0.8.0 or newer. Note that is a
+  # judgement about supported runtimes, NOT the declaring of a
+  # :jolt/min-version, which jolt only honours from #804 and therefore cannot
+  # keep an old-order runtime away. See that namespace's docstring.
+  # ---------------------------------------------------------------------------
+  old-order:
+    name: jolt before ffi/write swapped (v0.7.29)
+    runs-on: ubuntu-latest
+
+    env:
+      # Deliberately NOT ${{ env.JOLT_VERSION }}: the whole point is to differ
+      # from the pin. A workflow_dispatch jolt-version input does not override
+      # this either, since a run trialling a candidate jolt still needs the
+      # old-order side checked.
+      OLD_ORDER_JOLT: "0.7.29"
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install GTK4, GLib and OpenGL
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libgtk-4-dev libgl-dev
+
+      - name: Install jolt
+        run: |
+          set -euo pipefail
+          curl -sSL https://raw.githubusercontent.com/jolt-lang/jolt/main/install \
+            | bash -s -- --version "$OLD_ORDER_JOLT"
+          jolt --version
+
+      - uses: DeLaGuardo/setup-clojure@13.6.1
+        with:
+          bb: 1.12.196
+
+      - name: Cache dependencies
+        uses: actions/cache@v6.1.0
+        with:
+          path: |
+            ~/.jolt/gitlibs
+            ~/.jolt/mvnlibs
+          key: old-order-deps-${{ runner.os }}-${{ hashFiles('deps.edn') }}
+          restore-keys: old-order-deps-${{ runner.os }}-
+
+      # Asserts the runtime is the one intended before believing the result. An
+      # install that quietly resolved to something else would otherwise report
+      # a green run for a version nobody tested.
+      - name: Unit suite (pre-#802 argument order)
+        run: |
+          set +e
+          got="$(jolt --version 2>&1 | head -1)"
+          if [ "$got" != "jolt v$OLD_ORDER_JOLT" ]; then
+            echo "::error title=wrong jolt::wanted exactly 'jolt v$OLD_ORDER_JOLT', got '$got'"
+            exit 1
+          fi
+
+          out="$(bb test 2>&1)"; rc=$?
+          printf '%s\n' "$out"
+          if [ "$rc" -ne 0 ]; then
+            {
+              printf '### `bb test` failed on %s (exit %s)\n\n```\n%s\n```\n' \
+                "$got" "$rc" "$(printf '%s\n' "$out" | tail -60)"
+            } >> "$GITHUB_STEP_SUMMARY"
+            printf '%s\n' "$out" | tail -c 2000 \
+              | python3 -c 'import sys; print("::error title=old-order suite failed::" + sys.stdin.read().replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'
+          fi
+          exit "$rc"
