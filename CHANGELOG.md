@@ -72,8 +72,12 @@ pass.
   yet, `write!` probes the order once at load and binds whichever spelling
   the runtime wants. Call sites read value before offset, matching where
   jolt is going, and the suite passes identically on both sides of the
-  change. Deletable in one commit once a released jolt makes 0.8.0 a floor
-  worth declaring.
+  change. Verified green on released v0.7.29 and released v0.8.0 alike.
+  Deletable in one commit once every jolt the project supports is 0.8.0 or
+  newer, which declaring `:jolt/min-version "0.8.0"` does not by itself
+  achieve: jolt only honours that key from the same release that swapped
+  the arguments, so a runtime old enough to need the shim ignores the floor
+  rather than refusing.
 
 ### GTK integration
 

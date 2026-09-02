@@ -198,6 +198,14 @@ formatting pass, so it is recorded here rather than folded silently into
 the verbatim-port claim, per Invariant #1's requirement that any such
 change land in its own reviewed commit.
 
-Delete the namespace when `deps.edn` declares `:jolt/min-version "0.8.0"`
-or higher. At that point `write!` is exactly `ffi/write`, and removing it
-is a rename plus a `git rm`.
+Delete the namespace once every jolt this project supports is 0.8.0 or
+newer. At that point `write!` is exactly `ffi/write`, and removing it is a
+rename plus a `git rm`.
+
+Declaring `:jolt/min-version "0.8.0"` is NOT that point, which an earlier
+draft of this section got wrong. jolt honours that key only from
+[#804](https://github.com/jolt-lang/jolt/pull/804), which merged after #802
+and shipped in the same v0.8.0 release, so every runtime carrying the old
+argument order predates the key and ignores it as unknown data. The floor
+guards the next break, not this one. See `ffi_compat.clj`'s own docstring
+for the measured consequence of relying on it.
