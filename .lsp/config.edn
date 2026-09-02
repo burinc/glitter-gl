@@ -41,6 +41,40 @@
 ;; and both are needed. :source-aliases decides the aliases in the
 ;; `clojure -A:... -Spath` classpath probe. :source-paths decides which
 ;; directories get analyzed. Setting one does not cover the other.
+;; :cljfmt is pinned so formatting is a property of this repo rather than of
+;; whoever is running the check. clojure-lsp merges a developer's global config
+;; (~/.config/clojure-lsp/config.edn) when the project does not set :cljfmt, so
+;; a personal preference silently becomes a gate. Measured 2026-09-02 on
+;; df94bc8: with :split-keypairs-over-multiple-lines? true, from one machine's
+;; global config, `clojure-lsp format --dry` exits 1 demanding a map literal in
+;; test_runner.clj be split across four lines; with it false, as CI runs it
+;; since CI has no global config, the same tool at the same pinned version says
+;; "Nothing to format!" and exits 0. The local pre-commit hook then refuses
+;; commits that CI is perfectly happy with, and the natural reading of that is
+;; "the CI gate is broken", which it is not.
+;;
+;; Pinning this key changes no file: formatting the whole tree with no global
+;; config at all, and with this pin plus a global config setting the key the
+;; other way, produces byte-identical src/, test/ and examples/. Note the
+;; control on that comparison is weak, since neither run had anything to
+;; change; it shows the pin agrees with CI on today's code, not that it must
+;; on all future code.
+;;
+;; Project :cljfmt MERGES into a developer's global map, it does not replace
+;; it. Measured: setting an unrelated key here (:remove-trailing-whitespace?)
+;; leaves a global :split-keypairs-over-multiple-lines? true still in force,
+;; and an empty :cljfmt {} does not neutralise the global either. So this pin
+;; only nails down the key it names. Any other key a global sets and this file
+;; does not still leaks in, and the fix for the next one is to name it here
+;; too.
+;;
+;; The global config on the machine where this was found sets nine further
+;; cljfmt keys. None of them changes a byte of this tree, which is why only
+;; one key ever diverged, but that is "happens to match the default today"
+;; rather than anything this file guarantees. Making formatting fully a
+;; property of the repo means naming every key the repo depends on. This
+;; pin does not do that and is not claimed to.
 {:linters {:clojure-lsp/unused-public-var {:level :off}}
  :source-aliases #{:test}
- :source-paths #{"src" "test" "examples"}}
+ :source-paths #{"src" "test" "examples"}
+ :cljfmt {:split-keypairs-over-multiple-lines? false}}

@@ -163,35 +163,8 @@ jobs:
 
       # Formatting is owned by clojure-lsp, not cljfmt: the two disagree on
       # some compact literal tables. See CONTRIBUTING.md.
-      #
-      # This step reports what it examined, not just whether it passed, because
-      # a green run here has already disagreed with a red one locally. On
-      # 2026-09-02, main at df94bc8 carried a formatting diff that
-      # `clojure-lsp format --dry` rejects with exit 1 on a pristine clone,
-      # under BOTH the pinned 2026.05.05-12.58.26 and the newer 2026.07.06
-      # release, while this step reported success across three runs including a
-      # push. Version skew, a stale cache, an unresolvable classpath and a
-      # mis-measured exit code were each ruled out, so the mechanism is still
-      # unknown.
-      #
-      # The evidence goes out as a ::notice ANNOTATION rather than only to the
-      # step summary, because the summary is not reachable through the API from
-      # every environment while annotations are (see the Diagnostics step
-      # below, which already relies on that). A gate that examined nothing
-      # would otherwise look exactly like one that found nothing to fix.
       - name: Formatting
-        run: |
-          set +e
-          out="$(bb lsp:format-check 2>&1)"; rc=$?
-          printf '%s\n' "$out"
-          ver="$(clojure-lsp --version 2>&1 | head -1)"
-          {
-            printf '### Formatting (exit %s)\n\n`%s`\n\n```\n%s\n```\n' \
-              "$rc" "$ver" "$out"
-          } >> "$GITHUB_STEP_SUMMARY"
-          printf 'exit=%s %s\n%s\n' "$rc" "$ver" "$out" | tail -c 1500 \
-            | python3 -c 'import sys; print("::notice title=formatting evidence::" + sys.stdin.read().replace("%","%25").replace("\r","%0D").replace("\n","%0A"))'
-          exit "$rc"
+        run: bb lsp:format-check
 
       - name: Namespace forms
         run: bb lsp:clean-ns-check
