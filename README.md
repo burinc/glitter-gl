@@ -247,3 +247,18 @@ demo does; `ripple`, `knot`, `gears`, `textured` and `picking` do too,
 for reasons of their own (see `NOTICE.md`). See
 [`docs/guide/limitations.md`](docs/guide/limitations.md) for this and
 every other known v1 gap.
+
+## Licence
+
+Copyright (c) 2026 Burin Choomnuan.
+
+glitter-gl's own code is distributed under the
+[Eclipse Public License 2.0](LICENSE), matching the rest of jlt-commons and jolt
+itself. SPDX identifier: `EPL-2.0`. It was Apache License 2.0 until 2026-09-05.
+
+The geometry, matrix, mesh and shader layer is ported from glimmer-gl, and through
+it from thi.ng/geom, which Karsten Schmidt licenses under the Apache License 2.0.
+Those files keep that licence and its attribution requirements, and
+[`NOTICE.md`](NOTICE.md) is the file-by-file record that carries the required
+notice. EPL 2.0 relicenses none of it: the whole is EPL 2.0 and each part keeps
+what it came with, as long as that notice travels with it.

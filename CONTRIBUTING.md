@@ -289,9 +289,9 @@ list, rather than a duplicate one here.
 
 ## Licensing
 
-glitter-gl is released under the Apache License, Version 2.0; see
-[`LICENSE`](LICENSE). By contributing, you agree your contribution is
-licensed under those terms.
+glitter-gl is released under the Eclipse Public License 2.0 (`EPL-2.0`);
+see [`LICENSE`](LICENSE). It was Apache License 2.0 until 2026-09-05. By
+contributing, you agree your contribution is licensed under those terms.
 
 The project vendors ported code (from thi.ng/geom, via glimmer-gl) under
 file-by-file attribution in [`NOTICE.md`](NOTICE.md). If your change moves

@@ -14,9 +14,11 @@ model, tessellation, and primitive vertex/face definitions
 (thi.ng.geom.{basicmesh,utils,cuboid,tetrahedron,sphere,plane}); and the
 shader-spec model (thi.ng.geom.gl.shaders).
 
-Copyright 2026 Burin Choomnuan. glitter-gl is licensed under the Apache
-License, Version 2.0 (see ./LICENSE), which is compatible with jolt's
-Eclipse Public License 1.0.
+Copyright 2026 Burin Choomnuan. glitter-gl's own code is licensed under the
+Eclipse Public License 2.0 (see ./LICENSE), the licence used across
+jlt-commons; it was Apache License 2.0 until 2026-09-05. The ported material
+recorded below keeps the Apache License 2.0 it came with, which EPL 2.0 does
+not change.
 
 ## Porting ledger: glimmer-gl → glitter-gl (2026-08-06 arc)
 

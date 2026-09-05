@@ -12,6 +12,14 @@ pass.
 
 ## Unreleased
 
+### Licensing
+
+- **Relicensed from the Apache License 2.0 to the Eclipse Public License 2.0**
+  on 2026-09-05, matching the rest of jlt-commons and jolt itself. glitter-gl's
+  own code is EPL 2.0; the 22 files ported from glimmer-gl, and through it from
+  thi.ng/geom, keep the Apache License 2.0 they came with, recorded in
+  `NOTICE.md`, and nothing that arrived under another licence is relicensed.
+
 ### Geometry and shaders
 
 - **A composable geometry model**, ported (via
